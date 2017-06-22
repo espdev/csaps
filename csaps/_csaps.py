@@ -17,7 +17,7 @@ _1D = typing.Union[list, tuple, np.ndarray]
 
 
 class UnivariateCubicSmootingSpline:
-    """Univariate (1D) cubic smoothing spline
+    """Univariate cubic smoothing spline
 
     Parameters
     ----------
@@ -47,16 +47,18 @@ class UnivariateCubicSmootingSpline:
         self._make_spline()
 
     def __call__(self, xi: _1D):
-        """Evaluate the spline for given data
+        """Evaluate the spline's approximation for given data
         """
         xi = np.asarray(xi, dtype=np.float64)
 
         if xi.ndim > 1:
             raise ValueError('XI data must be a vector.')
 
-        # For each data site, compute its break interval
+        return self._evaluate(xi)
 
-        raise NotImplementedError
+    @property
+    def smooth(self):
+        return self._smooth
 
     @property
     def breaks(self):
@@ -111,12 +113,12 @@ class UnivariateCubicSmootingSpline:
         data = np.vstack((dxol[1:], 2 * (dxol[1:] + dxol[:-1]), dxol[:-1]))
         r = sp.diags(data, [-1, 0, 1], (pcount - 2, pcount - 2))
 
-        odx = 1.0 / dx
+        odx = 1. / dx
         data = np.vstack((odx[:-1], -(odx[1:] + odx[:-1]), odx[1:]))
         qt = sp.diags(data, [0, 1, 2], (pcount - 2, pcount))
 
-        ow = 1.0 / self._weights
-        osqw = 1.0 / np.sqrt(self._weights)  # type: np.ndarray
+        ow = 1. / self._weights
+        osqw = 1. / np.sqrt(self._weights)  # type: np.ndarray
         w = sp.diags(ow, 0, (pcount, pcount))
         qtw = qt @ sp.diags(osqw, 0, (pcount, pcount))
 
@@ -127,22 +129,46 @@ class UnivariateCubicSmootingSpline:
             return m.diagonal().sum()
 
         if self._smooth is None:
-            p = 1.0 / (1.0 + trace(r) / (6.0 * trace(qtwq)))
+            p = 1. / (1. + trace(r) / (6. * trace(qtwq)))
         else:
             p = self._smooth
 
-        u = la.spsolve((6.0 * (1 - p)) * qtwq + p * r, np.diff(divdydx))
+        u = la.spsolve((6. * (1. - p)) * qtwq + p * r, np.diff(divdydx))
 
-        d1 = np.diff(np.hstack((0.0, u, 0.0))) / dx
-        d2 = np.diff(np.hstack((0.0, d1, 0.0)))
+        d1 = np.diff(np.hstack((0., u, 0.))) / dx
+        d2 = np.diff(np.hstack((0., d1, 0.)))
 
-        yi = self._ydata - (6.0 * (1 - p)) * w * d2
-        c3 = np.hstack((0.0, p * u, 0.0))
-        c2 = np.diff(yi) / dx - dxol * (2.0 * c3[:-1] + c3[1:])
+        yi = self._ydata - (6. * (1. - p)) * w * d2
+        c3 = np.hstack((0., p * u, 0.))
+        c2 = np.diff(yi) / dx - dxol * (2. * c3[:-1] + c3[1:])
 
-        data = np.hstack((np.diff(c3) / dx, 3.0 * c3[:-1], c2, yi[:-1]))
+        data = np.hstack((np.diff(c3) / dx, 3. * c3[:-1], c2, yi[:-1]))
         coeffs = data.reshape((pcount - 1, 4), order='F')
 
+        self._smooth = p
         self._breaks = self._xdata.copy()
         self._coeffs = coeffs
         self._pieces = coeffs.shape[0]
+
+    def _evaluate(self, xi):
+        # For each data site, compute its break interval
+        mesh = self._breaks[1:-1]
+        edges = np.hstack((-np.inf, mesh, np.inf))
+
+        index = np.digitize(xi, edges)
+
+        nanx = np.flatnonzero(index == 0)
+        index = np.fmin(index, mesh.size + 1)
+        index[nanx] = 1
+        index -= 1
+
+        # Go to local coordinates
+        xi = xi - self._breaks[index]
+
+        # Apply nested multiplication
+        values = self.coeffs[index, 0].T
+
+        for i in range(1, self.coeffs.shape[1]):
+            values = xi * values + self.coeffs[index, i].T
+
+        return values

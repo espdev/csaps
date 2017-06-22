@@ -12,5 +12,12 @@ def test_univariate_csaps():
 
     sp = csaps.UnivariateCubicSmootingSpline(x, y)
 
-    xi = np.linspace(x[0], x[-1], 121)
+    xi = np.linspace(x[0], x[-1], 120)
     yi = sp(xi)
+
+    print('Smoothing parameter: ', sp.smooth)
+
+    import matplotlib.pyplot as plt
+
+    plt.plot(x, y, 'o', xi, yi, '-')
+    plt.show()
