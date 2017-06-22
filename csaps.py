@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Implementation of cubic spline approximation (smoothing)
+Cubic spline approximation (smoothing)
 
 """
 
@@ -11,6 +11,9 @@ import numpy as np
 
 import scipy.sparse as sp
 import scipy.sparse.linalg as la
+
+
+__version__ = '0.1.0'
 
 
 _1D = typing.Union[list, tuple, np.ndarray]

@@ -4,8 +4,8 @@ from setuptools import setup
 
 setup(
     name='csaps',
-    version='0.0.1',
-    packages=['csaps'],
+    version='0.1.0',
+    py_modules=['csaps'],
     url='',
     license='MIT',
     author='Eugene Prilepin',
