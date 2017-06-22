@@ -133,10 +133,6 @@ class UnivariateCubicSmootingSpline:
 
         u = la.spsolve((6.0 * (1 - p)) * qtwq + p * r, np.diff(divdydx))
 
-        """
-        pp=ppmak(xi.',...
-      reshape([(diff(c3)./dx(:,dd)).', 3*c3(1:n-1,:).', c2.', yi(1:n-1,:).'], (n-1)*yd,4), yd);
-        """
         d1 = np.diff(np.hstack((0.0, u, 0.0))) / dx
         d2 = np.diff(np.hstack((0.0, d1, 0.0)))
 
