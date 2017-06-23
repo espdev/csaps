@@ -6,6 +6,10 @@ setup(
     name='csaps',
     version='0.1.0',
     py_modules=['csaps'],
+    install_requires=[
+        'numpy>=0.12.1',
+        'scipy>=0.19.1',
+    ],
     url='',
     license='MIT',
     author='Eugene Prilepin',
