@@ -4,7 +4,7 @@ import numpy as np
 import csaps
 
 
-def test_univariate_csaps():
+def test_univariate():
     np.random.seed(1234)
 
     x = np.linspace(0, 2 * np.pi, 21)
