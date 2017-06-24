@@ -10,6 +10,8 @@ setup(
         'numpy>=0.12.1',
         'scipy>=0.19.1',
     ],
+    setup_requires=['pytest-runner'],
+    tests_require=['pytest'],
     url='',
     license='MIT',
     author='Eugene Prilepin',
