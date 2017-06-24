@@ -108,45 +108,46 @@ class UnivariateCubicSmootingSpline:
         dy = np.diff(self._ydata)
         divdydx = dy / dx
 
-        if pcount == 2:
-            raise NotImplementedError
+        if pcount > 2:
+            # Create sparse matrices
+            dxol = dx.copy()
+            data = np.vstack((dxol[1:], 2 * (dxol[1:] + dxol[:-1]), dxol[:-1]))
+            r = sp.diags(data, [-1, 0, 1], (pcount - 2, pcount - 2))
 
-        # Create sparse matrices
-        dxol = dx.copy()
-        data = np.vstack((dxol[1:], 2 * (dxol[1:] + dxol[:-1]), dxol[:-1]))
-        r = sp.diags(data, [-1, 0, 1], (pcount - 2, pcount - 2))
+            odx = 1. / dx
+            data = np.vstack((odx[:-1], -(odx[1:] + odx[:-1]), odx[1:]))
+            qt = sp.diags(data, [0, 1, 2], (pcount - 2, pcount))
 
-        odx = 1. / dx
-        data = np.vstack((odx[:-1], -(odx[1:] + odx[:-1]), odx[1:]))
-        qt = sp.diags(data, [0, 1, 2], (pcount - 2, pcount))
+            ow = 1. / self._weights
+            osqw = 1. / np.sqrt(self._weights)  # type: np.ndarray
+            w = sp.diags(ow, 0, (pcount, pcount))
+            qtw = qt @ sp.diags(osqw, 0, (pcount, pcount))
 
-        ow = 1. / self._weights
-        osqw = 1. / np.sqrt(self._weights)  # type: np.ndarray
-        w = sp.diags(ow, 0, (pcount, pcount))
-        qtw = qt @ sp.diags(osqw, 0, (pcount, pcount))
+            # Solve linear system for the 2nd derivatives
+            qtwq = qtw @ qtw.T
 
-        # Solve linear system for the 2nd derivatives
-        qtwq = qtw @ qtw.T
+            def trace(m: sp.dia_matrix):
+                return m.diagonal().sum()
 
-        def trace(m: sp.dia_matrix):
-            return m.diagonal().sum()
+            if self._smooth is None:
+                p = 1. / (1. + trace(r) / (6. * trace(qtwq)))
+            else:
+                p = self._smooth
 
-        if self._smooth is None:
-            p = 1. / (1. + trace(r) / (6. * trace(qtwq)))
+            u = la.spsolve((6. * (1. - p)) * qtwq + p * r, np.diff(divdydx))
+
+            d1 = np.diff(np.hstack((0., u, 0.))) / dx
+            d2 = np.diff(np.hstack((0., d1, 0.)))
+
+            yi = self._ydata - (6. * (1. - p)) * w * d2
+            c3 = np.hstack((0., p * u, 0.))
+            c2 = np.diff(yi) / dx - dxol * (2. * c3[:-1] + c3[1:])
+
+            data = np.hstack((np.diff(c3) / dx, 3. * c3[:-1], c2, yi[:-1]))
+            coeffs = data.reshape((pcount - 1, 4), order='F')
         else:
-            p = self._smooth
-
-        u = la.spsolve((6. * (1. - p)) * qtwq + p * r, np.diff(divdydx))
-
-        d1 = np.diff(np.hstack((0., u, 0.))) / dx
-        d2 = np.diff(np.hstack((0., d1, 0.)))
-
-        yi = self._ydata - (6. * (1. - p)) * w * d2
-        c3 = np.hstack((0., p * u, 0.))
-        c2 = np.diff(yi) / dx - dxol * (2. * c3[:-1] + c3[1:])
-
-        data = np.hstack((np.diff(c3) / dx, 3. * c3[:-1], c2, yi[:-1]))
-        coeffs = data.reshape((pcount - 1, 4), order='F')
+            p = 1.
+            coeffs = np.array(np.hstack((divdydx, self._ydata[0])), ndmin=2)
 
         self._smooth = p
         self._breaks = self._xdata.copy()
