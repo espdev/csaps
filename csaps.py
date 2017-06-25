@@ -170,9 +170,9 @@ class UnivariateCubicSmootingSpline:
         xi = xi - self._breaks[index]
 
         # Apply nested multiplication
-        values = self.coeffs[index, 0].T
+        values = self.coeffs[index, 0]
 
         for i in range(1, self.coeffs.shape[1]):
-            values = xi * values + self.coeffs[index, i].T
+            values = xi * values + self.coeffs[index, i]
 
         return values
