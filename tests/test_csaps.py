@@ -63,6 +63,25 @@ def test_univariate_auto_smooth():
     np.testing.assert_allclose(yi, desired_yi)
 
 
+def test_univariate_four_points():
+    x = [1., 2., 4., 6.]
+    y = [2., 4., 5., 7.]
+
+    sp = csaps.UnivariateCubicSmootingSpline(x, y)
+
+    xi = np.linspace(1., 6., 10)
+    yi = sp(xi)
+
+    desired_yi = [
+        2.2579392157892, 3.0231172855707, 3.6937304019483,
+        4.21971044584031, 4.65026761247821, 5.04804510368134,
+        5.47288175793241, 5.94265482897362, 6.44293945952166,
+        6.95847986982311
+    ]
+
+    np.testing.assert_allclose(yi, desired_yi)
+
+
 def test_univariate_two_points():
     x = [1., 2.]
     y = [3., 4.]

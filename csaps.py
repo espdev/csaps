@@ -111,7 +111,7 @@ class UnivariateCubicSmootingSpline:
         if pcount > 2:
             # Create sparse matrices
             data = np.vstack((dx[1:], 2 * (dx[1:] + dx[:-1]), dx[:-1]))
-            r = sp.diags(data, [-1, 0, 1], (pcount - 2, pcount - 2))
+            r = sp.spdiags(data, [-1, 0, 1], pcount - 2, pcount - 2)
 
             odx = 1. / dx
             data = np.vstack((odx[:-1], -(odx[1:] + odx[:-1]), odx[1:]))
