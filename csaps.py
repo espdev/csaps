@@ -133,7 +133,10 @@ class UnivariateCubicSmootingSpline:
             else:
                 p = self._smooth
 
-            u = la.spsolve((6. * (1. - p)) * qtwq + p * r, np.diff(divdydx))
+            a = (6. * (1. - p)) * qtwq + p * r
+            b = np.diff(divdydx)
+
+            u = la.spsolve(a, b)
 
             d1 = np.diff(np.hstack((0., u, 0.))) / dx
             d2 = np.diff(np.hstack((0., d1, 0.)))
