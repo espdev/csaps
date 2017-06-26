@@ -109,13 +109,13 @@ class UnivariateCubicSmootingSpline:
         divdydx = dy / dx
 
         if pcount > 2:
-            # Create sparse matrices
-            data = np.vstack((dx[1:], 2 * (dx[1:] + dx[:-1]), dx[:-1]))
-            r = sp.spdiags(data, [-1, 0, 1], pcount - 2, pcount - 2)
+            # Create diagonal sparse matrices
+            diags = np.vstack((dx[1:], 2 * (dx[1:] + dx[:-1]), dx[:-1]))
+            r = sp.spdiags(diags, [-1, 0, 1], pcount - 2, pcount - 2)
 
             odx = 1. / dx
-            data = np.vstack((odx[:-1], -(odx[1:] + odx[:-1]), odx[1:]))
-            qt = sp.diags(data, [0, 1, 2], (pcount - 2, pcount))
+            diags = np.vstack((odx[:-1], -(odx[1:] + odx[:-1]), odx[1:]))
+            qt = sp.diags(diags, [0, 1, 2], (pcount - 2, pcount))
 
             ow = 1. / self._weights
             osqw = 1. / np.sqrt(self._weights)  # type: np.ndarray
@@ -142,8 +142,8 @@ class UnivariateCubicSmootingSpline:
             c3 = np.hstack((0., p * u, 0.))
             c2 = np.diff(yi) / dx - dx * (2. * c3[:-1] + c3[1:])
 
-            data = np.hstack((np.diff(c3) / dx, 3. * c3[:-1], c2, yi[:-1]))
-            coeffs = data.reshape((pcount - 1, 4), order='F')
+            coeffs = np.hstack((np.diff(c3) / dx, 3. * c3[:-1], c2, yi[:-1]))
+            coeffs = coeffs.reshape((pcount - 1, 4), order='F')
         else:
             p = 1.
             coeffs = np.array(np.hstack((divdydx, self._ydata[0])), ndmin=2)
