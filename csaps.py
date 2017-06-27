@@ -19,7 +19,7 @@ __version__ = '0.1.0'
 _1D = typing.Union[list, tuple, np.ndarray]
 
 
-class UnivariateCubicSmootingSpline:
+class UnivariateCubicSmoothingSpline:
     """Univariate cubic smoothing spline
 
     Parameters
@@ -110,12 +110,12 @@ class UnivariateCubicSmootingSpline:
 
         if pcount > 2:
             # Create diagonal sparse matrices
-            diags = np.vstack((dx[1:], 2 * (dx[1:] + dx[:-1]), dx[:-1]))
-            r = sp.spdiags(diags, [-1, 0, 1], pcount - 2, pcount - 2)
+            diags_r = np.vstack((dx[1:], 2 * (dx[1:] + dx[:-1]), dx[:-1]))
+            r = sp.spdiags(diags_r, [-1, 0, 1], pcount - 2, pcount - 2)
 
             odx = 1. / dx
-            diags = np.vstack((odx[:-1], -(odx[1:] + odx[:-1]), odx[1:]))
-            qt = sp.diags(diags, [0, 1, 2], (pcount - 2, pcount))
+            diags_qt = np.vstack((odx[:-1], -(odx[1:] + odx[:-1]), odx[1:]))
+            qt = sp.diags(diags_qt, [0, 1, 2], (pcount - 2, pcount))
 
             ow = 1. / self._weights
             osqw = 1. / np.sqrt(self._weights)  # type: np.ndarray

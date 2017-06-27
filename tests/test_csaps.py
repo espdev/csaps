@@ -10,7 +10,7 @@ def test_univariate_auto_smooth():
     x = np.linspace(0, 2 * np.pi, 21)
     y = np.sin(x) + (np.random.rand(21) - .5) * .1
 
-    sp = csaps.UnivariateCubicSmootingSpline(x, y)
+    sp = csaps.UnivariateCubicSmoothingSpline(x, y)
 
     xi = np.linspace(x[0], x[-1], 120)
     yi = sp(xi)
@@ -67,7 +67,7 @@ def test_univariate_four_points():
     x = [1., 2., 4., 6.]
     y = [2., 4., 5., 7.]
 
-    sp = csaps.UnivariateCubicSmootingSpline(x, y)
+    sp = csaps.UnivariateCubicSmoothingSpline(x, y)
 
     xi = np.linspace(1., 6., 10)
     yi = sp(xi)
@@ -86,7 +86,7 @@ def test_univariate_two_points():
     x = [1., 2.]
     y = [3., 4.]
 
-    sp = csaps.UnivariateCubicSmootingSpline(x, y)
+    sp = csaps.UnivariateCubicSmoothingSpline(x, y)
 
     xi = [1., 1.5, 2.]
     yi = sp(xi)
