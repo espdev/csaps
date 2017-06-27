@@ -141,7 +141,7 @@ class UnivariateCubicSmootingSpline:
             d1 = np.diff(np.hstack((0., u, 0.))) / dx
             d2 = np.diff(np.hstack((0., d1, 0.)))
 
-            yi = self._ydata - (6. * (1. - p)) * w * d2
+            yi = self._ydata - ((6. * (1. - p)) * w) @ d2
             c3 = np.hstack((0., p * u, 0.))
             c2 = np.diff(yi) / dx - dx * (2. * c3[:-1] + c3[1:])
 
