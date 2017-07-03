@@ -79,7 +79,7 @@ class UnivariateCubicSmoothingSpline:
         xdata = np.asarray(self._xdata, dtype=np.float64)
         ydata = np.asarray(self._ydata, dtype=np.float64)
 
-        if not self._weights:
+        if self._weights is None:
             weights = np.ones_like(xdata)
         else:
             weights = np.asarray(self._weights, dtype=np.float64)
