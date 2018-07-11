@@ -22,3 +22,7 @@ plt.show()
 ```
 
 ![csaps1d](https://user-images.githubusercontent.com/1299189/27611703-f3093c14-5b9b-11e7-9f18-6d0c3cc7633a.png)
+
+## References
+
+C. de Boor, A Practical Guide to Splines, Springer-Verlag, 1978.
