@@ -27,9 +27,9 @@ class UnivariateCubicSmoothingSpline:
     xdata : np.ndarray, list
         X input 1D data vector
     ydata : np.ndarray, list
-        Y input 1D data vector
+        Y input 1D data vector or ND-array with shape[-1] equal of X data size)
     weights : np.ndarray, list
-        Weights vector
+        Weights 1D vector or ND-array with shape equal of Y data shape
     smooth : float
         Smoothing parameter in range [0, 1] where:
             - 0: The smoothing spline is the least-squares straight line fit
@@ -39,14 +39,14 @@ class UnivariateCubicSmoothingSpline:
     def __init__(self, xdata: DataType, ydata: DataType,
                  weights: t.Optional[DataType] = None,
                  smooth: t.Optional[float] = None):
-        self._xdata = xdata
-        self._ydata = ydata
-        self._weights = weights
-        self._smooth = smooth
-
         self._breaks = None
         self._coeffs = None
         self._pieces = 0
+        self._smooth = smooth
+
+        (self._xdata,
+         self._ydata,
+         self._weights) = self._prepare_data(xdata, ydata, weights)
 
         self._make_spline()
 
@@ -76,29 +76,45 @@ class UnivariateCubicSmoothingSpline:
     def pieces(self):
         return self._pieces
 
-    def _prepare_data(self):
-        xdata = np.asarray(self._xdata, dtype=np.float64)
-        ydata = np.asarray(self._ydata, dtype=np.float64)
-
-        if self._weights is None:
-            weights = np.ones_like(xdata)
-        else:
-            weights = np.asarray(self._weights, dtype=np.float64)
+    @staticmethod
+    def _prepare_data(xdata, ydata, weights):
+        xdata = np.asarray(xdata, dtype=np.float64)
+        ydata = np.asarray(ydata, dtype=np.float64)
 
         if xdata.ndim > 1:
-            raise ValueError('X data must be a vector.')
-        if ydata.ndim > 1:
-            raise ValueError('Y data must be a vector.')
-        if weights.ndim > 1:
-            raise ValueError('Weights data must be a vector.')
-        if len({xdata.size, ydata.size, weights.size}) > 1:
-            raise ValueError('Lenghts of the input data vectors are not equal.')
+            raise ValueError('xdata must be a vector')
         if xdata.size < 2:
-            raise ValueError('There must be at least 2 data points.')
+            raise ValueError('xdata must contain at least 2 data points.')
 
-        self._xdata = xdata
-        self._ydata = ydata
-        self._weights = weights
+        if ydata.ndim > 1:
+            if ydata.shape[-1] != xdata.size:
+                raise ValueError(
+                    'ydata data must be a vector or '
+                    'ND-array with shape[-1] equal of xdata.size')
+        else:
+            if ydata.size != xdata.size:
+                raise ValueError('ydata vector size must be equal of xdata size')
+
+        if weights is None:
+            weights = np.ones_like(ydata)
+        else:
+            weights = np.asarray(weights, dtype=np.float64)
+
+            if weights.ndim > 1:
+                if weights.shape != ydata.shape:
+                    raise ValueError(
+                        'Weights data must be a vector or '
+                        'ND-array with shape equal of ydata.shape')
+            else:
+                if weights.size != xdata.size:
+                    raise ValueError(
+                        'Weights vector size must be equal of xdata size')
+
+            if ydata.ndim > 1 and weights.ndim == 1:
+                weights = np.array(weights, ndmin=ydata.ndim)
+                weights = np.ones_like(ydata) * weights
+
+        return xdata, ydata, weights
 
     @staticmethod
     def _compute_smooth(a, b):
@@ -115,8 +131,6 @@ class UnivariateCubicSmoothingSpline:
         return 1. / (1. + trace(a) / (6. * trace(b)))
 
     def _make_spline(self):
-        self._prepare_data()
-
         pcount = self._xdata.size
 
         dx = np.diff(self._xdata)

@@ -1,7 +1,37 @@
 # -*- coding: utf-8 -*-
 
+import pytest
+
 import numpy as np
 import csaps
+
+
+@pytest.mark.parametrize('x,y,w', [
+    ([1, 2, 3], [1, 2], None),
+    (np.array([(1, 2, 3), (1, 2, 3)]), [1, 2, 3], None),
+    ([1, 2, 3], [1, 2, 3], [1, 1]),
+    ([1, 2, 3], [1, 2, 3], [1, 1, 1, 1]),
+    ([1, 2, 3], [1, 2, 3], np.array([(1, 1, 1), (1, 1, 1)])),
+    ([1, 2, 3], np.array([(1, 2, 3, 4), (1, 2, 3, 4)]), None),
+    ([1, 2, 3], np.ones((2, 4, 5)), None),
+    ([1, 2, 3], np.ones((2, 4, 3)), np.ones((2, 4, 4))),
+    ([1, 2, 3], np.array([(1, 2, 3), (1, 2, 3)]), np.array([(1, 1, 1, 1), (1, 1, 1, 1)])),
+    ([1, 2, 3], np.array([(1, 2, 3), (1, 2, 3)]), np.array([(1, 1, 1), (1, 1, 1), (1, 1, 1)]))
+])
+def test_univariate_invalid_data(x, y, w):
+    with pytest.raises(ValueError):
+        csaps.UnivariateCubicSmoothingSpline(x, y, w)
+
+
+@pytest.mark.parametrize('x,y,w', [
+    ([1, 2, 3], [1, 2, 3], None),
+    ([1, 2, 3], [1, 2, 3], [1, 1, 1]),
+    ([1, 2, 3], np.array([(1, 2, 3), (1, 2, 3)]), [1, 1, 1]),
+    ([1, 2, 3], np.ones((2, 4, 3)), [1, 1, 1]),
+    ([1, 2, 3], np.array([(1, 2, 3), (1, 2, 3)]), np.array([(1, 1, 1), (1, 1, 1)])),
+])
+def test_univariate_valid_data(x, y, w):
+    csaps.UnivariateCubicSmoothingSpline(x, y, w)
 
 
 def test_univariate_auto_smooth():
