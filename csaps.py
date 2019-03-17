@@ -5,7 +5,7 @@ Cubic spline approximation (smoothing)
 
 """
 
-import typing
+import typing as t
 
 import numpy as np
 
@@ -16,7 +16,7 @@ import scipy.sparse.linalg as la
 __version__ = '0.1.0'
 
 
-_1D = typing.Union[list, tuple, np.ndarray]
+DataType = t.Union[t.Sequence, np.ndarray]
 
 
 class UnivariateCubicSmoothingSpline:
@@ -36,8 +36,9 @@ class UnivariateCubicSmoothingSpline:
             - 1: The cubic spline interpolant
     """
 
-    def __init__(self, xdata: _1D, ydata: _1D, weights: _1D=None,
-                 smooth: float=None):
+    def __init__(self, xdata: DataType, ydata: DataType,
+                 weights: t.Optional[DataType] = None,
+                 smooth: t.Optional[float] = None):
         self._xdata = xdata
         self._ydata = ydata
         self._weights = weights
@@ -49,7 +50,7 @@ class UnivariateCubicSmoothingSpline:
 
         self._make_spline()
 
-    def __call__(self, xi: _1D):
+    def __call__(self, xi: DataType):
         """Evaluate the spline's approximation for given data
         """
         xi = np.asarray(xi, dtype=np.float64)
