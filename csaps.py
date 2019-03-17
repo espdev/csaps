@@ -99,6 +99,20 @@ class UnivariateCubicSmoothingSpline:
         self._ydata = ydata
         self._weights = weights
 
+    @staticmethod
+    def _compute_smooth(a, b):
+        """
+        The calculation of the smoothing spline requires the solution of a
+        linear system whose coefficient matrix has the form p*A + (1-p)*B, with
+        the matrices A and B depending on the data sites x. The default value
+        of p makes p*trace(A) equal (1 - p)*trace(B).
+        """
+
+        def trace(m: sp.dia_matrix):
+            return m.diagonal().sum()
+
+        return 1. / (1. + trace(a) / (6. * trace(b)))
+
     def _make_spline(self):
         self._prepare_data()
 
@@ -125,17 +139,13 @@ class UnivariateCubicSmoothingSpline:
             # Solve linear system for the 2nd derivatives
             qtwq = qtw @ qtw.T
 
-            def trace(m: sp.dia_matrix):
-                return m.diagonal().sum()
-
-            if self._smooth is None:
-                p = 1. / (1. + trace(r) / (6. * trace(qtwq)))
-            else:
+            if self._smooth:
                 p = self._smooth
+            else:
+                p = self._compute_smooth(r, qtwq)
 
             a = (6. * (1. - p)) * qtwq + p * r
             b = np.diff(divdydx)
-
             u = la.spsolve(a, b)
 
             d1 = np.diff(np.hstack((0., u, 0.))) / dx
