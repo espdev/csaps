@@ -198,3 +198,16 @@ def test_univariate_weighted(w, yid):
     yi = sp(xi)
 
     np.testing.assert_allclose(yi, yid)
+
+
+@pytest.mark.skip(reason='It might be long')
+def test_univariate_big_vectorized():
+    x = np.linspace(0, 10000, 10000)
+    y = np.random.rand(1000, 10000)
+    xi = np.linspace(0, 10000, 20000)
+
+    csaps.UnivariateCubicSmoothingSpline(x, y)(xi)
+
+
+if __name__ == '__main__':
+    pytest.main()
