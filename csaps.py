@@ -212,7 +212,7 @@ class UnivariateCubicSmoothingSpline:
 
         if d > 1:
             xi_shape = (1, d * lx)
-            xi_ndm = np.array(xi, ndmin=d)
+            xi_ndm = np.array(xi, ndmin=2)
             xi = np.reshape(np.repeat(xi_ndm, d, axis=0), xi_shape, order='F')
 
             index_rep = (np.repeat(np.array(1 + d * index, ndmin=2), d, axis=0)
