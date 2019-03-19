@@ -179,3 +179,22 @@ def test_univariate_npoints(x, y, xi, yid):
     yi = sp(xi)
 
     np.testing.assert_allclose(yi, yid)
+
+
+@pytest.mark.parametrize('w,yid',[
+    ([0.5, 1, 0.7, 1.2], [
+        2.39572102230177, 3.13781163365086, 3.78568993197139,
+        4.28992448591238, 4.7009959256016, 5.08290363789967,
+        5.49673867759808, 5.9600748344541, 6.45698622142886,
+        6.97068522346297
+    ])
+])
+def test_univariate_weighted(w, yid):
+    x = [1., 2., 4., 6.]
+    y = [2., 4., 5., 7.]
+    xi = np.linspace(1., 6., 10)
+
+    sp = csaps.UnivariateCubicSmoothingSpline(x, y, w)
+    yi = sp(xi)
+
+    np.testing.assert_allclose(yi, yid)
