@@ -29,9 +29,9 @@ class UnivariateCubicSmoothingSpline:
     ydata : np.ndarray, list
         Y input 1D data vector or ND-array with shape[-1] equal of X data size)
     weights : np.ndarray, list
-        Weights 1D vector or ND-array with shape equal of Y data shape
+        [Optional] Weights 1D vector with size equal of xdata size
     smooth : float
-        Smoothing parameter in range [0, 1] where:
+        [Optional] Smoothing parameter in range [0, 1] where:
             - 0: The smoothing spline is the least-squares straight line fit
             - 1: The cubic spline interpolant
     """
@@ -39,7 +39,6 @@ class UnivariateCubicSmoothingSpline:
     def __init__(self, xdata: DataType, ydata: DataType,
                  weights: t.Optional[DataType] = None,
                  smooth: t.Optional[float] = None):
-        self._breaks = None
         self._coeffs = None
         self._pieces = 0
         self._smooth = smooth
@@ -47,6 +46,9 @@ class UnivariateCubicSmoothingSpline:
         (self._xdata,
          self._ydata,
          self._weights) = self._prepare_data(xdata, ydata, weights)
+
+        self._axis = self._ydata.ndim - 1
+        self._ydim = self._ydata.shape[0]
 
         self._make_spline()
 
@@ -63,10 +65,6 @@ class UnivariateCubicSmoothingSpline:
     @property
     def smooth(self):
         return self._smooth
-
-    @property
-    def breaks(self):
-        return self._breaks
 
     @property
     def coeffs(self):
@@ -95,24 +93,16 @@ class UnivariateCubicSmoothingSpline:
             if ydata.size != xdata.size:
                 raise ValueError('ydata vector size must be equal of xdata size')
 
+            ydata = np.array(ydata, ndmin=2)
+
         if weights is None:
-            weights = np.ones_like(ydata)
+            weights = np.ones_like(xdata)
         else:
             weights = np.asarray(weights, dtype=np.float64)
 
-            if weights.ndim > 1:
-                if weights.shape != ydata.shape:
-                    raise ValueError(
-                        'Weights data must be a vector or '
-                        'ND-array with shape equal of ydata.shape')
-            else:
-                if weights.size != xdata.size:
-                    raise ValueError(
-                        'Weights vector size must be equal of xdata size')
-
-            if ydata.ndim > 1 and weights.ndim == 1:
-                weights = np.array(weights, ndmin=ydata.ndim)
-                weights = np.ones_like(ydata) * weights
+            if weights.size != xdata.size:
+                raise ValueError(
+                    'Weights vector size must be equal of xdata size')
 
         return xdata, ydata, weights
 
@@ -134,7 +124,7 @@ class UnivariateCubicSmoothingSpline:
         pcount = self._xdata.size
 
         dx = np.diff(self._xdata)
-        dy = np.diff(self._ydata)
+        dy = np.diff(self._ydata, axis=self._axis)
         divdydx = dy / dx
 
         if pcount > 2:
@@ -160,18 +150,27 @@ class UnivariateCubicSmoothingSpline:
                 p = self._compute_smooth(r, qtwq)
 
             a = (6. * (1. - p)) * qtwq + p * r
-            b = np.diff(divdydx)
+            b = np.diff(divdydx, axis=0)
             u = la.spsolve(a, b)
 
-            d1 = np.diff(np.hstack((0., u, 0.))) / dx
-            d2 = np.diff(np.hstack((0., d1, 0.)))
+            d_pad = np.zeros_like(u)
 
-            yi = self._ydata - ((6. * (1. - p)) * w) @ d2
-            c3 = np.hstack((0., p * u, 0.))
-            c2 = np.diff(yi) / dx - dx * (2. * c3[:-1] + c3[1:])
+            d1 = np.diff(np.vstack((d_pad, u, d_pad)), axis=0) / dx
+            d2 = np.diff(np.vstack((d_pad, d1, d_pad)), axis=0)
 
-            coeffs = np.hstack((np.diff(c3) / dx, 3. * c3[:-1], c2, yi[:-1]))
-            coeffs = coeffs.reshape((pcount - 1, 4), order='F')
+            yi = self._ydata.T - ((6. * (1. - p)) * w) @ d2
+            c3 = np.vstack((d_pad, p * u, d_pad))
+            c2 = np.diff(yi, axis=0) / dx - dx * (2. * c3[:-1, :] + c3[1:, :])
+
+            coeffs = np.hstack((
+                (np.diff(c3, axis=0) / dx).T,
+                3. * c3[:-1, :].T,
+                c2.T,
+                yi[:-1, :].T
+            ))
+
+            c_shape = ((pcount - 1) * self._ydim, 4)
+            coeffs = coeffs.reshape(c_shape, order='F')
         else:
             p = 1.
             coeffs = np.array(np.hstack((divdydx, self._ydata[0])), ndmin=2)
@@ -179,11 +178,11 @@ class UnivariateCubicSmoothingSpline:
         self._smooth = p
         self._breaks = self._xdata.copy()
         self._coeffs = coeffs
-        self._pieces = coeffs.shape[0]
+        self._pieces = np.prod(coeffs.shape[:-1]) // self._ydim
 
     def _evaluate(self, xi):
         # For each data site, compute its break interval
-        mesh = self._breaks[1:-1]
+        mesh = self._xdata[1:-1]
         edges = np.hstack((-np.inf, mesh, np.inf))
 
         index = np.digitize(xi, edges)
@@ -191,15 +190,29 @@ class UnivariateCubicSmoothingSpline:
         nanx = np.flatnonzero(index == 0)
         index = np.fmin(index, mesh.size + 1)
         index[nanx] = 1
-        index -= 1
 
         # Go to local coordinates
-        xi = xi - self._breaks[index]
+        xi = xi - self._xdata[index-1]
+        d = self._ydim
+        lx = len(xi)
+
+        if d > 1:
+            xi_shape = (1, d * lx)
+            xi_ndm = np.array(xi, ndmin=d)
+            xi = np.reshape(np.repeat(xi_ndm, d, axis=0), xi_shape, order='F')
+
+            index_rep = (np.repeat(np.array(1 + d * index, ndmin=2), d, axis=0)
+                         + np.repeat(np.array(np.r_[-2:0], ndmin=2).T, lx, axis=1))
+            index = np.reshape(index_rep, (d * lx, 1), order='F')
+
+        index -= 1
 
         # Apply nested multiplication
-        values = self.coeffs[index, 0]
+        values = self.coeffs[index, 0].T
 
         for i in range(1, self.coeffs.shape[1]):
-            values = xi * values + self.coeffs[index, i]
+            values = xi * values + self.coeffs[index, i].T
 
-        return values
+        values = np.reshape(values, (d, lx), order='F')
+
+        return values.squeeze()
