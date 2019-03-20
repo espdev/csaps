@@ -1,6 +1,6 @@
 # CSAPS: Cubic spline approximation (smoothing)
 
-This package provides cubic smoothing spline for fitting data.
+This package provides cubic smoothing spline for data approximation.
 The smoothing parameter can be calculated automatically or it can be set manually. 
 
 The smoothing parameter should be in range `[0, 1]` where:
