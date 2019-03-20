@@ -216,6 +216,7 @@ def test_univariate_big_vectorized():
     ([[1, 2, 3], [1, 2, 3]], np.ones((3, 3, 3)), None, None),
     ([[1, 2, 3], [1, 2, 3]], np.ones((3, 3)), [1, 2, 3], None),
     ([[1, 2, 3], [1, 2, 3]], np.ones((3, 3)), [[1, 2, 3]], None),
+    ([[1, 2, 3], [1, 2, 3]], np.ones((3, 3)), [[1, 2], [1, 2]], None),
     ([[1, 2, 3], [1, 2, 3]], np.ones((3, 3)), None, [0.5, 0.4, 0.2])
 ])
 def test_multivariate_invalid_data(x, y, w, p):

@@ -56,7 +56,7 @@ class UnivariateCubicSmoothingSpline:
 
         self._make_spline()
 
-    def __call__(self, xi: _UnivariateDataType):
+    def __call__(self, xi: _UnivariateDataType) -> np.ndarray:
         """Evaluate the spline's approximation for given data
         """
         xi = np.asarray(xi, dtype=np.float64)
@@ -241,7 +241,7 @@ class UnivariateCubicSmoothingSpline:
 class MultivariateCubicSmoothingSpline:
     """Multivariate cubic smoothing spline
 
-    Implments multivariate (ND-gridded) approximation via cubic smoothing spline.
+    Class implments multivariate (ND-gridded) approximation via cubic smoothing spline.
 
     Parameters
     ----------
@@ -259,25 +259,31 @@ class MultivariateCubicSmoothingSpline:
          self._weights,
          self._smoth) = self._prepare_data(xdata, ydata, weights, smooth)
 
+        self._ndim = len(self._xdata)
+
+        self._make_spline()
+
+    @staticmethod
+    def _prepare_univar(data, name):
+        if not isinstance(data, (tuple, list)):
+            raise TypeError('{} must be list/tuple of vectors'.format(name))
+
+        data = list(data)
+
+        for i, di in enumerate(data):
+            di = np.array(di, dtype=np.float64)
+            if di.ndim > 1:
+                raise ValueError('All {} elements must be vector'.format(name))
+            if di.size < 2:
+                raise ValueError(
+                    '{} must contain at least 2 data points'.format(name))
+            data[i] = di
+
+        return data
+
     @staticmethod
     def _prepare_data(xdata, ydata, weights, smooth):
-        def prepare_univar(data, name):
-            if not isinstance(data, (tuple, list)):
-                raise TypeError('{} must be list/tuple of vectors'.format(name))
-
-            data = list(data)
-
-            for i, di in enumerate(data):
-                di = np.array(di, dtype=np.float64)
-                if di.ndim > 1:
-                    raise ValueError('All {} elements must be vector'.format(name))
-                if di.size < 2:
-                    raise ValueError('{} must contain at least 2 data points'.format(name))
-                data[i] = di
-
-            return data
-
-        xdata = prepare_univar(xdata, 'xdata')
+        xdata = MultivariateCubicSmoothingSpline._prepare_univar(xdata, 'xdata')
         data_ndim = len(xdata)
 
         if ydata.ndim != data_ndim:
@@ -294,12 +300,17 @@ class MultivariateCubicSmoothingSpline:
             for xn in xdata:
                 weights.append(np.ones_like(xn))
 
-        weights = prepare_univar(weights, 'weights')
+        weights = MultivariateCubicSmoothingSpline._prepare_univar(weights, 'weights')
 
         if len(weights) != data_ndim:
             raise ValueError(
                 'weights ({}) and xdata ({}) dimensions mismatch'.format(
                     len(weights), data_ndim))
+
+        for w, x in zip(map(len, weights), map(len, xdata)):
+            if w != x:
+                raise ValueError(
+                    'weights ({}) and xdata ({}) dimension size mismatch'.format(w, x))
 
         if smooth:
             if not isinstance(smooth, (list, tuple)):
@@ -311,3 +322,19 @@ class MultivariateCubicSmoothingSpline:
                     'number of dimensions ({})'.format(data_ndim))
 
         return xdata, ydata, weights, smooth
+
+    def __call__(self, xi: _MultivariateDataType) -> np.ndarray:
+        xi = self._prepare_univar(xi, 'xi')
+
+        if len(xi) != self._ndim:
+            raise ValueError(
+                'xi ({}) and xdata ({}) dimensions mismatch'.format(
+                    len(xi), self._ndim))
+
+        return self._evaluate(xi)
+
+    def _make_spline(self):
+        pass
+
+    def _evaluate(self, xi):
+        raise NotImplementedError
