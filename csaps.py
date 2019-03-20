@@ -16,7 +16,8 @@ import scipy.sparse.linalg as la
 __version__ = '0.2.0'
 
 
-DataType = t.Union[t.Sequence, np.ndarray]
+_UnivariateDataType = t.Union[t.Sequence[t.Union[int, float]], np.ndarray]
+_MultivariateDataType = t.Tuple[_UnivariateDataType, ...]
 
 
 class UnivariateCubicSmoothingSpline:
@@ -36,8 +37,10 @@ class UnivariateCubicSmoothingSpline:
             - 1: The cubic spline interpolant
     """
 
-    def __init__(self, xdata: DataType, ydata: DataType,
-                 weights: t.Optional[DataType] = None,
+    def __init__(self,
+                 xdata: _UnivariateDataType,
+                 ydata: _UnivariateDataType,
+                 weights: t.Optional[_UnivariateDataType] = None,
                  smooth: t.Optional[float] = None):
         self._coeffs = None
         self._pieces = 0
@@ -53,7 +56,7 @@ class UnivariateCubicSmoothingSpline:
 
         self._make_spline()
 
-    def __call__(self, xi: DataType):
+    def __call__(self, xi: _UnivariateDataType):
         """Evaluate the spline's approximation for given data
         """
         xi = np.asarray(xi, dtype=np.float64)
@@ -233,3 +236,78 @@ class UnivariateCubicSmoothingSpline:
             values = values.reshape(self._data_shape)
 
         return values
+
+
+class MultivariateCubicSmoothingSpline:
+    """Multivariate cubic smoothing spline
+
+    Implments multivariate (ND-gridded) approximation via cubic smoothing spline.
+
+    Parameters
+    ----------
+
+    """
+
+    def __init__(self,
+                 xdata: _MultivariateDataType,
+                 ydata: np.ndarray,
+                 weights: t.Optional[t.Union[_UnivariateDataType,
+                                             _MultivariateDataType]] = None,
+                 smooth: t.Optional[t.Union[float, t.Sequence[float]]] = None):
+        (self._xdata,
+         self._ydata,
+         self._weights,
+         self._smoth) = self._prepare_data(xdata, ydata, weights, smooth)
+
+    @staticmethod
+    def _prepare_data(xdata, ydata, weights, smooth):
+        def prepare_univar(data, name):
+            if not isinstance(data, (tuple, list)):
+                raise TypeError('{} must be list/tuple of vectors'.format(name))
+
+            data = list(data)
+
+            for i, di in enumerate(data):
+                di = np.array(di, dtype=np.float64)
+                if di.ndim > 1:
+                    raise ValueError('All {} elements must be vector'.format(name))
+                if di.size < 2:
+                    raise ValueError('{} must contain at least 2 data points'.format(name))
+                data[i] = di
+
+            return data
+
+        xdata = prepare_univar(xdata, 'xdata')
+        data_ndim = len(xdata)
+
+        if ydata.ndim != data_ndim:
+            raise ValueError(
+                'ydata must have dimension {} according to xdata'.format(data_ndim))
+
+        for yd, xs in zip(ydata.shape, map(len, xdata)):
+            if yd != xs:
+                raise ValueError(
+                    'ydata ({}) and xdata ({}) dimension size mismatch'.format(yd, xs))
+
+        if not weights:
+            weights = []
+            for xn in xdata:
+                weights.append(np.ones_like(xn))
+
+        weights = prepare_univar(weights, 'weights')
+
+        if len(weights) != data_ndim:
+            raise ValueError(
+                'weights ({}) and xdata ({}) dimensions mismatch'.format(
+                    len(weights), data_ndim))
+
+        if smooth:
+            if not isinstance(smooth, (list, tuple)):
+                smooth = [smooth] * data_ndim
+
+            if len(smooth) != data_ndim:
+                raise ValueError(
+                    'Number of smoothing parameter values must be equal '
+                    'number of dimensions ({})'.format(data_ndim))
+
+        return xdata, ydata, weights, smooth

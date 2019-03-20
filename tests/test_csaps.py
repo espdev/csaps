@@ -209,5 +209,19 @@ def test_univariate_big_vectorized():
     csaps.UnivariateCubicSmoothingSpline(x, y)(xi)
 
 
+@pytest.mark.parametrize('x,y,w,p', [
+    ([1, 2, 3], np.ones((10, 10)), None, None),
+    ([[1], [1]], np.ones((1, 1)), None, None),
+    ([[1, 2, 3], [1, 2, 3]], np.ones((4, 3)), None, None),
+    ([[1, 2, 3], [1, 2, 3]], np.ones((3, 3, 3)), None, None),
+    ([[1, 2, 3], [1, 2, 3]], np.ones((3, 3)), [1, 2, 3], None),
+    ([[1, 2, 3], [1, 2, 3]], np.ones((3, 3)), [[1, 2, 3]], None),
+    ([[1, 2, 3], [1, 2, 3]], np.ones((3, 3)), None, [0.5, 0.4, 0.2])
+])
+def test_multivariate_invalid_data(x, y, w, p):
+    with pytest.raises((ValueError, TypeError)):
+        csaps.MultivariateCubicSmoothingSpline(x, y, w, p)
+
+
 if __name__ == '__main__':
     pytest.main()
