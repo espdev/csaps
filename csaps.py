@@ -17,6 +17,13 @@ __version__ = '0.2.0'
 
 
 _UnivariateDataType = t.Union[t.Sequence[t.Union[int, float]], np.ndarray]
+
+_UnivariateVectorizedDataType = t.Union[
+    t.Sequence[t.Union[int, float]],
+    np.ndarray,
+    t.List['_UnivariateVectorizedDataType']
+]
+
 _MultivariateDataType = t.Tuple[_UnivariateDataType, ...]
 
 
@@ -39,7 +46,7 @@ class UnivariateCubicSmoothingSpline:
 
     def __init__(self,
                  xdata: _UnivariateDataType,
-                 ydata: _UnivariateDataType,
+                 ydata: _UnivariateVectorizedDataType,
                  weights: t.Optional[_UnivariateDataType] = None,
                  smooth: t.Optional[float] = None):
         self._coeffs = None
