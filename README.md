@@ -57,7 +57,7 @@ sp = csaps.UnivariateCubicSmoothingSpline(x, y, w)
 
 The algorithm supports vectorization. You can compute smoothing splines for 
 `X`, `Y` data where `X` is data site vector and `Y` is ND-array of data value vectors. 
-The shape of `Y` array must be: `(s1, s2, ..., sN)` where `sN` must equal of `X` vector size.
+The shape of `Y` array must be: `(d0, d1, ..., dN)` where `dN` must equal of `X` vector size.
 
 In this case the smoothing splines will be computed for all `Y` data vectors at a time.
 
