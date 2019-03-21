@@ -76,16 +76,24 @@ class UnivariateCubicSmoothingSpline:
         return self._evaluate(xi)
 
     @property
-    def smooth(self):
+    def smooth(self) -> float:
         return self._smooth
 
     @property
-    def coeffs(self):
+    def breaks(self) -> np.ndarray:
+        return self._xdata
+
+    @property
+    def coeffs(self) -> np.ndarray:
         return self._coeffs
 
     @property
-    def pieces(self):
+    def pieces(self) -> int:
         return self._pieces
+
+    @property
+    def order(self) -> int:
+        return self._coeffs.shape[-1]
 
     @staticmethod
     def _prepare_data(xdata, ydata, weights):
@@ -200,7 +208,6 @@ class UnivariateCubicSmoothingSpline:
                 (divdydx, np.array(self._ydata[:, 0], ndmin=2).T)), ndmin=2)
 
         self._smooth = p
-        self._breaks = self._xdata.copy()
         self._coeffs = coeffs
         self._pieces = np.prod(coeffs.shape[:-1]) // self._yd
 
@@ -248,11 +255,25 @@ class UnivariateCubicSmoothingSpline:
 class MultivariateCubicSmoothingSpline:
     """Multivariate cubic smoothing spline
 
-    Class implments multivariate (ND-gridded) approximation via cubic smoothing spline.
+    Class implments multivariate (ND-gridded) approximation via cubic
+    smoothing spline.
 
     Parameters
     ----------
+    xdata : list, tuple
+        X data site vectors for all dimensions (determines a grid). For example::
 
+            # 2D grid
+            x = [np.linspace(0, 10, 100), np.linspace(0, 10, 100)]
+
+    ydata : np.ndarray
+        Y input ND data array with shape equal X data vector sizes
+    weights : list, tuple
+        [Optional] Weights data vectors for all dimensions with size equal xdata sizes
+    smooth : float
+        [Optional] Smoothing parameter (or list of parameters for each dimension) in range [0, 1] where:
+            - 0: The smoothing spline is the least-squares straight line fit
+            - 1: The cubic spline interpolant
     """
 
     def __init__(self,
@@ -264,14 +285,38 @@ class MultivariateCubicSmoothingSpline:
         (self._xdata,
          self._ydata,
          self._weights,
-         self._smoth) = self._prepare_data(xdata, ydata, weights, smooth)
+         self._smooth) = self._prepare_data(xdata, ydata, weights, smooth)
 
         self._ndim = len(self._xdata)
 
+        self._coeffs = None
+        self._pieces = None
+        self._order = None
+
         self._make_spline()
 
+    @property
+    def smooth(self) -> t.Tuple[float, ...]:
+        return self._smooth
+
+    @property
+    def breaks(self) -> t.Tuple[np.ndarray, ...]:
+        return self._xdata
+
+    @property
+    def coeffs(self) -> np.ndarray:
+        return self._coeffs
+
+    @property
+    def pieces(self) -> t.Tuple[int, ...]:
+        return self._pieces
+
+    @property
+    def order(self) -> t.Tuple[int, ...]:
+        return self._order
+
     @staticmethod
-    def _prepare_univar(data, name):
+    def _prepare_univariate(data, name):
         if not isinstance(data, (tuple, list)):
             raise TypeError('{} must be list/tuple of vectors'.format(name))
 
@@ -286,11 +331,11 @@ class MultivariateCubicSmoothingSpline:
                     '{} must contain at least 2 data points'.format(name))
             data[i] = di
 
-        return data
+        return tuple(data)
 
-    @staticmethod
-    def _prepare_data(xdata, ydata, weights, smooth):
-        xdata = MultivariateCubicSmoothingSpline._prepare_univar(xdata, 'xdata')
+    @classmethod
+    def _prepare_data(cls, xdata, ydata, weights, smooth):
+        xdata = cls._prepare_univariate(xdata, 'xdata')
         data_ndim = len(xdata)
 
         if ydata.ndim != data_ndim:
@@ -303,35 +348,36 @@ class MultivariateCubicSmoothingSpline:
                     'ydata ({}) and xdata ({}) dimension size mismatch'.format(yd, xs))
 
         if not weights:
-            weights = []
-            for xn in xdata:
-                weights.append(np.ones_like(xn))
-
-        weights = MultivariateCubicSmoothingSpline._prepare_univar(weights, 'weights')
+            weights = [None] * data_ndim
+        else:
+            weights = cls._prepare_univariate(weights, 'weights')
 
         if len(weights) != data_ndim:
             raise ValueError(
                 'weights ({}) and xdata ({}) dimensions mismatch'.format(
                     len(weights), data_ndim))
 
-        for w, x in zip(map(len, weights), map(len, xdata)):
-            if w != x:
-                raise ValueError(
-                    'weights ({}) and xdata ({}) dimension size mismatch'.format(w, x))
+        for w, x in zip(weights, xdata):
+            if w:
+                if w.size != x.size:
+                    raise ValueError(
+                        'weights ({}) and xdata ({}) dimension size mismatch'.format(w, x))
 
-        if smooth:
-            if not isinstance(smooth, (list, tuple)):
-                smooth = [smooth] * data_ndim
+        if not smooth:
+            smooth = [None] * data_ndim
 
-            if len(smooth) != data_ndim:
-                raise ValueError(
-                    'Number of smoothing parameter values must be equal '
-                    'number of dimensions ({})'.format(data_ndim))
+        if not isinstance(smooth, (list, tuple)):
+            smooth = [smooth] * data_ndim
+
+        if len(smooth) != data_ndim:
+            raise ValueError(
+                'Number of smoothing parameter values must be equal '
+                'number of dimensions ({})'.format(data_ndim))
 
         return xdata, ydata, weights, smooth
 
     def __call__(self, xi: _MultivariateDataType) -> np.ndarray:
-        xi = self._prepare_univar(xi, 'xi')
+        xi = self._prepare_univariate(xi, 'xi')
 
         if len(xi) != self._ndim:
             raise ValueError(
@@ -341,7 +387,30 @@ class MultivariateCubicSmoothingSpline:
         return self._evaluate(xi)
 
     def _make_spline(self):
-        pass
+        sizey = [1] + list(self._ydata.shape)
+        ydata = self._ydata.reshape(sizey, order='F').copy()
+
+        # Perform coordinatewise smoothing spline computing
+        for i in range(self._ndim-1, -1, -1):
+            shape_i = (np.prod(sizey[:-1]), sizey[-1])
+            ydata_i = ydata.reshape(shape_i, order='F')
+
+            spline = UnivariateCubicSmoothingSpline(
+                self._xdata[i], ydata_i, self._weights[i], self._smooth[i])
+
+            self._smooth[i] = spline.smooth
+
+            sizey[-1] = spline.pieces * spline.order
+            ydata = spline.coeffs.reshape(sizey, order='F')
+
+            if self._ndim > 1:
+                axes = (0, self._ndim, *np.r_[1:self._ndim].tolist())
+                ydata = ydata.transpose(axes)
+                sizey = list(ydata.shape)
+
+        self._coeffs = ydata
+        self._pieces = tuple(x.size - 1 for x in self._xdata)
+        self._order = tuple((np.array(sizey[1:]) // np.array(self._pieces)).tolist())
 
     def _evaluate(self, xi):
         raise NotImplementedError
