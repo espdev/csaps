@@ -43,11 +43,13 @@ The algorithm supports weighting. You can set weights vector that will determine
 weights for all data values:
 
 ```python
+import csaps
+
 x = [1., 2., 4., 6.]
 y = [2., 4., 5., 7.]
 w = [0.5, 1, 0.7, 1.2]
 
-sp = UnivariateCubicSmoothingSpline(x, y, w)
+sp = csaps.UnivariateCubicSmoothingSpline(x, y, w)
 ...
 ```
 
@@ -62,15 +64,23 @@ In this case the smoothing splines will be computed for all `Y` data vectors at 
 For example:
 
 ```python
+import numpy
+import csaps
+
 # data sites
 x = [1, 2, 3, 4]
 
 # two data vectors
 y = [(2, 4, 6, 8), 
      (1, 3, 5, 7)]
- 
-s = UnivariateCubicSmoothingSpline(x, y)
-...
+
+sp = csaps.UnivariateCubicSmoothingSpline(x, y)
+
+xi = numpy.linspace(1, 4, 10)
+yi = sp(xi)
+
+print(yi.shape)  # (2, 10)
+assert yi.shape[:-1] == yi.shape[:-1]
 ```
 
 **Important**:
