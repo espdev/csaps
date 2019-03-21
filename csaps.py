@@ -24,7 +24,7 @@ _UnivariateVectorizedDataType = t.Union[
     t.List['_UnivariateVectorizedDataType']
 ]
 
-_MultivariateDataType = t.Tuple[_UnivariateDataType, ...]
+_MultivariateDataType = t.Sequence[_UnivariateDataType]
 
 
 class UnivariateCubicSmoothingSpline:
@@ -408,9 +408,10 @@ class MultivariateCubicSmoothingSpline:
                 ydata = ydata.transpose(axes)
                 sizey = list(ydata.shape)
 
+        self._smooth = tuple(self._smooth)
         self._coeffs = ydata
         self._pieces = tuple(x.size - 1 for x in self._xdata)
-        self._order = tuple((np.array(sizey[1:]) // np.array(self._pieces)).tolist())
+        self._order = tuple(map(lambda a, b: a // b, sizey[1:], self._pieces))
 
     def _evaluate(self, xi):
         raise NotImplementedError
