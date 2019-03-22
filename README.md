@@ -12,11 +12,9 @@ whose coefficient matrix has the form `p*A + (1 - p)*B`, with the matrices `A` a
 depending on the data sites `X`. The automatically computed smoothing parameter makes 
 `p*trace(A) equal (1 - p)*trace(B)`.
 
-## The examples of usage
+## Smoothing univariate data
 
-### Smoothing univariate data
-
-We can use 'UnivariateCubicSmoothingSpline' class for uivariate data smoothing.
+You can use 'UnivariateCubicSmoothingSpline' class for uivariate data smoothing.
 
 ```python
 import numpy as np
@@ -39,7 +37,7 @@ plt.show()
 
 ![csaps1d](https://user-images.githubusercontent.com/1299189/27611703-f3093c14-5b9b-11e7-9f18-6d0c3cc7633a.png)
 
-### Weighted smoothing univariate data
+## Weighted smoothing univariate data
 
 The algorithm supports weighting. You can set weights vector that will determine 
 weights for all data values:
@@ -55,7 +53,7 @@ sp = csaps.UnivariateCubicSmoothingSpline(x, y, w)
 ...
 ```
 
-### Smoothing univariate data with vectorization
+## Smoothing univariate data with vectorization
 
 The algorithm supports vectorization. You can compute smoothing splines for 
 `X`, `Y` data where `X` is data site vector and `Y` is ND-array of data value vectors. 
@@ -88,12 +86,14 @@ assert yi.shape[:-1] == yi.shape[:-1]
 **Important**:
 The same weights vector and the same smoothing parameter will be used for all Y data.
 
-### Smoothing multivariate data
+## Smoothing multivariate data
 
 The algorithm can make multivariate smoothing splines for ND-gridded data approximation.
 In this case we use coordinatewise smoothing (tensor-product of univariate splines coefficients).
 
-We can use 'MultivariateCubicSmoothingSpline' class for multivariate smoothing.
+You can use 'MultivariateCubicSmoothingSpline' class for multivariate smoothing.
+
+### Bivariate smoothing example
 
 ```python
 import numpy as np
