@@ -1,9 +1,9 @@
 # CSAPS: Cubic spline approximation (smoothing)
 
-This package provides cubic smoothing spline for data approximation.
+This package provides cubic smoothing spline for univariate/multivariate data approximation.
 The smoothing parameter can be calculated automatically or it can be set manually. 
 
-The smoothing parameter should be in range `[0, 1]` where:
+The smoothing parameter should be in range `[0, 1]` where bounds are:
 * 0: The smoothing spline is the least-squares straight line fit to the data
 * 1: The natural cubic spline interpolant
 
@@ -15,6 +15,8 @@ depending on the data sites `X`. The automatically computed smoothing parameter 
 ## The examples of usage
 
 ### Smoothing univariate data
+
+We can use 'UnivariateCubicSmoothingSpline' class for uivariate data smoothing.
 
 ```python
 import numpy as np
@@ -86,10 +88,51 @@ assert yi.shape[:-1] == yi.shape[:-1]
 **Important**:
 The same weights vector and the same smoothing parameter will be used for all Y data.
 
+### Smoothing multivariate data
+
+The algorithm can make multivariate smoothing splines for ND-gridded data approximation.
+In this case we use coordinatewise smoothing (tensor-product of univariate splines coefficients).
+
+We can use 'MultivariateCubicSmoothingSpline' class for multivariate smoothing.
+
+```python
+import numpy as np
+
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+
+import csaps
+
+xdata = [np.linspace(-3, 3, 61), np.linspace(-3.5, 3.5, 51)]
+i, j = np.meshgrid(*xdata, indexing='ij')
+
+ydata = (3 * (1 - j)**2. * np.exp(-(j**2) - (i + 1)**2)
+         - 10 * (j / 5 - j**3 - i**5) * np.exp(-j**2 - i**2)
+         - 1 / 3 * np.exp(-(j + 1)**2 - i**2))
+
+np.random.seed(12345)
+noisy = ydata + (np.random.randn(*ydata.shape) * 0.75)
+
+sp = csaps.MultivariateCubicSmoothingSpline(xdata, noisy, smooth=0.988)
+ysmth = sp(xdata)
+
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+
+ax.plot_wireframe(j, i, noisy, linewidths=0.5, color='r')
+ax.scatter(j, i, noisy, s=5, c='r')
+
+ax.plot_surface(j, i, ysmth, linewidth=0, alpha=1.0)
+
+plt.show()
+```
+
+<img width="653" alt="2019-03-22_10-22-59" src="https://user-images.githubusercontent.com/1299189/54817564-2ff30200-4c8f-11e9-8afd-9055efcd6ea0.png">
+
 ## Algorithms and implementations
 
-`csaps` is a Python/NumPy rough port of MATLAB `csaps` function that is an implementation of 
-Fortran routine SMOOTH from PGS.
+`csaps` is a Python/NumPy rough port of MATLAB [CSAPS](https://www.mathworks.com/help/curvefit/csaps.html) function that is an implementation of 
+Fortran routine SMOOTH from [PGS](http://pages.cs.wisc.edu/~deboor/pgs/) (originally written by Carl de Boor).
 
 [csaps-cpp](https://github.com/espdev/csaps-cpp) C++11 Eigen based implementation of the algorithm.
 
