@@ -27,6 +27,101 @@ _UnivariateVectorizedDataType = t.Union[
 _MultivariateDataType = t.Sequence[_UnivariateDataType]
 
 
+class SplinePPForm:
+    """Spline representation in PP-form
+    """
+
+    def __init__(self, breaks, coeffs, dim=1):
+        self.univariate = not isinstance(breaks, (tuple, list))
+
+        self.breaks = breaks
+        self.coeffs = coeffs
+
+        self.pieces = None  # type: t.Union[int, t.Tuple[int, ...]]
+        self.order = None  # type: t.Union[int, t.Tuple[int, ...]]
+
+        if self.univariate:
+            self.pieces = np.prod(coeffs.shape[:-1]) // dim
+            self.order = coeffs.shape[-1]
+            self.dim = dim
+        else:
+            self.pieces = tuple(x.size - 1 for x in breaks)
+            self.order = tuple(s // p for s, p in zip(coeffs.shape[1:], self.pieces))
+            self.dim = len(breaks)
+
+    def __str__(self):
+        return (
+            '{}\n'
+            '  univariate: {}\n'
+            '  breaks: {}\n'
+            '  coeffs: {}\n{}\n'
+            '  pieces: {}\n'
+            '  order: {}\n'
+            '  dim: {}\n'
+        ).format(self.__class__.__name__,
+                 self.univariate, self.breaks, self.coeffs.shape, self.coeffs,
+                 self.pieces, self.order, self.dim)
+
+    def evaluate(self, xi, shape=None):
+        """Evaluate spline on given data sites or grid
+        """
+        if self.univariate:
+            return self._univariate_evaluate(xi, shape)
+        else:
+            return self._multivariate_evaluate(xi)
+
+    def _univariate_evaluate(self, xi, shape):
+        # For each data site, compute its break interval
+        mesh = self.breaks[1:-1]
+        edges = np.hstack((-np.inf, mesh, np.inf))
+
+        index = np.digitize(xi, edges)
+
+        nanx = np.flatnonzero(index == 0)
+        index = np.fmin(index, mesh.size + 1)
+        index[nanx] = 1
+
+        # Go to local coordinates
+        xi = xi - self.breaks[index - 1]
+        d = self.dim
+        lx = len(xi)
+
+        if d > 1:
+            xi_shape = (1, d * lx)
+            xi_ndm = np.array(xi, ndmin=2)
+            xi = np.reshape(np.repeat(xi_ndm, d, axis=0), xi_shape, order='F')
+
+            index_rep = (np.repeat(np.array(1 + d * index, ndmin=2), d, axis=0)
+                         + np.repeat(np.array(np.r_[-d:0], ndmin=2).T, lx, axis=1))
+            index = np.reshape(index_rep, (d * lx, 1), order='F')
+
+        index -= 1
+
+        # Apply nested multiplication
+        values = self.coeffs[index, 0].T
+
+        for i in range(1, self.coeffs.shape[1]):
+            values = xi * values + self.coeffs[index, i].T
+
+        values = values.reshape((d, lx), order='F').squeeze()
+
+        if values.shape != shape:
+            values = values.reshape(shape)
+
+        return values
+
+    def _multivariate_evaluate(self, xi):
+        yi = self.coeffs.copy()
+        sizey = list(yi.shape)
+        nsize = tuple(x.size for x in xi)
+
+        for i in range(self.dim - 1, -1, -1):
+            szprod = np.prod(sizey[:self.dim])
+            shape_i = (*sizey[:self.dim], nsize[i])
+            # TODO:
+            yi = yi.reshape(shape_i, order='F')
+
+
 class UnivariateCubicSmoothingSpline:
     """Univariate cubic smoothing spline
 
@@ -49,8 +144,8 @@ class UnivariateCubicSmoothingSpline:
                  ydata: _UnivariateVectorizedDataType,
                  weights: t.Optional[_UnivariateDataType] = None,
                  smooth: t.Optional[float] = None):
-        self._coeffs = None
-        self._pieces = 0
+
+        self._spline: SplinePPForm = None
         self._smooth = smooth
 
         (self._xdata,
@@ -58,7 +153,7 @@ class UnivariateCubicSmoothingSpline:
          self._weights,
          self._data_shape) = self._prepare_data(xdata, ydata, weights)
 
-        self._yd = self._ydata.shape[0]
+        self._ydim = self._ydata.shape[0]
         self._axis = self._ydata.ndim - 1
 
         self._make_spline()
@@ -72,28 +167,15 @@ class UnivariateCubicSmoothingSpline:
             raise ValueError('XI data must be a vector.')
 
         self._data_shape[-1] = xi.size
-
-        return self._evaluate(xi)
+        return self._spline.evaluate(xi, self._data_shape)
 
     @property
     def smooth(self) -> float:
         return self._smooth
 
     @property
-    def breaks(self) -> np.ndarray:
-        return self._xdata
-
-    @property
-    def coeffs(self) -> np.ndarray:
-        return self._coeffs
-
-    @property
-    def pieces(self) -> int:
-        return self._pieces
-
-    @property
-    def order(self) -> int:
-        return self._coeffs.shape[-1]
+    def spline(self) -> SplinePPForm:
+        return self._spline
 
     @staticmethod
     def _prepare_data(xdata, ydata, weights):
@@ -179,11 +261,11 @@ class UnivariateCubicSmoothingSpline:
             b = np.diff(divdydx, axis=self._axis).T
             u = np.array(la.spsolve(a, b), ndmin=2)
 
-            if self._yd == 1:
+            if self._ydim == 1:
                 u = u.T
 
             dx = np.array(dx, ndmin=2).T
-            d_pad = np.zeros((1, self._yd))
+            d_pad = np.zeros((1, self._ydim))
 
             d1 = np.diff(np.vstack((d_pad, u, d_pad)), axis=0) / dx
             d2 = np.diff(np.vstack((d_pad, d1, d_pad)), axis=0)
@@ -200,7 +282,7 @@ class UnivariateCubicSmoothingSpline:
                 yi[:-1, :].T
             ))
 
-            c_shape = ((pcount - 1) * self._yd, 4)
+            c_shape = ((pcount - 1) * self._ydim, 4)
             coeffs = coeffs.reshape(c_shape, order='F')
         else:
             p = 1.
@@ -208,48 +290,7 @@ class UnivariateCubicSmoothingSpline:
                 (divdydx, np.array(self._ydata[:, 0], ndmin=2).T)), ndmin=2)
 
         self._smooth = p
-        self._coeffs = coeffs
-        self._pieces = np.prod(coeffs.shape[:-1]) // self._yd
-
-    def _evaluate(self, xi):
-        # For each data site, compute its break interval
-        mesh = self._xdata[1:-1]
-        edges = np.hstack((-np.inf, mesh, np.inf))
-
-        index = np.digitize(xi, edges)
-
-        nanx = np.flatnonzero(index == 0)
-        index = np.fmin(index, mesh.size + 1)
-        index[nanx] = 1
-
-        # Go to local coordinates
-        xi = xi - self._xdata[index-1]
-        d = self._yd
-        lx = len(xi)
-
-        if d > 1:
-            xi_shape = (1, d * lx)
-            xi_ndm = np.array(xi, ndmin=2)
-            xi = np.reshape(np.repeat(xi_ndm, d, axis=0), xi_shape, order='F')
-
-            index_rep = (np.repeat(np.array(1 + d * index, ndmin=2), d, axis=0)
-                         + np.repeat(np.array(np.r_[-d:0], ndmin=2).T, lx, axis=1))
-            index = np.reshape(index_rep, (d * lx, 1), order='F')
-
-        index -= 1
-
-        # Apply nested multiplication
-        values = self.coeffs[index, 0].T
-
-        for i in range(1, self.coeffs.shape[1]):
-            values = xi * values + self.coeffs[index, i].T
-
-        values = values.reshape((d, lx), order='F').squeeze()
-
-        if values.shape != self._data_shape:
-            values = values.reshape(self._data_shape)
-
-        return values
+        self._spline = SplinePPForm(self._xdata, coeffs, self._ydim)
 
 
 class MultivariateCubicSmoothingSpline:
@@ -288,10 +329,7 @@ class MultivariateCubicSmoothingSpline:
          self._smooth) = self._prepare_data(xdata, ydata, weights, smooth)
 
         self._ndim = len(self._xdata)
-
-        self._coeffs = None
-        self._pieces = None
-        self._order = None
+        self._spline = None  # type: SplinePPForm
 
         self._make_spline()
 
@@ -300,20 +338,8 @@ class MultivariateCubicSmoothingSpline:
         return self._smooth
 
     @property
-    def breaks(self) -> t.Tuple[np.ndarray, ...]:
-        return self._xdata
-
-    @property
-    def coeffs(self) -> np.ndarray:
-        return self._coeffs
-
-    @property
-    def pieces(self) -> t.Tuple[int, ...]:
-        return self._pieces
-
-    @property
-    def order(self) -> t.Tuple[int, ...]:
-        return self._order
+    def spline(self) -> SplinePPForm:
+        return self._spline
 
     @staticmethod
     def _prepare_univariate(data, name):
@@ -384,7 +410,7 @@ class MultivariateCubicSmoothingSpline:
                 'xi ({}) and xdata ({}) dimensions mismatch'.format(
                     len(xi), self._ndim))
 
-        return self._evaluate(xi)
+        return self._spline.evaluate(xi)
 
     def _make_spline(self):
         sizey = [1] + list(self._ydata.shape)
@@ -395,13 +421,12 @@ class MultivariateCubicSmoothingSpline:
             shape_i = (np.prod(sizey[:-1]), sizey[-1])
             ydata_i = ydata.reshape(shape_i, order='F')
 
-            spline = UnivariateCubicSmoothingSpline(
+            s = UnivariateCubicSmoothingSpline(
                 self._xdata[i], ydata_i, self._weights[i], self._smooth[i])
 
-            self._smooth[i] = spline.smooth
-
-            sizey[-1] = spline.pieces * spline.order
-            ydata = spline.coeffs.reshape(sizey, order='F')
+            self._smooth[i] = s.smooth
+            sizey[-1] = s.spline.pieces * s.spline.order
+            ydata = s.spline.coeffs.reshape(sizey, order='F')
 
             if self._ndim > 1:
                 axes = (0, self._ndim, *np.r_[1:self._ndim].tolist())
@@ -409,9 +434,4 @@ class MultivariateCubicSmoothingSpline:
                 sizey = list(ydata.shape)
 
         self._smooth = tuple(self._smooth)
-        self._coeffs = ydata
-        self._pieces = tuple(x.size - 1 for x in self._xdata)
-        self._order = tuple(map(lambda a, b: a // b, sizey[1:], self._pieces))
-
-    def _evaluate(self, xi):
-        raise NotImplementedError
+        self._spline = SplinePPForm(self._xdata, ydata)

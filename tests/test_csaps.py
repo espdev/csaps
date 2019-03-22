@@ -230,8 +230,10 @@ def test_multivariate_surface():
     ydata = (3 * (1 - x)**2. * np.exp(-(x**2) - (y + 1)**2)
              - 10 * (x / 5 - x**3 - y**5) * np.exp(-x**2 - y**2)
              - 1 / 3 * np.exp(-(x + 1)**2 - y**2)).T
+    ydata = ydata + (np.random.rand(*ydata.shape) - 0.5)
 
-    csaps.MultivariateCubicSmoothingSpline(xdata, ydata)
+    sp = csaps.MultivariateCubicSmoothingSpline(xdata, ydata)
+    yi = sp(xdata)
 
 
 if __name__ == '__main__':
