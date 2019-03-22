@@ -64,6 +64,11 @@ class SplinePPForm:
 
     def evaluate(self, xi, shape=None):
         """Evaluate spline on given data sites or grid
+
+        Parameters
+        ----------
+        xi: X data vector or list of vectors for multivariate spline
+        shape: tuple The shape for univariate case. It determines univariate vectorized Y data shape
         """
         if self.univariate:
             return self._univariate_evaluate(xi, shape)
