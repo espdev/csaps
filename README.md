@@ -71,8 +71,8 @@ import csaps
 x = [1, 2, 3, 4]
 
 # two data vectors
-y = [(2, 4, 6, 8), 
-     (1, 3, 5, 7)]
+y = numpy.array([(2, 4, 6, 8), 
+                 (1, 3, 5, 7)])
 
 sp = csaps.UnivariateCubicSmoothingSpline(x, y)
 
@@ -80,7 +80,8 @@ xi = numpy.linspace(1, 4, 10)
 yi = sp(xi)
 
 print(yi.shape)  # (2, 10)
-assert yi.shape[:-1] == yi.shape[:-1]
+assert yi.shape[:-1] == y.shape[:-1]
+assert yi.shape[-1] == xi.shape[-1]
 ```
 
 **Important**:
