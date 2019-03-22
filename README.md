@@ -12,6 +12,14 @@ whose coefficient matrix has the form `p*A + (1 - p)*B`, with the matrices `A` a
 depending on the data sites `X`. The automatically computed smoothing parameter makes 
 `p*trace(A) equal (1 - p)*trace(B)`.
 
+## Installation
+
+Currently we do not distribute the package via PyPI. You can install it via pip and git from this repo:
+
+```
+pip install git+https://github.com/espdev/csaps.git
+```
+
 ## Smoothing univariate data
 
 You can use `UnivariateCubicSmoothingSpline` class for uivariate data smoothing.
