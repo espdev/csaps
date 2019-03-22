@@ -21,8 +21,8 @@ You can install it via pip and git from this repo:
 pip install git+https://github.com/espdev/csaps.git
 ```
 
-On Windows we highly recommend to use unofficial [numpy+MKL whl](https://www.lfd.uci.edu/~gohlke/pythonlibs/#numpy) 
-and [scipy whl](https://www.lfd.uci.edu/~gohlke/pythonlibs/#scipy) from Christoph Gohlke.
+On Windows we highly recommend to use unofficial [NumPy+MKL](https://www.lfd.uci.edu/~gohlke/pythonlibs/#numpy) 
+and [SciPy](https://www.lfd.uci.edu/~gohlke/pythonlibs/#scipy) from Christoph Gohlke.
 
 ## Smoothing univariate data
 
