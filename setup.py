@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
     name='csaps',
-    version='0.2.0',
+    version='0.3.0',
     py_modules=['csaps'],
     install_requires=[
         'numpy>=0.12.1',

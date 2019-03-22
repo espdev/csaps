@@ -13,7 +13,7 @@ import scipy.sparse as sp
 import scipy.sparse.linalg as la
 
 
-__version__ = '0.2.0'
+__version__ = '0.3.0'
 
 
 _UnivariateDataType = t.Union[t.Sequence[t.Union[int, float]], np.ndarray]
