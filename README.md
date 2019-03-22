@@ -14,11 +14,15 @@ depending on the data sites `X`. The automatically computed smoothing parameter 
 
 ## Installation
 
-Currently we do not distribute the package via PyPI. You can install it via pip and git from this repo:
+Python 3.5 or newer is supported. Currently we do not distribute the package via PyPI. 
+You can install it via pip and git from this repo:
 
 ```
 pip install git+https://github.com/espdev/csaps.git
 ```
+
+On Windows we highly recommend to use unofficial [numpy+MKL whl](https://www.lfd.uci.edu/~gohlke/pythonlibs/#numpy) 
+and [scipy whl](https://www.lfd.uci.edu/~gohlke/pythonlibs/#scipy) from Christoph Gohlke.
 
 ## Smoothing univariate data
 

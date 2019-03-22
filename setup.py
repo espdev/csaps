@@ -6,6 +6,7 @@ setup(
     name='csaps',
     version='0.3.0',
     py_modules=['csaps'],
+    python_requires='>=3.5',
     install_requires=[
         'numpy>=0.12.1',
         'scipy>=0.19.1',
