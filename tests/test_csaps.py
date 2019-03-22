@@ -224,7 +224,7 @@ def test_multivariate_invalid_data(x, y, w, p):
         csaps.MultivariateCubicSmoothingSpline(x, y, w, p)
 
 
-def test_multivariate_make_spline():
+def test_bivariate_make_spline():
     xdata = [np.linspace(-2, 3, 21), np.linspace(-3, 3, 31)]
     y, x = np.meshgrid(xdata[1], xdata[0])
 
