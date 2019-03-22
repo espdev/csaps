@@ -14,7 +14,7 @@ depending on the data sites `X`. The automatically computed smoothing parameter 
 
 ## Smoothing univariate data
 
-You can use 'UnivariateCubicSmoothingSpline' class for uivariate data smoothing.
+You can use `UnivariateCubicSmoothingSpline` class for uivariate data smoothing.
 
 ```python
 import numpy as np
@@ -91,7 +91,7 @@ The same weights vector and the same smoothing parameter will be used for all Y 
 The algorithm can make multivariate smoothing splines for ND-gridded data approximation.
 In this case we use coordinatewise smoothing (tensor-product of univariate splines coefficients).
 
-You can use 'MultivariateCubicSmoothingSpline' class for multivariate smoothing.
+You can use `MultivariateCubicSmoothingSpline` class for multivariate smoothing.
 
 ### Bivariate smoothing example
 
