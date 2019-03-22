@@ -224,16 +224,18 @@ def test_multivariate_invalid_data(x, y, w, p):
         csaps.MultivariateCubicSmoothingSpline(x, y, w, p)
 
 
-def test_multivariate_surface():
-    xdata = [np.linspace(-2, 3, 51), np.linspace(-3, 3, 61)]
-    x, y = np.meshgrid(*xdata)
+def test_multivariate_make_spline():
+    xdata = [np.linspace(-2, 3, 21), np.linspace(-3, 3, 31)]
+    y, x = np.meshgrid(xdata[1], xdata[0])
+
     ydata = (3 * (1 - x)**2. * np.exp(-(x**2) - (y + 1)**2)
              - 10 * (x / 5 - x**3 - y**5) * np.exp(-x**2 - y**2)
-             - 1 / 3 * np.exp(-(x + 1)**2 - y**2)).T
+             - 1 / 3 * np.exp(-(x + 1)**2 - y**2))
     ydata = ydata + (np.random.rand(*ydata.shape) - 0.5)
 
     sp = csaps.MultivariateCubicSmoothingSpline(xdata, ydata)
-    yi = sp(xdata)
+
+    print(sp.spline.coeffs.shape)
 
 
 if __name__ == '__main__':

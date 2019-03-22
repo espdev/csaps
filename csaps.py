@@ -116,10 +116,20 @@ class SplinePPForm:
         nsize = tuple(x.size for x in xi)
 
         for i in range(self.dim - 1, -1, -1):
-            szprod = np.prod(sizey[:self.dim])
-            shape_i = (*sizey[:self.dim], nsize[i])
-            # TODO:
-            yi = yi.reshape(shape_i, order='F')
+            dim = int(np.prod(sizey[:self.dim]))
+            coeffs = yi.reshape((dim * self.pieces[i], self.order[i]), order='F')
+
+            spp = SplinePPForm(self.breaks[i], coeffs, dim=dim)
+            yi = spp.evaluate(xi[i], shape=(dim, xi[i].size))
+
+            yi = yi.reshape((*sizey[:self.dim], nsize[i]), order='F')
+            axes = (0, self.dim, *np.r_[1:self.dim].tolist())
+            yi = yi.transpose(axes)
+            sizey = list(yi.shape)
+
+        yi = yi.reshape(nsize, order='F')
+
+        return yi
 
 
 class UnivariateCubicSmoothingSpline:
