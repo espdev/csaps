@@ -49,7 +49,7 @@ plt.show()
 
 ![csaps1d](https://user-images.githubusercontent.com/1299189/27611703-f3093c14-5b9b-11e7-9f18-6d0c3cc7633a.png)
 
-## Weighted smoothing univariate data
+### Smoothing weighted univariate data
 
 The algorithm supports weighting. You can set weights vector that will determine 
 weights for all data values:
@@ -65,7 +65,7 @@ sp = csaps.UnivariateCubicSmoothingSpline(x, y, w)
 ...
 ```
 
-## Smoothing univariate data with vectorization
+### Smoothing univariate data with vectorization
 
 The algorithm supports vectorization. You can compute smoothing splines for 
 `X`, `Y` data where `X` is data site vector and `Y` is ND-array of data value vectors. 
@@ -104,7 +104,10 @@ The same weights vector and the same smoothing parameter will be used for all Y 
 The algorithm can make multivariate smoothing splines for ND-gridded data approximation.
 In this case we use coordinatewise smoothing (tensor-product of univariate splines coefficients).
 
-You can use `MultivariateCubicSmoothingSpline` class for multivariate smoothing.
+You can use `MultivariateCubicSmoothingSpline` class for multivariate smoothing. 
+You also can set weights and smoothing parameters for each dimension.
+
+Currently the implementation does not support vectorization for multivariate data.
 
 ### Bivariate smoothing example
 
