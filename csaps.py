@@ -399,7 +399,7 @@ class MultivariateCubicSmoothingSpline:
                     len(weights), data_ndim))
 
         for w, x in zip(weights, xdata):
-            if w:
+            if w is not None:
                 if w.size != x.size:
                     raise ValueError(
                         'weights ({}) and xdata ({}) dimension size mismatch'.format(w, x))
