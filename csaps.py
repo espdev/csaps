@@ -151,7 +151,7 @@ class UnivariateCubicSmoothingSpline:
     smooth : float
         [Optional] Smoothing parameter in range [0, 1] where:
             - 0: The smoothing spline is the least-squares straight line fit
-            - 1: The cubic spline interpolant
+            - 1: The cubic spline interpolant (natural condition)
     """
 
     def __init__(self,
@@ -329,7 +329,7 @@ class MultivariateCubicSmoothingSpline:
     smooth : float
         [Optional] Smoothing parameter (or list of parameters for each dimension) in range [0, 1] where:
             - 0: The smoothing spline is the least-squares straight line fit
-            - 1: The cubic spline interpolant
+            - 1: The cubic spline interpolant (natural condition)
     """
 
     def __init__(self,
