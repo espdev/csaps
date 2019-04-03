@@ -317,15 +317,16 @@ class UnivariateCubicSmoothingSpline:
         self._spline = SplinePPForm(self._xdata, coeffs, self._ydim)
 
 
-class GridCubicSmoothingSpline:
+class NdGridCubicSmoothingSpline:
     """ND-Gridded cubic smoothing spline
 
-    Class implments ND-gridded data approximation via cubic smoothing spline.
+    Class implments ND-gridded data approximation via cubic smoothing spline
+    (piecewise tensor product polynomial).
 
     Parameters
     ----------
     xdata : list, tuple
-        X data site vectors for all dimensions. These vectors determine ND-grid.
+        X data site vectors for each dimensions. These vectors determine ND-grid.
         For example::
 
             # 2D grid

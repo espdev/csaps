@@ -221,7 +221,7 @@ def test_univariate_big_vectorized():
 ])
 def test_grid_invalid_data(x, y, w, p):
     with pytest.raises((ValueError, TypeError)):
-        csaps.GridCubicSmoothingSpline(x, y, w, p)
+        csaps.NdGridCubicSmoothingSpline(x, y, w, p)
 
 
 def test_surface_smoothing():
@@ -235,7 +235,7 @@ def test_surface_smoothing():
     np.random.seed(12345)
     noisy = ydata + (np.random.randn(*ydata.shape) * 0.75)
 
-    sp = csaps.GridCubicSmoothingSpline(xdata, noisy)
+    sp = csaps.NdGridCubicSmoothingSpline(xdata, noisy)
     _ = sp(xdata)
 
 

@@ -109,7 +109,7 @@ The same weights vector and the same smoothing parameter will be used for all Y 
 The algorithm can make smoothing splines for ND-gridded data approximation.
 In this case we use coordinatewise smoothing (tensor-product of univariate splines coefficients).
 
-You can use `GridCubicSmoothingSpline` class for ND-gridded data smoothing. 
+You can use `NdGridCubicSmoothingSpline` class for ND-gridded data smoothing. 
 You also can set weights and smoothing parameters for each dimension.
 
 Currently the implementation does not support vectorization for ND-gridded data.
@@ -134,7 +134,7 @@ ydata = (3 * (1 - j)**2. * np.exp(-(j**2) - (i + 1)**2)
 np.random.seed(12345)
 noisy = ydata + (np.random.randn(*ydata.shape) * 0.75)
 
-sp = csaps.GridCubicSmoothingSpline(xdata, noisy, smooth=0.988)
+sp = csaps.NdGridCubicSmoothingSpline(xdata, noisy, smooth=0.988)
 ysmth = sp(xdata)
 
 fig = plt.figure()
