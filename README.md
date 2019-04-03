@@ -104,6 +104,66 @@ assert yi.shape[-1] == xi.size
 **Important**:
 The same weights vector and the same smoothing parameter will be used for all Y data.
 
+## Smoothing multivariate data
+
+We can easily smooth multivariate data using univariate smoothing spline, vectorization and parametrization.
+We should define parametric data sites vector `t` with condition `t1 < t2 < ... < tN` and make spline for each dimension `X(t), Y(t), ..., N(t)`.
+
+The module provides `MultivariateCubicSmoothingSpline` class for this case.
+
+This class just computes `t` vector and calls UnivariateCubicSmoothingSpline inside:
+
+```python
+# Construct multivariate spline from t and X, Y, Z
+sx = UnivariateCubicSmoothingSpline(t, data[x])
+sy = UnivariateCubicSmoothingSpline(t, data[y])
+sz = UnivariateCubicSmoothingSpline(t, data[z])
+...
+sm = UnivariateCubicSmoothingSpline(t, data[m])
+
+# Or the same with using vectorization
+sxyz_m = UnivariateCubicSmoothingSpline(t, data)
+```
+    
+### Smoothing 3D noisy parametric curve example
+
+```python
+import numpy as np
+
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+
+import csaps
+
+np.random.seed(12345)
+
+n = 100
+theta = np.linspace(-4 * np.pi, 4 * np.pi, n)
+z = np.linspace(-2, 2, n)
+r = z**2 + 1
+x = r * np.sin(theta) + np.random.randn(n) * 0.3
+y = r * np.cos(theta) + np.random.randn(n) * 0.3
+
+data = np.vstack((x, y, z))
+
+sp = csaps.MultivariateCubicSmoothingSpline(data, smooth=0.6)
+
+ti = np.linspace(sp.tdata[0], sp.tdata[-1], 250)
+data_i = sp(ti)
+
+xi = data_i[0,:]
+yi = data_i[1,:]
+zi = data_i[2,:]
+
+fig = plt.figure()
+ax = fig.gca(projection='3d')
+ax.plot(x, y, z, '.:', label='parametric curve')
+ax.plot(xi, yi, zi, '-', label='spline curve')
+ax.legend()
+```
+
+<img width="585" alt="2019-04-04_02-02-37" src="https://user-images.githubusercontent.com/1299189/55518809-1209a200-567e-11e9-8acb-5ae94cb789d4.png">
+
 ## Smoothing ND-gridded data
 
 The algorithm can make smoothing splines for ND-gridded data approximation.

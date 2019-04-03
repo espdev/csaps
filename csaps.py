@@ -350,6 +350,9 @@ class MultivariateCubicSmoothingSpline:
         sy = UnivariateCubicSmoothingSpline(t, data[y])
         sz = UnivariateCubicSmoothingSpline(t, data[z])
 
+        # Or the same with using vectorization
+        sxyz = UnivariateCubicSmoothingSpline(t, data)
+
     Parameters
     ----------
 
@@ -375,9 +378,28 @@ class MultivariateCubicSmoothingSpline:
                  smooth: t.Optional[float] = None):
         self._data, self._tdata = self._prepare_data(data, tdata)
 
+        # Use vectorization for compute spline for each dimension from t
+        self._univariate_spline = UnivariateCubicSmoothingSpline(
+            xdata=self._tdata,
+            ydata=self._data,
+            weights=weights,
+            smooth=smooth
+        )
+
+    def __call__(self, ti: _UnivariateDataType):
+        return self._univariate_spline(ti)
+
     @property
     def tdata(self) -> np.ndarray:
         return self._tdata
+
+    @property
+    def spline(self) -> SplinePPForm:
+        return self._univariate_spline.spline
+
+    @property
+    def smooth(self) -> float:
+        return self._univariate_spline.smooth
 
     @staticmethod
     def _compute_tdata(data):
