@@ -36,6 +36,11 @@ _UnivariateVectorizedDataType = t.Union[
     t.List['_UnivariateVectorizedDataType']
 ]
 
+_MultivariateData = t.Union[
+    np.ndarray,
+    t.Sequence[_UnivariateDataType]
+]
+
 _GridDataType = t.Sequence[_UnivariateDataType]
 
 
@@ -315,6 +320,92 @@ class UnivariateCubicSmoothingSpline:
 
         self._smooth = p
         self._spline = SplinePPForm(self._xdata, coeffs, self._ydim)
+
+
+class MultivariateCubicSmoothingSpline:
+    """Multivariate parametrized cubic smoothing spline
+
+    Class implments multivariate data approximation via cubic smoothing spline with
+    parametric data sites vector `t`: `X(t), Y(t), ..., N(t)`.
+
+    This approach with parametrization allows us to use univariate splines for
+    approximation multivariate data.
+
+    For example:
+
+        # 3D data
+        data = [
+            # Data vectors   Dimension
+            (2, 4, 1, 3),  # X
+            (1, 4, 3, 2),  # Y
+            (3, 4, 1, 5),  # Z
+        ]
+
+        x, y, z = 0, 1, 2
+
+        t = (0, 1, 2, 3)  # parametric vector of data sites (t1 < t2 < ... < tN)
+
+        # Construct multivariate spline from t and X, Y, Z
+        sx = UnivariateCubicSmoothingSpline(t, data[x])
+        sy = UnivariateCubicSmoothingSpline(t, data[y])
+        sz = UnivariateCubicSmoothingSpline(t, data[z])
+
+    Parameters
+    ----------
+
+    data : np.ndarray, array-like
+        Input multivariate data vectors for each dimension.
+        Array (M, N) shape where M is data dimension and N is data size
+    tdata : np.ndarray, list
+        [Optional] Parametric vector of data sites with condition: `t1 < t2 < ... < tN`.
+        If it is not set will be computed automatically.
+    weights : np.ndarray, list
+        [Optional] Weights 1D vector with size equal of N
+    smooth : float
+        [Optional] Smoothing parameter in range [0, 1] where:
+            - 0: The smoothing spline is the least-squares straight line fit
+            - 1: The cubic spline interpolant with natural condition
+
+    """
+
+    def __init__(self,
+                 data: _MultivariateData,
+                 tdata: t.Optional[_UnivariateDataType] = None,
+                 weights: t.Optional[_UnivariateDataType] = None,
+                 smooth: t.Optional[float] = None):
+        self._data, self._tdata = self._prepare_data(data, tdata)
+
+    @property
+    def tdata(self) -> np.ndarray:
+        return self._tdata
+
+    @staticmethod
+    def _compute_tdata(data):
+        """
+        Computes t vector for M-dimensional data::
+
+            t_1 = 0
+            t_i+1 = t_i + sqrt((x_i+1 - x_i)**2 + (y_i+1 - y_i)**2 + ... + (m_i+1 - m_i)**2)
+        """
+        head = 0.
+        tail = np.sqrt(np.sum(np.diff(data, axis=1)**2, axis=0))
+        return np.cumsum(np.hstack((head, tail)))
+
+    @classmethod
+    def _prepare_data(cls, data, tdata):
+        data = np.asarray(data, dtype=np.float64)
+
+        if data.ndim != 2:
+            raise ValueError('data must be 2D-array with shape (M, N) '
+                             'where M is data dimension and N is data size')
+
+        if tdata:
+            if tdata.size != data.shape[-1]:
+                raise ValueError('tdata size must be equal to data size (N)')
+        else:
+            tdata = cls._compute_tdata(data)
+
+        return data, tdata
 
 
 class NdGridCubicSmoothingSpline:
