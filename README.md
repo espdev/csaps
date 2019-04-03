@@ -111,7 +111,7 @@ We should define parametric data sites vector `t` with condition `t1 < t2 < ... 
 
 The module provides `MultivariateCubicSmoothingSpline` class for this case.
 
-This class just computes `t` vector and calls UnivariateCubicSmoothingSpline inside:
+This class just computes `t` vector and calls `UnivariateCubicSmoothingSpline` inside:
 
 ```python
 # Construct multivariate spline from t and X, Y, Z
