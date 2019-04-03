@@ -320,7 +320,7 @@ class UnivariateCubicSmoothingSpline:
 class GridCubicSmoothingSpline:
     """ND-Gridded cubic smoothing spline
 
-    Class implments ND-gridded multivariate approximation via cubic smoothing spline.
+    Class implments ND-gridded data approximation via cubic smoothing spline.
 
     Parameters
     ----------
