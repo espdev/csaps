@@ -15,51 +15,61 @@ import scipy.sparse.linalg as la
 
 __version__ = '0.3.0'
 
+_BreaksDataType = t.Union[
+    # Univariate data sites
+    np.ndarray,
 
-_UnivariateDataType = t.Union[t.Sequence[t.Union[int, float]], np.ndarray]
+    # Grid data sites
+    t.Union[
+        t.List[np.ndarray],
+        t.Tuple[np.ndarray, ...]
+    ]
+]
+
+_UnivariateDataType = t.Union[
+    np.ndarray,
+    t.Sequence[t.Union[int, float]]
+]
 
 _UnivariateVectorizedDataType = t.Union[
-    t.Sequence[t.Union[int, float]],
-    np.ndarray,
+    _UnivariateDataType,
     t.List['_UnivariateVectorizedDataType']
 ]
 
-_MultivariateDataType = t.Sequence[_UnivariateDataType]
+_GridDataType = t.Sequence[_UnivariateDataType]
 
 
 class SplinePPForm:
     """Spline representation in PP-form
     """
 
-    def __init__(self, breaks, coeffs, dim=1):
-        self.univariate = not isinstance(breaks, (tuple, list))
-
+    def __init__(self, breaks: _BreaksDataType, coeffs: np.ndarray, dim: int = 1):
+        self.gridded = isinstance(breaks, (tuple, list))
         self.breaks = breaks
         self.coeffs = coeffs
-
         self.pieces = None  # type: t.Union[int, t.Tuple[int, ...]]
         self.order = None  # type: t.Union[int, t.Tuple[int, ...]]
 
-        if self.univariate:
-            self.pieces = np.prod(coeffs.shape[:-1]) // dim
-            self.order = coeffs.shape[-1]
-            self.dim = dim
-        else:
+        if self.gridded:
             self.pieces = tuple(x.size - 1 for x in breaks)
             self.order = tuple(s // p for s, p in zip(coeffs.shape[1:], self.pieces))
             self.dim = len(breaks)
+        else:
+            self.pieces = np.prod(coeffs.shape[:-1]) // dim
+            self.order = coeffs.shape[-1]
+            self.dim = dim
 
     def __str__(self):
         return (
             '{}\n'
-            '  univariate: {}\n'
+            '  gridded: {}\n'
             '  breaks: {}\n'
             '  coeffs: {}\n{}\n'
             '  pieces: {}\n'
             '  order: {}\n'
             '  dim: {}\n'
         ).format(self.__class__.__name__,
-                 self.univariate, self.breaks, self.coeffs.shape, self.coeffs,
+                 self.gridded, self.breaks, self.coeffs.shape, self.coeffs,
                  self.pieces, self.order, self.dim)
 
     def evaluate(self, xi, shape=None):
@@ -70,10 +80,10 @@ class SplinePPForm:
         xi: X data vector or list of vectors for multivariate spline
         shape: tuple The shape for univariate case. It determines univariate vectorized Y data shape
         """
-        if self.univariate:
-            return self._univariate_evaluate(xi, shape)
+        if self.gridded:
+            return self._grid_evaluate(xi)
         else:
-            return self._multivariate_evaluate(xi)
+            return self._univariate_evaluate(xi, shape)
 
     def _univariate_evaluate(self, xi, shape):
         # For each data site, compute its break interval
@@ -115,7 +125,7 @@ class SplinePPForm:
 
         return values
 
-    def _multivariate_evaluate(self, xi):
+    def _grid_evaluate(self, xi):
         yi = self.coeffs.copy()
         sizey = list(yi.shape)
         nsize = tuple(x.size for x in xi)
@@ -132,9 +142,7 @@ class SplinePPForm:
             yi = yi.transpose(axes)
             sizey = list(yi.shape)
 
-        yi = yi.reshape(nsize, order='F')
-
-        return yi
+        return yi.reshape(nsize, order='F')
 
 
 class UnivariateCubicSmoothingSpline:
@@ -143,7 +151,7 @@ class UnivariateCubicSmoothingSpline:
     Parameters
     ----------
     xdata : np.ndarray, list
-        X input 1D data vector
+        X input 1D data vector (data sites: x1 < x2 < ... < xN)
     ydata : np.ndarray, list
         Y input 1D data vector or ND-array with shape[-1] equal of X data size)
     weights : np.ndarray, list
@@ -151,7 +159,7 @@ class UnivariateCubicSmoothingSpline:
     smooth : float
         [Optional] Smoothing parameter in range [0, 1] where:
             - 0: The smoothing spline is the least-squares straight line fit
-            - 1: The cubic spline interpolant (natural condition)
+            - 1: The cubic spline interpolant with natural condition
     """
 
     def __init__(self,
@@ -209,7 +217,6 @@ class UnivariateCubicSmoothingSpline:
                 raise ValueError(
                     'ydata data must be a vector or '
                     'ND-array with shape[-1] equal of xdata.size')
-
             if ydata.ndim > 2:
                 ydata = ydata.reshape((np.prod(data_shape[:-1]), data_shape[-1]))
         else:
@@ -222,7 +229,6 @@ class UnivariateCubicSmoothingSpline:
             weights = np.ones_like(xdata)
         else:
             weights = np.asarray(weights, dtype=np.float64)
-
             if weights.size != xdata.size:
                 raise ValueError(
                     'Weights vector size must be equal of xdata size')
@@ -237,16 +243,19 @@ class UnivariateCubicSmoothingSpline:
         the matrices A and B depending on the data sites x. The default value
         of p makes p*trace(A) equal (1 - p)*trace(B).
         """
-
         def trace(m: sp.dia_matrix):
             return m.diagonal().sum()
-
         return 1. / (1. + trace(a) / (6. * trace(b)))
 
     def _make_spline(self):
         pcount = self._xdata.size
 
         dx = np.diff(self._xdata)
+
+        if not all(dx > 0):
+            raise ValueError(
+                'Items of xdata vector must satisfy the condition: x1 < x2 < ... < xN')
+
         dy = np.diff(self._ydata, axis=self._axis)
         divdydx = dy / dx
 
@@ -308,35 +317,34 @@ class UnivariateCubicSmoothingSpline:
         self._spline = SplinePPForm(self._xdata, coeffs, self._ydim)
 
 
-class MultivariateCubicSmoothingSpline:
-    """Multivariate cubic smoothing spline
+class GridCubicSmoothingSpline:
+    """ND-Gridded cubic smoothing spline
 
-    Class implments multivariate (ND-gridded) approximation via cubic
-    smoothing spline.
+    Class implments ND-gridded multivariate approximation via cubic smoothing spline.
 
     Parameters
     ----------
     xdata : list, tuple
-        X data site vectors for all dimensions (determines a grid). For example::
+        X data site vectors for all dimensions. These vectors determine ND-grid.
+        For example::
 
             # 2D grid
-            x = [np.linspace(0, 10, 100), np.linspace(0, 10, 100)]
+            x = [np.linspace(0, 5, 21), np.linspace(0, 6, 25)]
 
     ydata : np.ndarray
-        Y input ND data array with shape equal X data vector sizes
+        Y input data ND-array with shape equal X data vector sizes
     weights : list, tuple
         [Optional] Weights data vectors for all dimensions with size equal xdata sizes
     smooth : float
         [Optional] Smoothing parameter (or list of parameters for each dimension) in range [0, 1] where:
             - 0: The smoothing spline is the least-squares straight line fit
-            - 1: The cubic spline interpolant (natural condition)
+            - 1: The cubic spline interpolant with natural condition
     """
 
     def __init__(self,
-                 xdata: _MultivariateDataType,
+                 xdata: _GridDataType,
                  ydata: np.ndarray,
-                 weights: t.Optional[t.Union[_UnivariateDataType,
-                                             _MultivariateDataType]] = None,
+                 weights: t.Optional[t.Union[_UnivariateDataType, _GridDataType]] = None,
                  smooth: t.Optional[t.Union[float, t.Sequence[float]]] = None):
         (self._xdata,
          self._ydata,
@@ -357,7 +365,7 @@ class MultivariateCubicSmoothingSpline:
         return self._spline
 
     @staticmethod
-    def _prepare_univariate(data, name):
+    def _prepare_grid_vectors(data, name) -> t.Tuple[np.ndarray, ...]:
         if not isinstance(data, (tuple, list)):
             raise TypeError('{} must be list/tuple of vectors'.format(name))
 
@@ -376,7 +384,7 @@ class MultivariateCubicSmoothingSpline:
 
     @classmethod
     def _prepare_data(cls, xdata, ydata, weights, smooth):
-        xdata = cls._prepare_univariate(xdata, 'xdata')
+        xdata = cls._prepare_grid_vectors(xdata, 'xdata')
         data_ndim = len(xdata)
 
         if ydata.ndim != data_ndim:
@@ -391,7 +399,7 @@ class MultivariateCubicSmoothingSpline:
         if not weights:
             weights = [None] * data_ndim
         else:
-            weights = cls._prepare_univariate(weights, 'weights')
+            weights = cls._prepare_grid_vectors(weights, 'weights')
 
         if len(weights) != data_ndim:
             raise ValueError(
@@ -417,8 +425,8 @@ class MultivariateCubicSmoothingSpline:
 
         return xdata, ydata, weights, smooth
 
-    def __call__(self, xi: _MultivariateDataType) -> np.ndarray:
-        xi = self._prepare_univariate(xi, 'xi')
+    def __call__(self, xi: _GridDataType) -> np.ndarray:
+        xi = self._prepare_grid_vectors(xi, 'xi')
 
         if len(xi) != self._ndim:
             raise ValueError(

@@ -219,12 +219,12 @@ def test_univariate_big_vectorized():
     ([[1, 2, 3], [1, 2, 3]], np.ones((3, 3)), [[1, 2], [1, 2]], None),
     ([[1, 2, 3], [1, 2, 3]], np.ones((3, 3)), None, [0.5, 0.4, 0.2])
 ])
-def test_multivariate_invalid_data(x, y, w, p):
+def test_grid_invalid_data(x, y, w, p):
     with pytest.raises((ValueError, TypeError)):
-        csaps.MultivariateCubicSmoothingSpline(x, y, w, p)
+        csaps.GridCubicSmoothingSpline(x, y, w, p)
 
 
-def test_bivariate_smoothing():
+def test_surface_smoothing():
     xdata = [np.linspace(-3, 3, 61), np.linspace(-3.5, 3.5, 51)]
     i, j = np.meshgrid(*xdata, indexing='ij')
 
@@ -235,7 +235,7 @@ def test_bivariate_smoothing():
     np.random.seed(12345)
     noisy = ydata + (np.random.randn(*ydata.shape) * 0.75)
 
-    sp = csaps.MultivariateCubicSmoothingSpline(xdata, noisy)
+    sp = csaps.GridCubicSmoothingSpline(xdata, noisy)
     _ = sp(xdata)
 
 

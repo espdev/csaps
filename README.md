@@ -1,6 +1,6 @@
 # CSAPS: Cubic spline approximation (smoothing)
 
-This package provides cubic smoothing spline for univariate/multivariate data approximation.
+This module provides cubic smoothing spline for univariate/multivariate/gridded data approximation.
 The smoothing parameter can be calculated automatically or it can be set manually. 
 
 The smoothing parameter should be in range `[0, 1]` where bounds are:
@@ -21,10 +21,15 @@ You can install it via pip and git from this repo:
 pip install git+https://github.com/espdev/csaps.git
 ```
 
+The module depends only on NumPy and SciPy.
+
 On Windows we highly recommend to use unofficial builds [NumPy+MKL](https://www.lfd.uci.edu/~gohlke/pythonlibs/#numpy) 
 and [SciPy](https://www.lfd.uci.edu/~gohlke/pythonlibs/#scipy) from Christoph Gohlke.
 
 ## Smoothing univariate data
+
+Univariate data are two vectors: X and Y with the same size. X is data sites, Y is data values.
+For univariate case X-values must satisfy the condition: `x1 < x2 < ... < xN`.
 
 You can use `UnivariateCubicSmoothingSpline` class for uivariate data smoothing.
 
@@ -99,17 +104,17 @@ assert yi.shape[-1] == xi.size
 **Important**:
 The same weights vector and the same smoothing parameter will be used for all Y data.
 
-## Smoothing multivariate data
+## Smoothing ND-gridded data
 
-The algorithm can make multivariate smoothing splines for ND-gridded data approximation.
+The algorithm can make smoothing splines for ND-gridded data approximation.
 In this case we use coordinatewise smoothing (tensor-product of univariate splines coefficients).
 
-You can use `MultivariateCubicSmoothingSpline` class for multivariate smoothing. 
+You can use `GridCubicSmoothingSpline` class for ND-gridded data smoothing. 
 You also can set weights and smoothing parameters for each dimension.
 
-Currently the implementation does not support vectorization for multivariate data.
+Currently the implementation does not support vectorization for ND-gridded data.
 
-### Bivariate smoothing example
+### Smoothing 2D-gridded data (surface) example
 
 ```python
 import numpy as np
@@ -129,7 +134,7 @@ ydata = (3 * (1 - j)**2. * np.exp(-(j**2) - (i + 1)**2)
 np.random.seed(12345)
 noisy = ydata + (np.random.randn(*ydata.shape) * 0.75)
 
-sp = csaps.MultivariateCubicSmoothingSpline(xdata, noisy, smooth=0.988)
+sp = csaps.GridCubicSmoothingSpline(xdata, noisy, smooth=0.988)
 ysmth = sp(xdata)
 
 fig = plt.figure()
@@ -147,7 +152,7 @@ plt.show()
 
 ## Algorithms and implementations
 
-`csaps` is a Python/NumPy rough port of MATLAB [CSAPS](https://www.mathworks.com/help/curvefit/csaps.html) function that is an implementation of 
+`csaps` is a Python modified port of MATLAB [CSAPS](https://www.mathworks.com/help/curvefit/csaps.html) function that is an implementation of 
 Fortran routine SMOOTH from [PGS](http://pages.cs.wisc.edu/~deboor/pgs/) (originally written by Carl de Boor).
 
 [csaps-cpp](https://github.com/espdev/csaps-cpp) C++11 Eigen based implementation of the algorithm.
