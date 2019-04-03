@@ -114,7 +114,7 @@ The module provides `MultivariateCubicSmoothingSpline` class for this case.
 This class just computes `t` vector and calls `UnivariateCubicSmoothingSpline` inside:
 
 ```python
-# Construct multivariate spline from t and X, Y, Z
+# Construct multivariate spline from t and X, Y, Z, ..., M
 sx = UnivariateCubicSmoothingSpline(t, data[x])
 sy = UnivariateCubicSmoothingSpline(t, data[y])
 sz = UnivariateCubicSmoothingSpline(t, data[z])
