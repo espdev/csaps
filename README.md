@@ -107,7 +107,7 @@ The same weights vector and the same smoothing parameter will be used for all Y 
 ## Smoothing multivariate data
 
 We can easily smooth multivariate data using univariate smoothing spline, vectorization and parametrization.
-We should define parametric data sites vector `t` with condition `t1 < t2 < ... < tN` and make spline for each dimension `X(t), Y(t), ..., N(t)`.
+We should define parametric data sites vector `t` with condition `t1 < t2 < ... < tN` and make spline for each dimension `X(t), Y(t), ..., M(t)`.
 
 The module provides `MultivariateCubicSmoothingSpline` class for this case.
 

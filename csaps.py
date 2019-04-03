@@ -326,7 +326,7 @@ class MultivariateCubicSmoothingSpline:
     """Multivariate parametrized cubic smoothing spline
 
     Class implments multivariate data approximation via cubic smoothing spline with
-    parametric data sites vector `t`: `X(t), Y(t), ..., N(t)`.
+    parametric data sites vector `t`: `X(t), Y(t), ..., M(t)`.
 
     This approach with parametrization allows us to use univariate splines for
     approximation multivariate data.
