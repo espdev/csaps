@@ -111,7 +111,7 @@ We should define parametric data sites vector `t` with condition `t1 < t2 < ... 
 
 The module provides `MultivariateCubicSmoothingSpline` class for this case.
 
-This class just computes `t` vector and calls `UnivariateCubicSmoothingSpline` inside:
+This class is a simple wrapper and it just automatically computes `t` vector by default and calls `UnivariateCubicSmoothingSpline`:
 
 ```python
 # Construct multivariate spline from t and X, Y, Z, ..., M
@@ -127,6 +127,9 @@ sxyz_m = UnivariateCubicSmoothingSpline(t, data)
     
 ### Smoothing 3D noisy parametric curve example
 
+In this example we make parametric 3D curve from `theta` parameter and compute spline from the same `theta` parameter.
+In fact we could use `UnivariateCubicSmoothingSpline` with vectorization instead of `MultivariateCubicSmoothingSpline` in this case.
+
 ```python
 import numpy as np
 
@@ -135,34 +138,35 @@ from mpl_toolkits.mplot3d import Axes3D
 
 import csaps
 
-np.random.seed(12345)
-
 n = 100
 theta = np.linspace(-4 * np.pi, 4 * np.pi, n)
 z = np.linspace(-2, 2, n)
-r = z**2 + 1
+r = z ** 2 + 1
+np.random.seed(1234)
 x = r * np.sin(theta) + np.random.randn(n) * 0.3
+np.random.seed(5678)
 y = r * np.cos(theta) + np.random.randn(n) * 0.3
 
 data = np.vstack((x, y, z))
 
-sp = csaps.MultivariateCubicSmoothingSpline(data, smooth=0.6)
+sp_theta = csaps.MultivariateCubicSmoothingSpline(data, theta, smooth=0.95)
 
-ti = np.linspace(sp.tdata[0], sp.tdata[-1], 250)
-data_i = sp(ti)
+# or the same
+# sp_theta = csaps.UnivariateCubicSmoothingSpline(theta, data, smooth=0.95)
 
-xi = data_i[0,:]
-yi = data_i[1,:]
-zi = data_i[2,:]
+theta_i = np.linspace(-4 * np.pi, 4 * np.pi, 250)
+data_i = sp_theta(theta_i)
+
+xi = data_i[0, :]
+yi = data_i[1, :]
+zi = data_i[2, :]
 
 fig = plt.figure()
 ax = fig.gca(projection='3d')
-ax.plot(x, y, z, '.:', label='parametric curve')
-ax.plot(xi, yi, zi, '-', label='spline curve')
-ax.legend()
+plt.show()
 ```
 
-<img width="585" alt="2019-04-04_02-02-37" src="https://user-images.githubusercontent.com/1299189/55518809-1209a200-567e-11e9-8acb-5ae94cb789d4.png">
+<img width="663" alt="2019-04-04_02-28-52" src="https://user-images.githubusercontent.com/1299189/55519724-a75a6580-5681-11e9-8beb-2111664f8ee3.png">
 
 ## Smoothing ND-gridded data
 

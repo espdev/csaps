@@ -421,11 +421,11 @@ class MultivariateCubicSmoothingSpline:
             raise ValueError('data must be 2D-array with shape (M, N) '
                              'where M is data dimension and N is data size')
 
-        if tdata:
+        if tdata is None:
+            tdata = cls._compute_tdata(data)
+        else:
             if tdata.size != data.shape[-1]:
                 raise ValueError('tdata size must be equal to data size (N)')
-        else:
-            tdata = cls._compute_tdata(data)
 
         return data, tdata
 
