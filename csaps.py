@@ -390,7 +390,7 @@ class MultivariateCubicSmoothingSpline:
         return self._univariate_spline(ti)
 
     @property
-    def tdata(self) -> np.ndarray:
+    def t(self) -> np.ndarray:
         return self._tdata
 
     @property
