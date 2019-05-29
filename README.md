@@ -1,5 +1,9 @@
 # CSAPS: Cubic spline approximation (smoothing)
 
+[![PyPI version](https://img.shields.io/pypi/v/csaps.svg)](https://pypi.python.org/pypi/csaps)
+[![Build status](https://travis-ci.org/espdev/csaps.svg?branch=master)](https://travis-ci.org/espdev/csaps)
+[![License](https://img.shields.io/pypi/l/mpl-events.svg)](LICENSE)
+
 This module provides cubic smoothing spline for univariate/multivariate/gridded data approximation.
 The smoothing parameter can be calculated automatically or it can be set manually. 
 
@@ -14,17 +18,25 @@ depending on the data sites `X`. The automatically computed smoothing parameter 
 
 ## Installation
 
-Python 3.5 or newer is supported. Currently we do not distribute the package via PyPI. 
-You can install it via pip and git from this repo:
+Python 3.5 or newer is supported.
 
 ```
-pip install git+https://github.com/espdev/csaps.git
+pip install csaps
 ```
 
 The module depends only on NumPy and SciPy.
 
 On Windows we highly recommend to use unofficial builds [NumPy+MKL](https://www.lfd.uci.edu/~gohlke/pythonlibs/#numpy) 
 and [SciPy](https://www.lfd.uci.edu/~gohlke/pythonlibs/#scipy) from Christoph Gohlke.
+
+```
+> mkdir depends
+
+download numpy (https://www.lfd.uci.edu/~gohlke/pythonlibs/#numpy) to "depends" directory
+download scipy (https://www.lfd.uci.edu/~gohlke/pythonlibs/#scipy) to "depends" directory
+
+> pip install --find-links depends/ csaps
+```
 
 ## Smoothing univariate data
 
@@ -213,6 +225,15 @@ plt.show()
 ```
 
 <img width="653" alt="2019-03-22_10-22-59" src="https://user-images.githubusercontent.com/1299189/54817564-2ff30200-4c8f-11e9-8afd-9055efcd6ea0.png">
+
+## More examples
+
+Please look through [csaps.ipynb](examples/csaps.ipynb) file for more examples.
+
+## Testing
+
+We use pytest and tox (on Travis CI) for testing.
+Please see [test_csaps.py](tests/test_csaps.py) file.
 
 ## Algorithms and implementations
 
