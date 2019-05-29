@@ -5,7 +5,7 @@ from setuptools import setup
 
 
 NAME = 'csaps'
-VERSION = '0.4.0'
+VERSION = '0.4.1'
 ROOT_DIR = pathlib.Path(__file__).parent
 
 
