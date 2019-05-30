@@ -219,7 +219,7 @@ def test_multivariate_auto_tdata():
     t = [0., 3.74165739, 8.10055633, 12.68313203]
 
     sp = csaps.MultivariateCubicSmoothingSpline(data)
-    np.testing.assert_allclose(sp.tdata, t)
+    np.testing.assert_allclose(sp.t, t)
 
 
 @pytest.mark.parametrize('x,y,w,p', [
