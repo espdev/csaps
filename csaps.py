@@ -173,7 +173,7 @@ class UnivariateCubicSmoothingSpline:
                  weights: t.Optional[_UnivariateDataType] = None,
                  smooth: t.Optional[float] = None):
 
-        self._spline: SplinePPForm = None
+        self._spline = None  # type: SplinePPForm
         self._smooth = smooth
 
         (self._xdata,
