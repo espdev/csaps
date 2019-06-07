@@ -252,5 +252,21 @@ def test_surface_smoothing():
     _ = sp(xdata)
 
 
+def test_zero_smooth():
+    x = [1., 2., 4., 6.]
+    y = [2., 4., 5., 7.]
+
+    sp = csaps.UnivariateCubicSmoothingSpline(x, y, smooth=0.)
+
+    assert sp.smooth == pytest.approx(0.)
+
+    ys = sp(x)
+
+    assert ys == pytest.approx([2.440677966101695,
+                                3.355932203389830,
+                                5.186440677966102,
+                                7.016949152542373])
+
+
 if __name__ == '__main__':
     pytest.main()

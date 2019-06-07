@@ -281,10 +281,10 @@ class UnivariateCubicSmoothingSpline:
             # Solve linear system for the 2nd derivatives
             qtwq = qtw @ qtw.T
 
-            if self._smooth:
-                p = self._smooth
-            else:
+            if self._smooth is None:
                 p = self._compute_smooth(r, qtwq)
+            else:
+                p = self._smooth
 
             a = (6. * (1. - p)) * qtwq + p * r
             b = np.diff(divdydx, axis=self._axis).T
