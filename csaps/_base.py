@@ -64,7 +64,7 @@ class SplinePPForm:
                  self.pieces, self.order, self.dim)
 
     def evaluate(self, xi: t.Union[UnivariateDataType, NdGridDataType],
-                 shape: t.Sequence[int, ...] = None):
+                 shape: t.Sequence[int] = None):
         """Evaluate spline on given data sites or grid
 
         Parameters
