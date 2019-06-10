@@ -23,6 +23,15 @@ from csaps._types import (
 
 class SplinePPForm:
     """Spline representation in PP-form
+
+    Parameters
+    ----------
+    breaks : BreaksDataType
+        Breaks values vector or list of vectors (for nd-grid)
+    coeffs : np.ndarray
+        Spline coefficients
+    dim : int
+        Spline dimension (>= 1 for nd-grid/multivariate)
     """
 
     def __init__(self, breaks: BreaksDataType, coeffs: np.ndarray, dim: int = 1):
@@ -54,13 +63,16 @@ class SplinePPForm:
                  self.gridded, self.breaks, self.coeffs.shape, self.coeffs,
                  self.pieces, self.order, self.dim)
 
-    def evaluate(self, xi, shape=None):
+    def evaluate(self, xi: t.Union[UnivariateDataType, NdGridDataType],
+                 shape: t.Sequence[int, ...] = None):
         """Evaluate spline on given data sites or grid
 
         Parameters
         ----------
-        xi: X data vector or list of vectors for multivariate spline
-        shape: tuple The shape for univariate case. It determines univariate vectorized Y data shape
+        xi : UnivariateDataType, NdGridDataType
+            X data vector or list of vectors for multivariate spline
+        shape : Sequence[int, ...]
+            tuple The shape for univariate case. It determines univariate vectorized Y data shape
         """
         if self.gridded:
             return self._grid_evaluate(xi)
