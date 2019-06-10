@@ -9,9 +9,24 @@ from csaps._base import (
     NdGridCubicSmoothingSpline,
 )
 
+from csaps._types import (
+    BreaksDataType,
+    UnivariateDataType,
+    UnivariateVectorizedDataType,
+    MultivariateDataType,
+    NdGridDataType,
+)
+
 __all__ = [
     'SplinePPForm',
     'UnivariateCubicSmoothingSpline',
     'MultivariateCubicSmoothingSpline',
     'NdGridCubicSmoothingSpline',
+
+    # Type-hints
+    'BreaksDataType',
+    'UnivariateDataType',
+    'UnivariateVectorizedDataType',
+    'MultivariateDataType',
+    'NdGridDataType',
 ]

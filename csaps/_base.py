@@ -12,46 +12,25 @@ import numpy as np
 import scipy.sparse as sp
 import scipy.sparse.linalg as la
 
-
-_BreaksDataType = t.Union[
-    # Univariate data sites
-    np.ndarray,
-
-    # Grid data sites
-    t.Union[
-        t.List[np.ndarray],
-        t.Tuple[np.ndarray, ...]
-    ]
-]
-
-_UnivariateDataType = t.Union[
-    np.ndarray,
-    t.Sequence[t.Union[int, float]]
-]
-
-_UnivariateVectorizedDataType = t.Union[
-    _UnivariateDataType,
-    t.List['_UnivariateVectorizedDataType']
-]
-
-_MultivariateData = t.Union[
-    np.ndarray,
-    t.Sequence[_UnivariateDataType]
-]
-
-_GridDataType = t.Sequence[_UnivariateDataType]
+from csaps._types import (
+    BreaksDataType,
+    UnivariateDataType,
+    UnivariateVectorizedDataType,
+    MultivariateDataType,
+    NdGridDataType,
+)
 
 
 class SplinePPForm:
     """Spline representation in PP-form
     """
 
-    def __init__(self, breaks: _BreaksDataType, coeffs: np.ndarray, dim: int = 1):
+    def __init__(self, breaks: BreaksDataType, coeffs: np.ndarray, dim: int = 1):
         self.gridded = isinstance(breaks, (tuple, list))
         self.breaks = breaks
         self.coeffs = coeffs
-        self.pieces = None  # type: t.Union[int, t.Tuple[int, ...]]
-        self.order = None  # type: t.Union[int, t.Tuple[int, ...]]
+        self.pieces = None  # type: t.Optional[t.Union[int, t.Tuple[int, ...]]]
+        self.order = None  # type: t.Optional[t.Union[int, t.Tuple[int, ...]]]
 
         if self.gridded:
             self.pieces = tuple(x.size - 1 for x in breaks)
@@ -166,12 +145,12 @@ class UnivariateCubicSmoothingSpline:
     """
 
     def __init__(self,
-                 xdata: _UnivariateDataType,
-                 ydata: _UnivariateVectorizedDataType,
-                 weights: t.Optional[_UnivariateDataType] = None,
+                 xdata: UnivariateDataType,
+                 ydata: UnivariateVectorizedDataType,
+                 weights: t.Optional[UnivariateDataType] = None,
                  smooth: t.Optional[float] = None):
 
-        self._spline = None  # type: SplinePPForm
+        self._spline = None  # type: t.Optional[SplinePPForm]
         self._smooth = smooth
 
         (self._xdata,
@@ -184,7 +163,7 @@ class UnivariateCubicSmoothingSpline:
 
         self._make_spline()
 
-    def __call__(self, xi: _UnivariateDataType) -> np.ndarray:
+    def __call__(self, xi: UnivariateDataType) -> np.ndarray:
         """Evaluate the spline's approximation for given data
         """
         xi = np.asarray(xi, dtype=np.float64)
@@ -370,9 +349,9 @@ class MultivariateCubicSmoothingSpline:
     """
 
     def __init__(self,
-                 data: _MultivariateData,
-                 tdata: t.Optional[_UnivariateDataType] = None,
-                 weights: t.Optional[_UnivariateDataType] = None,
+                 data: MultivariateDataType,
+                 tdata: t.Optional[UnivariateDataType] = None,
+                 weights: t.Optional[UnivariateDataType] = None,
                  smooth: t.Optional[float] = None):
         self._data, self._tdata = self._prepare_data(data, tdata)
 
@@ -384,7 +363,7 @@ class MultivariateCubicSmoothingSpline:
             smooth=smooth
         )
 
-    def __call__(self, ti: _UnivariateDataType):
+    def __call__(self, ti: UnivariateDataType):
         return self._univariate_spline(ti)
 
     @property
@@ -454,9 +433,9 @@ class NdGridCubicSmoothingSpline:
     """
 
     def __init__(self,
-                 xdata: _GridDataType,
+                 xdata: NdGridDataType,
                  ydata: np.ndarray,
-                 weights: t.Optional[t.Union[_UnivariateDataType, _GridDataType]] = None,
+                 weights: t.Optional[t.Union[UnivariateDataType, NdGridDataType]] = None,
                  smooth: t.Optional[t.Union[float, t.Sequence[float]]] = None):
         (self._xdata,
          self._ydata,
@@ -464,7 +443,7 @@ class NdGridCubicSmoothingSpline:
          self._smooth) = self._prepare_data(xdata, ydata, weights, smooth)
 
         self._ndim = len(self._xdata)
-        self._spline = None  # type: SplinePPForm
+        self._spline = None  # type: t.Optional[SplinePPForm]
 
         self._make_spline()
 
@@ -537,7 +516,7 @@ class NdGridCubicSmoothingSpline:
 
         return xdata, ydata, weights, smooth
 
-    def __call__(self, xi: _GridDataType) -> np.ndarray:
+    def __call__(self, xi: NdGridDataType) -> np.ndarray:
         xi = self._prepare_grid_vectors(xi, 'xi')
 
         if len(xi) != self._ndim:
