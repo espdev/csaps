@@ -1,12 +1,18 @@
 # -*- coding: utf-8 -*-
 
 import pathlib
-from setuptools import setup
+from setuptools import setup, find_packages
 
 
-NAME = 'csaps'
-VERSION = '0.4.2'
 ROOT_DIR = pathlib.Path(__file__).parent
+
+
+def _get_version():
+    about = {}
+    ver_mod = ROOT_DIR / 'csaps' / '_version.py'
+    with ver_mod.open() as f:
+        exec(f.read(), about)
+    return about['__version__']
 
 
 def _get_long_description():
@@ -15,16 +21,14 @@ def _get_long_description():
 
 
 setup(
-    name=NAME,
-    version=VERSION,
-    py_modules=['csaps'],
+    name='csaps',
+    version=_get_version(),
+    packages=find_packages(exclude=["tests", "*.tests", "*.tests.*", "tests.*"]),
     python_requires='>=3.5',
     install_requires=[
         'numpy>=0.12.1',
         'scipy>=0.19.1',
     ],
-    setup_requires=['pytest-runner'],
-    tests_require=['pytest'],
     url='https://github.com/espdev/csaps',
     license='MIT',
     author='Eugene Prilepin',

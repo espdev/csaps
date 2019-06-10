@@ -13,8 +13,6 @@ import scipy.sparse as sp
 import scipy.sparse.linalg as la
 
 
-__version__ = '0.4.0'
-
 _BreaksDataType = t.Union[
     # Univariate data sites
     np.ndarray,
