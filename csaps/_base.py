@@ -5,6 +5,7 @@ Cubic spline approximation (smoothing)
 
 """
 
+import abc
 import typing as t
 
 import numpy as np
@@ -139,7 +140,32 @@ class SplinePPForm:
         return yi.reshape(nsize, order='F')
 
 
-class UnivariateCubicSmoothingSpline:
+class ISmoothingSpline(abc.ABC):
+    """The interface class for smooting splines
+    """
+
+    @property
+    @abc.abstractmethod
+    def smooth(self) -> t.Union[float, t.Tuple[float, ...]]:
+        """Returns smoothing parameter
+        """
+        pass
+
+    @property
+    @abc.abstractmethod
+    def spline(self) -> SplinePPForm:
+        """Returns spline representation in PP-form
+        """
+        pass
+
+    @abc.abstractmethod
+    def __call__(self, xi: t.Union[UnivariateDataType, NdGridDataType]) -> np.ndarray:
+        """Evaluates spline on the data sites
+        """
+        pass
+
+
+class UnivariateCubicSmoothingSpline(ISmoothingSpline):
     """Univariate cubic smoothing spline
 
     Parameters
@@ -311,7 +337,7 @@ class UnivariateCubicSmoothingSpline:
         self._spline = SplinePPForm(self._xdata, coeffs, self._ydim)
 
 
-class MultivariateCubicSmoothingSpline:
+class MultivariateCubicSmoothingSpline(ISmoothingSpline):
     """Multivariate parametrized cubic smoothing spline
 
     Class implments multivariate data approximation via cubic smoothing spline with
@@ -388,6 +414,8 @@ class MultivariateCubicSmoothingSpline:
 
     @property
     def t(self) -> np.ndarray:
+        """Returns parametric data vector
+        """
         return self._tdata
 
     @staticmethod
@@ -419,7 +447,7 @@ class MultivariateCubicSmoothingSpline:
         return data, tdata
 
 
-class NdGridCubicSmoothingSpline:
+class NdGridCubicSmoothingSpline(ISmoothingSpline):
     """ND-Gridded cubic smoothing spline
 
     Class implments ND-gridded data approximation via cubic smoothing spline
