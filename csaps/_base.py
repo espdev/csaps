@@ -1,10 +1,5 @@
 # -*- coding: utf-8 -*-
 
-"""
-Cubic spline approximation (smoothing)
-
-"""
-
 import abc
 import typing as t
 
