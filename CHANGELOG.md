@@ -1,4 +1,9 @@
+# v0.6.1
+
+* A slight refactoring and extra data copies removing
+
 # v0.6.0
+
 * Add "axis" parameter for univariate/multivariate cases
 
 # v0.5.0

@@ -270,7 +270,6 @@ class UnivariateCubicSmoothingSpline(ISmoothingSpline):
 
     def _make_spline(self):
         pcount = self._xdata.size
-
         dx = np.diff(self._xdata)
 
         if not all(dx > 0):
@@ -278,7 +277,7 @@ class UnivariateCubicSmoothingSpline(ISmoothingSpline):
                 'Items of xdata vector must satisfy the condition: x1 < x2 < ... < xN')
 
         dy = np.diff(self._ydata, axis=1)
-        divdydx = dy / dx
+        dy_dx = dy / dx
 
         if pcount > 2:
             # Create diagonal sparse matrices
@@ -303,20 +302,21 @@ class UnivariateCubicSmoothingSpline(ISmoothingSpline):
                 p = self._smooth
 
             a = (6. * (1. - p)) * qtwq + p * r
-            b = np.diff(divdydx, axis=1).T
-            u = np.array(la.spsolve(a, b), ndmin=2)
+            b = np.diff(dy_dx, axis=1).T
 
+            u = la.spsolve(a, b)
+            if u.ndim < 2:
+                u = u[np.newaxis]
             if self._ydim == 1:
                 u = u.T
 
-            dx = np.array(dx, ndmin=2).T
+            dx = dx[:, np.newaxis]
             d_pad = np.zeros((1, self._ydim))
 
             d1 = np.diff(np.vstack((d_pad, u, d_pad)), axis=0) / dx
             d2 = np.diff(np.vstack((d_pad, d1, d_pad)), axis=0)
 
-            yi = np.array(self._ydata, ndmin=2).T
-            yi = yi - ((6. * (1. - p)) * w) @ d2
+            yi = self._ydata.T - ((6. * (1. - p)) * w) @ d2
             c3 = np.vstack((d_pad, p * u, d_pad))
             c2 = np.diff(yi, axis=0) / dx - dx * (2. * c3[:-1, :] + c3[1:, :])
 
@@ -327,12 +327,12 @@ class UnivariateCubicSmoothingSpline(ISmoothingSpline):
                 yi[:-1, :].T
             ))
 
-            c_shape = ((pcount - 1) * self._ydim, 4)
-            coeffs = coeffs.reshape(c_shape, order='F')
+            cf_shape = ((pcount - 1) * self._ydim, 4)
+            coeffs = coeffs.reshape(cf_shape, order='F')
         else:
             p = 1.
-            coeffs = np.array(np.hstack(
-                (divdydx, np.array(self._ydata[:, 0], ndmin=2).T)), ndmin=2)
+            yi = self._ydata[:, 0][:, np.newaxis]
+            coeffs = np.array(np.hstack((dy_dx, yi)), ndmin=2)
 
         self._smooth = p
         self._spline = SplinePPForm(self._xdata, coeffs, self._ydim)
@@ -482,6 +482,7 @@ class NdGridCubicSmoothingSpline(ISmoothingSpline):
                  ydata: np.ndarray,
                  weights: t.Optional[t.Union[UnivariateDataType, NdGridDataType]] = None,
                  smooth: t.Optional[t.Union[float, t.Sequence[float]]] = None):
+
         (self._xdata,
          self._ydata,
          self._weights,
@@ -539,8 +540,7 @@ class NdGridCubicSmoothingSpline(ISmoothingSpline):
 
         if len(weights) != data_ndim:
             raise ValueError(
-                'weights ({}) and xdata ({}) dimensions mismatch'.format(
-                    len(weights), data_ndim))
+                'weights ({}) and xdata ({}) dimensions mismatch'.format(len(weights), data_ndim))
 
         for w, x in zip(weights, xdata):
             if w is not None:
@@ -566,8 +566,7 @@ class NdGridCubicSmoothingSpline(ISmoothingSpline):
 
         if len(xi) != self._ndim:
             raise ValueError(
-                'xi ({}) and xdata ({}) dimensions mismatch'.format(
-                    len(xi), self._ndim))
+                'xi ({}) and xdata ({}) dimensions mismatch'.format(len(xi), self._ndim))
 
         return self._spline.evaluate(xi)
 
@@ -588,7 +587,7 @@ class NdGridCubicSmoothingSpline(ISmoothingSpline):
             ydata = s.spline.coeffs.reshape(sizey, order='F')
 
             if self._ndim > 1:
-                axes = (0, self._ndim, *np.r_[1:self._ndim].tolist())
+                axes = (0, self._ndim, *range(1, self._ndim))
                 ydata = ydata.transpose(axes)
                 sizey = list(ydata.shape)
 
