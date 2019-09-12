@@ -16,6 +16,8 @@ from csaps._types import (
     NdGridDataType,
 )
 
+from csaps._utils import to_2d, from_2d
+
 
 class SplinePPForm:
     """Spline representation in PP-form
@@ -60,7 +62,7 @@ class SplinePPForm:
                  self.pieces, self.order, self.dim)
 
     def evaluate(self, xi: t.Union[UnivariateDataType, NdGridDataType],
-                 shape: t.Sequence[int] = None):
+                 shape: t.Sequence[int] = None, axis: int = None):
         """Evaluate spline on given data sites or grid
 
         Parameters
@@ -69,13 +71,15 @@ class SplinePPForm:
             X data vector or list of vectors for multivariate spline
         shape : Sequence[int, ...]
             tuple The shape for univariate case. It determines univariate vectorized Y data shape
+        axis : int
+            Axis along which values are assumed to be varying
         """
         if self.gridded:
             return self._grid_evaluate(xi)
         else:
-            return self._univariate_evaluate(xi, shape)
+            return self._univariate_evaluate(xi, shape, axis)
 
-    def _univariate_evaluate(self, xi, shape):
+    def _univariate_evaluate(self, xi, shape, axis):
         # For each data site, compute its break interval
         mesh = self.breaks[1:-1]
         edges = np.hstack((-np.inf, mesh, np.inf))
@@ -111,7 +115,8 @@ class SplinePPForm:
         values = values.reshape((d, lx), order='F').squeeze()
 
         if values.shape != shape:
-            values = values.reshape(shape)
+            # Reshape values 2-D NxM array to N-D array with original shape
+            values = from_2d(values, shape, axis)
 
         return values
 
@@ -168,20 +173,25 @@ class UnivariateCubicSmoothingSpline(ISmoothingSpline):
     xdata : np.ndarray, list
         X input 1D data vector (data sites: x1 < x2 < ... < xN)
     ydata : np.ndarray, list
-        Y input 1D data vector or ND-array with shape[-1] equal of X data size)
+        Y input 1D data vector or ND-array with shape[axis] equal of X data size)
     weights : np.ndarray, list
         [Optional] Weights 1D vector with size equal of xdata size
     smooth : float
         [Optional] Smoothing parameter in range [0, 1] where:
             - 0: The smoothing spline is the least-squares straight line fit
             - 1: The cubic spline interpolant with natural condition
+    axis : int
+        Axis along which "ydata" is assumed to be varying.
+        Meaning that for x[i] the corresponding values are np.take(ydata, i, axis=axis).
+        By default is -1 (the last axis).
     """
 
     def __init__(self,
                  xdata: UnivariateDataType,
                  ydata: UnivariateVectorizedDataType,
                  weights: t.Optional[UnivariateDataType] = None,
-                 smooth: t.Optional[float] = None):
+                 smooth: t.Optional[float] = None,
+                 axis: int = -1):
 
         self._spline = None  # type: t.Optional[SplinePPForm]
         self._smooth = smooth
@@ -189,10 +199,10 @@ class UnivariateCubicSmoothingSpline(ISmoothingSpline):
         (self._xdata,
          self._ydata,
          self._weights,
-         self._data_shape) = self._prepare_data(xdata, ydata, weights)
+         self._shape) = self._prepare_data(xdata, ydata, weights, axis)
 
         self._ydim = self._ydata.shape[0]
-        self._axis = self._ydata.ndim - 1
+        self._axis = axis
 
         self._make_spline()
 
@@ -204,8 +214,8 @@ class UnivariateCubicSmoothingSpline(ISmoothingSpline):
         if xi.ndim > 1:
             raise ValueError('XI data must be a vector.')
 
-        self._data_shape[-1] = xi.size
-        return self._spline.evaluate(xi, self._data_shape)
+        self._shape[self._axis] = xi.size
+        return self._spline.evaluate(xi, self._shape, self._axis)
 
     @property
     def smooth(self) -> float:
@@ -216,29 +226,25 @@ class UnivariateCubicSmoothingSpline(ISmoothingSpline):
         return self._spline
 
     @staticmethod
-    def _prepare_data(xdata, ydata, weights):
+    def _prepare_data(xdata, ydata, weights, axis):
         xdata = np.asarray(xdata, dtype=np.float64)
         ydata = np.asarray(ydata, dtype=np.float64)
-
-        data_shape = list(ydata.shape)
 
         if xdata.ndim > 1:
             raise ValueError('xdata must be a vector')
         if xdata.size < 2:
             raise ValueError('xdata must contain at least 2 data points.')
 
-        if ydata.ndim > 1:
-            if data_shape[-1] != xdata.size:
-                raise ValueError(
-                    'ydata data must be a vector or '
-                    'ND-array with shape[-1] equal of xdata.size')
-            if ydata.ndim > 2:
-                ydata = ydata.reshape((np.prod(data_shape[:-1]), data_shape[-1]))
-        else:
-            if ydata.size != xdata.size:
-                raise ValueError('ydata vector size must be equal of xdata size')
+        yshape = list(ydata.shape)
 
-            ydata = np.array(ydata, ndmin=2)
+        if yshape[axis] != xdata.size:
+            raise ValueError(
+                '"ydata" data must be a 1-D or N-D array with shape[{}] that is equal to "xdata" size ({})'.format(
+                    axis, xdata.size))
+
+        # Reshape ydata N-D array to 2-D NxM array where N is the data
+        # dimension and M is the number of data points.
+        ydata = to_2d(ydata, axis)
 
         if weights is None:
             weights = np.ones_like(xdata)
@@ -248,7 +254,7 @@ class UnivariateCubicSmoothingSpline(ISmoothingSpline):
                 raise ValueError(
                     'Weights vector size must be equal of xdata size')
 
-        return xdata, ydata, weights, data_shape
+        return xdata, ydata, weights, yshape
 
     @staticmethod
     def _compute_smooth(a, b):
@@ -271,7 +277,7 @@ class UnivariateCubicSmoothingSpline(ISmoothingSpline):
             raise ValueError(
                 'Items of xdata vector must satisfy the condition: x1 < x2 < ... < xN')
 
-        dy = np.diff(self._ydata, axis=self._axis)
+        dy = np.diff(self._ydata, axis=1)
         divdydx = dy / dx
 
         if pcount > 2:
@@ -297,7 +303,7 @@ class UnivariateCubicSmoothingSpline(ISmoothingSpline):
                 p = self._smooth
 
             a = (6. * (1. - p)) * qtwq + p * r
-            b = np.diff(divdydx, axis=self._axis).T
+            b = np.diff(divdydx, axis=1).T
             u = np.array(la.spsolve(a, b), ndmin=2)
 
             if self._ydim == 1:
@@ -366,9 +372,8 @@ class MultivariateCubicSmoothingSpline(ISmoothingSpline):
     Parameters
     ----------
 
-    data : np.ndarray, array-like
-        Input multivariate data vectors for each dimension.
-        Array (M, N) shape where M is data dimension and N is data size
+    ydata : np.ndarray, array-like
+        Input multivariate data vectors. N-D array.
     tdata : np.ndarray, list
         [Optional] Parametric vector of data sites with condition: `t1 < t2 < ... < tN`.
         If it is not set will be computed automatically.
@@ -378,22 +383,43 @@ class MultivariateCubicSmoothingSpline(ISmoothingSpline):
         [Optional] Smoothing parameter in range [0, 1] where:
             - 0: The smoothing spline is the least-squares straight line fit
             - 1: The cubic spline interpolant with natural condition
+    axis : int
+        Axis along which "ydata" is assumed to be varying.
+        Meaning that for x[i] the corresponding values are np.take(ydata, i, axis=axis).
+        By default is -1 (the last axis).
+
+    See Also
+    --------
+    UnivariateCubicSmoothingSpline
 
     """
 
     def __init__(self,
-                 data: MultivariateDataType,
+                 ydata: MultivariateDataType,
                  tdata: t.Optional[UnivariateDataType] = None,
                  weights: t.Optional[UnivariateDataType] = None,
-                 smooth: t.Optional[float] = None):
-        self._data, self._tdata = self._prepare_data(data, tdata)
+                 smooth: t.Optional[float] = None,
+                 axis: int = -1):
 
-        # Use vectorization for compute spline for each dimension from t
+        ydata = np.asarray(ydata)
+
+        if tdata is None:
+            tdata = self._compute_tdata(to_2d(ydata, axis))
+
+        tdata = np.asarray(tdata)
+        if tdata.size != ydata.shape[-1]:
+            raise ValueError('"tdata" size must be equal to "ydata" shape[{}] size ({})'.format(
+                axis, ydata.shape[axis]))
+
+        self._tdata = tdata
+
+        # Use vectorization for compute spline for every dimension from t
         self._univariate_spline = UnivariateCubicSmoothingSpline(
-            xdata=self._tdata,
-            ydata=self._data,
+            xdata=tdata,
+            ydata=ydata,
             weights=weights,
-            smooth=smooth
+            smooth=smooth,
+            axis=axis,
         )
 
     def __call__(self, ti: UnivariateDataType):
@@ -416,30 +442,14 @@ class MultivariateCubicSmoothingSpline(ISmoothingSpline):
     @staticmethod
     def _compute_tdata(data):
         """
-        Computes t vector for M-dimensional data::
+        Computes t vector for N-dimensional data::
 
             t_1 = 0
-            t_i+1 = t_i + sqrt((x_i+1 - x_i)**2 + (y_i+1 - y_i)**2 + ... + (m_i+1 - m_i)**2)
+            t_i+1 = t_i + sqrt((x_i+1 - x_i)**2 + (y_i+1 - y_i)**2 + ... + (n_i+1 - n_i)**2)
         """
         head = 0.
         tail = np.sqrt(np.sum(np.diff(data, axis=1)**2, axis=0))
         return np.cumsum(np.hstack((head, tail)))
-
-    @classmethod
-    def _prepare_data(cls, data, tdata):
-        data = np.asarray(data, dtype=np.float64)
-
-        if data.ndim != 2:
-            raise ValueError('data must be 2D-array with shape (M, N) '
-                             'where M is data dimension and N is data size')
-
-        if tdata is None:
-            tdata = cls._compute_tdata(data)
-        else:
-            if tdata.size != data.shape[-1]:
-                raise ValueError('tdata size must be equal to data size (N)')
-
-        return data, tdata
 
 
 class NdGridCubicSmoothingSpline(ISmoothingSpline):

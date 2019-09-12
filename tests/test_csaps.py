@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from itertools import chain, product, permutations
 import pytest
 
 import numpy as np
@@ -105,6 +106,29 @@ def test_univariate_vectorize(y):
     np.testing.assert_allclose(ys, y)
 
 
+@pytest.mark.parametrize('shape, axis', chain(
+    *map(product, [
+        # shape
+        [(2,), (4,)],
+        permutations((2, 4), 2),
+        permutations((3, 4, 5), 3),
+        permutations((3, 4, 5, 6), 4)
+    ], [
+        # axis
+        range(-1, 1),
+        range(-2, 2),
+        range(-3, 3),
+        range(-4, 4),
+    ])
+))
+def test_axis(shape, axis):
+    y = np.arange(int(np.prod(shape))).reshape(shape)
+    x = np.arange(np.array(y).shape[axis])
+
+    ys = csaps.UnivariateCubicSmoothingSpline(x, y, axis=axis)(x)
+    np.testing.assert_allclose(ys, y)
+
+
 def test_univariate_auto_smooth():
     np.random.seed(1234)
 
@@ -181,7 +205,7 @@ def test_univariate_npoints(x, y, xi, yid):
     np.testing.assert_allclose(yi, yid)
 
 
-@pytest.mark.parametrize('w,yid',[
+@pytest.mark.parametrize('w,yid', [
     ([0.5, 1, 0.7, 1.2], [
         2.39572102230177, 3.13781163365086, 3.78568993197139,
         4.28992448591238, 4.7009959256016, 5.08290363789967,
