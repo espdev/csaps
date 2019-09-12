@@ -1,3 +1,6 @@
+# v0.6.0
+* Add "axis" parameter for univariate/multivariate cases
+
 # v0.5.0
 
 * Reorganize the project to package-based structure
