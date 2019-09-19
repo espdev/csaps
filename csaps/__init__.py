@@ -14,7 +14,6 @@ from csaps._base import (
 )
 
 from csaps._types import (
-    BreaksDataType,
     UnivariateDataType,
     UnivariateVectorizedDataType,
     MultivariateDataType,
@@ -28,7 +27,6 @@ __all__ = [
     'NdGridCubicSmoothingSpline',
 
     # Type-hints
-    'BreaksDataType',
     'UnivariateDataType',
     'UnivariateVectorizedDataType',
     'MultivariateDataType',

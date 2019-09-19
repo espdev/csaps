@@ -5,14 +5,6 @@ import numbers
 import numpy as np
 
 
-BreaksDataType = ty.Union[
-    # Univariate data sites
-    np.ndarray,
-
-    # Grid data sites
-    ty.Sequence[np.ndarray],
-]
-
 UnivariateDataType = ty.Union[
     np.ndarray,
     ty.Sequence[numbers.Number]

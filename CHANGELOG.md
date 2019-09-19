@@ -1,3 +1,7 @@
+# v0.7.0
+
+* Add Generic-based type-hints and mypy-compatibility
+
 # v0.6.1
 
 * A slight refactoring and extra data copies removing
