@@ -29,6 +29,7 @@ setup(
         'numpy>=0.12.1',
         'scipy>=0.19.1',
     ],
+    package_data={"csaps": ["py.typed"]},
     url='https://github.com/espdev/csaps',
     license='MIT',
     author='Eugene Prilepin',

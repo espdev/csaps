@@ -1,33 +1,25 @@
 # -*- coding: utf-8 -*-
 
-import typing as t
+import typing as ty
+import numbers
 import numpy as np
 
 
-BreaksDataType = t.Union[
-    # Univariate data sites
+UnivariateDataType = ty.Union[
     np.ndarray,
-
-    # Grid data sites
-    t.Union[
-        t.List[np.ndarray],
-        t.Tuple[np.ndarray, ...]
-    ]
+    ty.Sequence[numbers.Number]
 ]
 
-UnivariateDataType = t.Union[
-    np.ndarray,
-    t.Sequence[t.Union[int, float]]
-]
-
-UnivariateVectorizedDataType = t.Union[
+UnivariateVectorizedDataType = ty.Union[
     UnivariateDataType,
-    t.List['UnivariateVectorizedDataType']
+    # FIXME: mypy does not support recursive types
+    # https://github.com/python/mypy/issues/731
+    # ty.Sequence['UnivariateVectorizedDataType']
 ]
 
-MultivariateDataType = t.Union[
+MultivariateDataType = ty.Union[
     np.ndarray,
-    t.Sequence[UnivariateDataType]
+    ty.Sequence[UnivariateDataType]
 ]
 
-NdGridDataType = t.Sequence[UnivariateDataType]
+NdGridDataType = ty.Sequence[UnivariateDataType]

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import typing as ty
 import numpy as np
 
 
@@ -75,7 +76,7 @@ def to_2d(arr: np.ndarray, axis: int) -> np.ndarray:
     return arr.transpose(tr_axes).reshape(new_shape)
 
 
-def from_2d(arr: np.ndarray, shape: tuple, axis: int) -> np.ndarray:
+def from_2d(arr: np.ndarray, shape: ty.Sequence[int], axis: int) -> np.ndarray:
     """Transforms 2-d NxM array to N-D array using given shape and axis
 
     Parameters
