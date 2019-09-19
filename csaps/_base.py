@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
 import abc
-import typing as t
+import typing as ty
+import collections.abc as c_abc
 
 import numpy as np
-
 import scipy.sparse as sp
 import scipy.sparse.linalg as la
 
@@ -32,12 +32,12 @@ class SplinePPForm:
         Spline dimension (>= 1 for nd-grid/multivariate)
     """
 
-    def __init__(self, breaks: BreaksDataType, coeffs: np.ndarray, dim: int = 1):
+    def __init__(self, breaks: BreaksDataType, coeffs: np.ndarray, dim: int = 1) -> None:
         self.gridded = isinstance(breaks, (tuple, list))
         self.breaks = breaks
         self.coeffs = coeffs
-        self.pieces = None  # type: t.Optional[t.Union[int, t.Tuple[int, ...]]]
-        self.order = None  # type: t.Optional[t.Union[int, t.Tuple[int, ...]]]
+        self.pieces = None  # type: ty.Optional[ty.Union[int, ty.Tuple[int, ...]]]
+        self.order = None  # type: ty.Optional[ty.Union[int, ty.Tuple[int, ...]]]
 
         if self.gridded:
             self.pieces = tuple(x.size - 1 for x in breaks)
@@ -61,8 +61,9 @@ class SplinePPForm:
                  self.gridded, self.breaks, self.coeffs.shape, self.coeffs,
                  self.pieces, self.order, self.dim)
 
-    def evaluate(self, xi: t.Union[UnivariateDataType, NdGridDataType],
-                 shape: t.Sequence[int] = None, axis: int = None):
+    def evaluate(self, xi: ty.Union[UnivariateDataType, NdGridDataType],
+                 shape: ty.Optional[ty.Sequence[int]] = None,
+                 axis: ty.Optional[int] = None) -> np.ndarray:
         """Evaluate spline on given data sites or grid
 
         Parameters
@@ -146,7 +147,7 @@ class ISmoothingSpline(abc.ABC):
 
     @property
     @abc.abstractmethod
-    def smooth(self) -> t.Union[float, t.Tuple[float, ...]]:
+    def smooth(self) -> ty.Union[float, ty.Tuple[float, ...]]:
         """Returns smoothing parameter
         """
         pass
@@ -159,7 +160,7 @@ class ISmoothingSpline(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def __call__(self, xi: t.Union[UnivariateDataType, NdGridDataType]) -> np.ndarray:
+    def __call__(self, xi: ty.Union[UnivariateDataType, NdGridDataType]) -> np.ndarray:
         """Evaluates spline on the data sites
         """
         pass
@@ -189,12 +190,9 @@ class UnivariateCubicSmoothingSpline(ISmoothingSpline):
     def __init__(self,
                  xdata: UnivariateDataType,
                  ydata: UnivariateVectorizedDataType,
-                 weights: t.Optional[UnivariateDataType] = None,
-                 smooth: t.Optional[float] = None,
+                 weights: ty.Optional[UnivariateDataType] = None,
+                 smooth: ty.Optional[float] = None,
                  axis: int = -1):
-
-        self._spline = None  # type: t.Optional[SplinePPForm]
-        self._smooth = smooth
 
         (self._xdata,
          self._ydata,
@@ -204,7 +202,7 @@ class UnivariateCubicSmoothingSpline(ISmoothingSpline):
         self._ydim = self._ydata.shape[0]
         self._axis = axis
 
-        self._make_spline()
+        self._spline, self._smooth = self._make_spline(smooth)
 
     def __call__(self, xi: UnivariateDataType) -> np.ndarray:
         """Evaluate the spline's approximation for given data
@@ -219,10 +217,24 @@ class UnivariateCubicSmoothingSpline(ISmoothingSpline):
 
     @property
     def smooth(self) -> float:
+        """Returns smooth factor
+
+        Returns
+        -------
+        smooth : float
+            Smooth factor in the range [0, 1]
+        """
         return self._smooth
 
     @property
     def spline(self) -> SplinePPForm:
+        """Returns the spline description in 'SplinePPForm' instance
+
+        Returns
+        -------
+        spline : SplinePPForm
+            The spline description in 'SplinePPForm' instance
+        """
         return self._spline
 
     @staticmethod
@@ -268,7 +280,7 @@ class UnivariateCubicSmoothingSpline(ISmoothingSpline):
             return m.diagonal().sum()
         return 1. / (1. + trace(a) / (6. * trace(b)))
 
-    def _make_spline(self):
+    def _make_spline(self, smooth: ty.Optional[float]) -> ty.Tuple[SplinePPForm, float]:
         pcount = self._xdata.size
         dx = np.diff(self._xdata)
 
@@ -296,10 +308,10 @@ class UnivariateCubicSmoothingSpline(ISmoothingSpline):
             # Solve linear system for the 2nd derivatives
             qtwq = qtw @ qtw.T
 
-            if self._smooth is None:
+            if smooth is None:
                 p = self._compute_smooth(r, qtwq)
             else:
-                p = self._smooth
+                p = smooth
 
             a = (6. * (1. - p)) * qtwq + p * r
             b = np.diff(dy_dx, axis=1).T
@@ -334,8 +346,7 @@ class UnivariateCubicSmoothingSpline(ISmoothingSpline):
             yi = self._ydata[:, 0][:, np.newaxis]
             coeffs = np.array(np.hstack((dy_dx, yi)), ndmin=2)
 
-        self._smooth = p
-        self._spline = SplinePPForm(self._xdata, coeffs, self._ydim)
+        return SplinePPForm(self._xdata, coeffs, self._ydim), p
 
 
 class MultivariateCubicSmoothingSpline(ISmoothingSpline):
@@ -396,9 +407,9 @@ class MultivariateCubicSmoothingSpline(ISmoothingSpline):
 
     def __init__(self,
                  ydata: MultivariateDataType,
-                 tdata: t.Optional[UnivariateDataType] = None,
-                 weights: t.Optional[UnivariateDataType] = None,
-                 smooth: t.Optional[float] = None,
+                 tdata: ty.Optional[UnivariateDataType] = None,
+                 weights: ty.Optional[UnivariateDataType] = None,
+                 smooth: ty.Optional[float] = None,
                  axis: int = -1):
 
         ydata = np.asarray(ydata)
@@ -427,22 +438,42 @@ class MultivariateCubicSmoothingSpline(ISmoothingSpline):
 
     @property
     def smooth(self) -> float:
+        """Returns smooth factor
+
+        Returns
+        -------
+        smooth : float
+            Smooth factor in the range [0, 1]
+        """
         return self._univariate_spline.smooth
 
     @property
     def spline(self) -> SplinePPForm:
+        """Returns the spline description in 'SplinePPForm' instance
+
+        Returns
+        -------
+        spline : SplinePPForm
+            The spline description in 'SplinePPForm' instance
+        """
         return self._univariate_spline.spline
 
     @property
     def t(self) -> np.ndarray:
-        """Returns parametric data vector
+        """Returns parametrization data vector
+
+        Returns
+        -------
+        t : np.ndarray
+            The parametrization data vector
         """
         return self._tdata
 
     @staticmethod
     def _compute_tdata(data):
-        """
-        Computes t vector for N-dimensional data::
+        """Computes "natural" t parametrization vector for N-dimensional data
+
+        .. code-block::
 
             t_1 = 0
             t_i+1 = t_i + sqrt((x_i+1 - x_i)**2 + (y_i+1 - y_i)**2 + ... + (n_i+1 - n_i)**2)
@@ -480,29 +511,42 @@ class NdGridCubicSmoothingSpline(ISmoothingSpline):
     def __init__(self,
                  xdata: NdGridDataType,
                  ydata: np.ndarray,
-                 weights: t.Optional[t.Union[UnivariateDataType, NdGridDataType]] = None,
-                 smooth: t.Optional[t.Union[float, t.Sequence[float]]] = None):
+                 weights: ty.Optional[ty.Union[UnivariateDataType, NdGridDataType]] = None,
+                 smooth: ty.Optional[ty.Union[float, ty.Sequence[ty.Optional[float]]]] = None) -> None:
 
         (self._xdata,
          self._ydata,
          self._weights,
-         self._smooth) = self._prepare_data(xdata, ydata, weights, smooth)
+         _smooth) = self._prepare_data(xdata, ydata, weights, smooth)
 
         self._ndim = len(self._xdata)
-        self._spline = None  # type: t.Optional[SplinePPForm]
 
-        self._make_spline()
+        self._spline, self._smooth = self._make_spline(_smooth)
 
     @property
-    def smooth(self) -> t.Tuple[float, ...]:
+    def smooth(self) -> ty.Tuple[float, ...]:
+        """Returns smooth factor for every axis
+
+        Returns
+        -------
+        smooth : Tuple[float, ...]
+            Smooth factor in the range [0, 1] for every axis
+        """
         return self._smooth
 
     @property
     def spline(self) -> SplinePPForm:
+        """Returns the spline description in 'SplinePPForm' instance
+
+        Returns
+        -------
+        spline : SplinePPForm
+            The spline description in 'SplinePPForm' instance
+        """
         return self._spline
 
     @staticmethod
-    def _prepare_grid_vectors(data, name) -> t.Tuple[np.ndarray, ...]:
+    def _prepare_grid_vectors(data, name) -> ty.Tuple[np.ndarray, ...]:
         if not isinstance(data, (tuple, list)):
             raise TypeError('{} must be list/tuple of vectors'.format(name))
 
@@ -551,8 +595,10 @@ class NdGridCubicSmoothingSpline(ISmoothingSpline):
         if not smooth:
             smooth = [None] * data_ndim
 
-        if not isinstance(smooth, (list, tuple)):
-            smooth = [smooth] * data_ndim
+        if not isinstance(smooth, c_abc.Sequence):
+            smooth = [float(smooth)] * data_ndim
+        else:
+            smooth = list(smooth)
 
         if len(smooth) != data_ndim:
             raise ValueError(
@@ -570,9 +616,11 @@ class NdGridCubicSmoothingSpline(ISmoothingSpline):
 
         return self._spline.evaluate(xi)
 
-    def _make_spline(self):
+    def _make_spline(self, smooth: ty.List[ty.Optional[float]]) \
+            -> ty.Tuple[SplinePPForm, ty.Tuple[float, ...]]:
         sizey = [1] + list(self._ydata.shape)
         ydata = self._ydata.reshape(sizey, order='F').copy()
+        _smooth = []
 
         # Perform coordinatewise smoothing spline computing
         for i in range(self._ndim-1, -1, -1):
@@ -580,9 +628,9 @@ class NdGridCubicSmoothingSpline(ISmoothingSpline):
             ydata_i = ydata.reshape(shape_i, order='F')
 
             s = UnivariateCubicSmoothingSpline(
-                self._xdata[i], ydata_i, self._weights[i], self._smooth[i])
+                self._xdata[i], ydata_i, self._weights[i], smooth[i])
 
-            self._smooth[i] = s.smooth
+            _smooth.append(s.smooth)
             sizey[-1] = s.spline.pieces * s.spline.order
             ydata = s.spline.coeffs.reshape(sizey, order='F')
 
@@ -591,5 +639,4 @@ class NdGridCubicSmoothingSpline(ISmoothingSpline):
                 ydata = ydata.transpose(axes)
                 sizey = list(ydata.shape)
 
-        self._smooth = tuple(self._smooth)
-        self._spline = SplinePPForm(self._xdata, ydata)
+        return SplinePPForm(self._xdata, ydata), tuple(_smooth)
