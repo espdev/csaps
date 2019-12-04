@@ -3,7 +3,7 @@
 [![PyPI version](https://img.shields.io/pypi/v/csaps.svg)](https://pypi.python.org/pypi/csaps)
 [![Build status](https://travis-ci.org/espdev/csaps.svg?branch=master)](https://travis-ci.org/espdev/csaps)
 ![Supported Python versions](https://img.shields.io/pypi/pyversions/csaps.svg)
-[![License](https://img.shields.io/pypi/l/mpl-events.svg)](LICENSE)
+[![License](https://img.shields.io/pypi/l/csaps.svg)](LICENSE)
 
 This module provides cubic smoothing spline for univariate/multivariate/gridded data approximation.
 The smoothing parameter can be calculated automatically or it can be set manually. 
