@@ -23,6 +23,8 @@ TProps = ty.TypeVar('TProps', int, ty.Tuple[int, ...])
 
 
 class SplinePPFormBase(abc.ABC, ty.Generic[TData, TProps]):
+    """The base class for spline representation in PP-form
+    """
 
     @property
     @abc.abstractmethod
