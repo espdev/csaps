@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from itertools import chain, product, permutations
-import pytest
 
 import numpy as np
+import pytest
+
 import csaps
 
 
@@ -20,7 +21,7 @@ import csaps
     ([1, 2, 3], [(1, 2, 3), (1, 2, 3)], [(1, 1, 1, 1), (1, 1, 1, 1)]),
     ([1, 2, 3], [(1, 2, 3), (1, 2, 3)], [(1, 1, 1), (1, 1, 1), (1, 1, 1)])
 ])
-def test_univariate_invalid_data(x, y, w):
+def test_invalid_data(x, y, w):
     with pytest.raises(ValueError):
         csaps.UnivariateCubicSmoothingSpline(x, y, w)
 
@@ -94,13 +95,16 @@ def test_univariate_invalid_data(x, y, w):
      [[(2, 4, 6, 8), (3, 5, 7, 9), (4, 6, 8, 10)], [(2, 4, 6, 8), (3, 5, 7, 9), (4, 6, 8, 10)]]],
 
     # 4D (3, 3, 3, 4)
-    [[[(2, 4, 6, 8), (3, 5, 7, 9), (4, 6, 8, 10)], [(2, 4, 6, 8), (3, 5, 7, 9), (4, 6, 8, 10)], [(2, 4, 6, 8), (3, 5, 7, 9), (4, 6, 8, 10)]],
-     [[(2, 4, 6, 8), (3, 5, 7, 9), (4, 6, 8, 10)], [(2, 4, 6, 8), (3, 5, 7, 9), (4, 6, 8, 10)], [(2, 4, 6, 8), (3, 5, 7, 9), (4, 6, 8, 10)]],
-     [[(2, 4, 6, 8), (3, 5, 7, 9), (4, 6, 8, 10)], [(2, 4, 6, 8), (3, 5, 7, 9), (4, 6, 8, 10)], [(2, 4, 6, 8), (3, 5, 7, 9), (4, 6, 8, 10)]]],
+    [[[(2, 4, 6, 8), (3, 5, 7, 9), (4, 6, 8, 10)], [(2, 4, 6, 8), (3, 5, 7, 9), (4, 6, 8, 10)],
+      [(2, 4, 6, 8), (3, 5, 7, 9), (4, 6, 8, 10)]],
+     [[(2, 4, 6, 8), (3, 5, 7, 9), (4, 6, 8, 10)], [(2, 4, 6, 8), (3, 5, 7, 9), (4, 6, 8, 10)],
+      [(2, 4, 6, 8), (3, 5, 7, 9), (4, 6, 8, 10)]],
+     [[(2, 4, 6, 8), (3, 5, 7, 9), (4, 6, 8, 10)], [(2, 4, 6, 8), (3, 5, 7, 9), (4, 6, 8, 10)],
+      [(2, 4, 6, 8), (3, 5, 7, 9), (4, 6, 8, 10)]]],
 
 ])
-def test_univariate_vectorize(y):
-    x = list(range(np.array(y).shape[-1]))
+def test_vectorize(y):
+    x = np.arange(np.array(y).shape[-1])
 
     ys = csaps.UnivariateCubicSmoothingSpline(x, y)(x)
     np.testing.assert_allclose(ys, y)
@@ -129,7 +133,23 @@ def test_axis(shape, axis):
     np.testing.assert_allclose(ys, y)
 
 
-def test_univariate_auto_smooth():
+def test_zero_smooth():
+    x = [1., 2., 4., 6.]
+    y = [2., 4., 5., 7.]
+
+    sp = csaps.UnivariateCubicSmoothingSpline(x, y, smooth=0.)
+
+    assert sp.smooth == pytest.approx(0.)
+
+    ys = sp(x)
+
+    assert ys == pytest.approx([2.440677966101695,
+                                3.355932203389830,
+                                5.186440677966102,
+                                7.016949152542373])
+
+
+def test_auto_smooth():
     np.random.seed(1234)
 
     x = np.linspace(0, 2 * np.pi, 21)
@@ -196,9 +216,9 @@ def test_univariate_auto_smooth():
         4.21971044584031, 4.65026761247821, 5.04804510368134,
         5.47288175793241, 5.94265482897362, 6.44293945952166,
         6.95847986982311
-     ]),
+    ]),
 ])
-def test_univariate_npoints(x, y, xi, yid):
+def test_npoints(x, y, xi, yid):
     sp = csaps.UnivariateCubicSmoothingSpline(x, y)
     yi = sp(xi)
 
@@ -213,7 +233,7 @@ def test_univariate_npoints(x, y, xi, yid):
         6.97068522346297
     ])
 ])
-def test_univariate_weighted(w, yid):
+def test_weighted(w, yid):
     x = [1., 2., 4., 6.]
     y = [2., 4., 5., 7.]
     xi = np.linspace(1., 6., 10)
@@ -224,73 +244,10 @@ def test_univariate_weighted(w, yid):
     np.testing.assert_allclose(yi, yid)
 
 
-@pytest.mark.skip(reason='It might be long')
-def test_univariate_big_vectorized():
+@pytest.mark.skip(reason='It may take a long time')
+def test_big_vectorized():
     x = np.linspace(0, 10000, 10000)
     y = np.random.rand(1000, 10000)
     xi = np.linspace(0, 10000, 20000)
 
     csaps.UnivariateCubicSmoothingSpline(x, y)(xi)
-
-
-def test_multivariate_auto_tdata():
-    data = [
-        (2, 4, 1, 3),  # X
-        (1, 4, 3, 2),  # Y
-        (3, 4, 1, 5),  # Z
-    ]
-
-    t = [0., 3.74165739, 8.10055633, 12.68313203]
-
-    sp = csaps.MultivariateCubicSmoothingSpline(data)
-    np.testing.assert_allclose(sp.t, t)
-
-
-@pytest.mark.parametrize('x,y,w,p', [
-    ([1, 2, 3], np.ones((10, 10)), None, None),
-    ([[1], [1]], np.ones((1, 1)), None, None),
-    ([[1, 2, 3], [1, 2, 3]], np.ones((4, 3)), None, None),
-    ([[1, 2, 3], [1, 2, 3]], np.ones((3, 3, 3)), None, None),
-    ([[1, 2, 3], [1, 2, 3]], np.ones((3, 3)), [1, 2, 3], None),
-    ([[1, 2, 3], [1, 2, 3]], np.ones((3, 3)), [[1, 2, 3]], None),
-    ([[1, 2, 3], [1, 2, 3]], np.ones((3, 3)), [[1, 2], [1, 2]], None),
-    ([[1, 2, 3], [1, 2, 3]], np.ones((3, 3)), None, [0.5, 0.4, 0.2])
-])
-def test_grid_invalid_data(x, y, w, p):
-    with pytest.raises((ValueError, TypeError)):
-        csaps.NdGridCubicSmoothingSpline(x, y, w, p)
-
-
-def test_surface_smoothing():
-    xdata = [np.linspace(-3, 3, 61), np.linspace(-3.5, 3.5, 51)]
-    i, j = np.meshgrid(*xdata, indexing='ij')
-
-    ydata = (3 * (1 - j)**2. * np.exp(-(j**2) - (i + 1)**2)
-             - 10 * (j / 5 - j**3 - i**5) * np.exp(-j**2 - i**2)
-             - 1 / 3 * np.exp(-(j + 1)**2 - i**2))
-
-    np.random.seed(12345)
-    noisy = ydata + (np.random.randn(*ydata.shape) * 0.75)
-
-    sp = csaps.NdGridCubicSmoothingSpline(xdata, noisy)
-    _ = sp(xdata)
-
-
-def test_zero_smooth():
-    x = [1., 2., 4., 6.]
-    y = [2., 4., 5., 7.]
-
-    sp = csaps.UnivariateCubicSmoothingSpline(x, y, smooth=0.)
-
-    assert sp.smooth == pytest.approx(0.)
-
-    ys = sp(x)
-
-    assert ys == pytest.approx([2.440677966101695,
-                                3.355932203389830,
-                                5.186440677966102,
-                                7.016949152542373])
-
-
-if __name__ == '__main__':
-    pytest.main()
