@@ -23,3 +23,8 @@ MultivariateDataType = ty.Union[
 ]
 
 NdGridDataType = ty.Sequence[UnivariateDataType]
+
+TData = ty.TypeVar('TData', np.ndarray, ty.Sequence[np.ndarray])
+TProps = ty.TypeVar('TProps', int, ty.Tuple[int, ...])
+TSmooth = ty.TypeVar('TSmooth', float, ty.Tuple[float, ...])
+TXi = ty.TypeVar('TXi', UnivariateDataType, NdGridDataType)

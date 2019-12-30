@@ -13,13 +13,13 @@ from csaps._types import (
     UnivariateVectorizedDataType,
     MultivariateDataType,
     NdGridDataType,
+    TData,
+    TProps,
+    TSmooth,
+    TXi,
 )
 
 from csaps._utils import to_2d, from_2d
-
-
-TData = ty.TypeVar('TData', np.ndarray, ty.Sequence[np.ndarray])
-TProps = ty.TypeVar('TProps', int, ty.Tuple[int, ...])
 
 
 class SplinePPFormBase(abc.ABC, ty.Generic[TData, TProps]):
@@ -260,12 +260,10 @@ class NdGridSplinePPForm(SplinePPFormBase[ty.Sequence[np.ndarray], ty.Tuple[int,
         return yi.reshape(nsize, order='F')
 
 
-TSmooth = ty.TypeVar('TSmooth', float, ty.Tuple[float, ...])
 TSpline = ty.TypeVar('TSpline', SplinePPForm, NdGridSplinePPForm)
-TXi = ty.TypeVar('TXi', UnivariateDataType, NdGridDataType)
 
 
-class ISmoothingSpline(abc.ABC, ty.Generic[TSmooth, TSpline, TXi]):
+class ISmoothingSpline(abc.ABC, ty.Generic[TSpline, TSmooth, TXi]):
     """The interface class for smooting splines
     """
 
@@ -287,7 +285,7 @@ class ISmoothingSpline(abc.ABC, ty.Generic[TSmooth, TSpline, TXi]):
         """
 
 
-class UnivariateCubicSmoothingSpline(ISmoothingSpline[float, SplinePPForm, UnivariateDataType]):
+class UnivariateCubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, UnivariateDataType]):
     """Univariate cubic smoothing spline
 
     Parameters
@@ -477,7 +475,7 @@ class UnivariateCubicSmoothingSpline(ISmoothingSpline[float, SplinePPForm, Univa
         return spline, p
 
 
-class MultivariateCubicSmoothingSpline(ISmoothingSpline[float, SplinePPForm, UnivariateDataType]):
+class MultivariateCubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, UnivariateDataType]):
     """Multivariate parametrized cubic smoothing spline
 
     Class implments multivariate data approximation via cubic smoothing spline with
@@ -612,7 +610,7 @@ class MultivariateCubicSmoothingSpline(ISmoothingSpline[float, SplinePPForm, Uni
         return np.cumsum(np.hstack((head, tail)))
 
 
-class NdGridCubicSmoothingSpline(ISmoothingSpline[ty.Tuple[float, ...], NdGridSplinePPForm, NdGridDataType]):
+class NdGridCubicSmoothingSpline(ISmoothingSpline[NdGridSplinePPForm, ty.Tuple[float, ...], NdGridDataType]):
     """ND-Gridded cubic smoothing spline
 
     Class implments ND-gridded data approximation via cubic smoothing spline
