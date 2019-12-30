@@ -1,28 +1,22 @@
 dist: bionic
 language: python
 
-python:
-  - "3.5"
-  - "3.6"
-  - "3.7"
-  - "3.8"
-
 matrix:
   include:
     - python: "3.5"
-      env: ENV=pytest
+      env: TOXENV=py35-pytest
     - python: "3.6"
-      env: ENV=pytest
+      env: TOXENV=py36-pytest
     - python: "3.7"
-      env: ENV=pytest
+      env: TOXENV=py37-pytest
     - python: "3.8"
-      env: ENV=pytest
+      env: TOXENV=py38-pytest
 
     - python: "3.6"
-      env: ENV=flake8
+      env: TOXENV=flake8
 
 install:
-  pip install tox-travis
+  pip install tox
 
 script:
   tox
