@@ -2,6 +2,7 @@
 
 [![PyPI version](https://img.shields.io/pypi/v/csaps.svg)](https://pypi.python.org/pypi/csaps)
 [![Build status](https://travis-ci.org/espdev/csaps.svg?branch=master)](https://travis-ci.org/espdev/csaps)
+[![Coverage Status](https://coveralls.io/repos/github/espdev/csaps/badge.svg?branch=master)](https://coveralls.io/github/espdev/csaps?branch=master)
 ![Supported Python versions](https://img.shields.io/pypi/pyversions/csaps.svg)
 [![License](https://img.shields.io/pypi/l/csaps.svg)](LICENSE)
 
