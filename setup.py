@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import pathlib
-from setuptools import setup, find_packages
+from setuptools import setup
 
 
 ROOT_DIR = pathlib.Path(__file__).parent
@@ -10,8 +10,7 @@ ROOT_DIR = pathlib.Path(__file__).parent
 def _get_version():
     about = {}
     ver_mod = ROOT_DIR / 'csaps' / '_version.py'
-    with ver_mod.open() as f:
-        exec(f.read(), about)
+    exec(ver_mod.read_text(), about)
     return about['__version__']
 
 
@@ -23,14 +22,18 @@ def _get_long_description():
 setup(
     name='csaps',
     version=_get_version(),
-    packages=find_packages(exclude=["tests", "*.tests", "*.tests.*", "tests.*"]),
-    python_requires='>=3.5',
+    packages=['csaps'],
+    python_requires='>=3.5, <4',
     install_requires=[
-        'numpy>=0.12.1',
-        'scipy>=0.19.1',
+        'numpy >=0.12.1, <1.20.0',
+        'scipy >=0.19.1, <1.6.0',
     ],
     package_data={"csaps": ["py.typed"]},
     url='https://github.com/espdev/csaps',
+    project_urls={
+        "Code": 'https://github.com/espdev/csaps',
+        "Issue tracker": 'https://github.com/espdev/csaps/issues',
+    },
     license='MIT',
     author='Eugene Prilepin',
     author_email='esp.home@gmail.com',
@@ -51,6 +54,7 @@ setup(
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: Implementation :: CPython',
     ],
 )
