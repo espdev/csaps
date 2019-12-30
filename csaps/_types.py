@@ -1,5 +1,10 @@
 # -*- coding: utf-8 -*-
 
+"""
+Type-hints and type vars
+
+"""
+
 import typing as ty
 import numbers
 import numpy as np
@@ -28,3 +33,4 @@ TData = ty.TypeVar('TData', np.ndarray, ty.Sequence[np.ndarray])
 TProps = ty.TypeVar('TProps', int, ty.Tuple[int, ...])
 TSmooth = ty.TypeVar('TSmooth', float, ty.Tuple[float, ...])
 TXi = ty.TypeVar('TXi', UnivariateDataType, NdGridDataType)
+TSpline = ty.TypeVar('TSpline')
