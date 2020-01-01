@@ -25,14 +25,14 @@ _XiDataType = Optional[Union[UnivariateDataType, NdGridDataType]]
 _WeightsDataType = Optional[Union[UnivariateDataType, NdGridDataType]]
 _SmoothDataType = Optional[Union[float, Sequence[Optional[float]]]]
 
-SmoothedData = NamedTuple('SmoothedData', [
+SmoothingResult = NamedTuple('SmoothingResult', [
     ('values', _YDataType),
     ('smooth', _SmoothDataType),
 ])
 
 _ReturnType = Union[
     _YDataType,
-    SmoothedData,
+    SmoothingResult,
     ISmoothingSpline,
 ]
 
@@ -77,7 +77,7 @@ def csaps(xdata: _XDataType,
             - float value in the range ``[0, 1]`` for univariate/multivariate ydata case
             - the sequence of float in the range ``[0, 1]`` or None for nd-gridded ydata case
         If this argument was not set or None or sequence with None-items, the function will return
-        named tuple `SmoothedData` with computed smoothed data values and smoothing factor value(s).
+        named tuple `SmoothingResult` with computed smoothed data values and smoothing factor value(s).
 
     axis : int
         [optional] The ydata axis. Axis along which "ydata" is assumed to be varying.
@@ -88,7 +88,7 @@ def csaps(xdata: _XDataType,
     -------
     yidata : np.ndarray
         Smoothed data values if `xidata` and `smooth` were set.
-    smoothed_data : SmoothedData
+    smoothed_data : SmoothingResult
         The named tuple with two fileds:
             - 'values' -- smoothed data values
             - 'smooth' -- computed smoothing factor
@@ -121,6 +121,12 @@ def csaps(xdata: _XDataType,
         # Do not evaluate the spline, only compute it
         sp = csaps(x, y, smooth=0.98)
 
+    See Also
+    --------
+
+    `UnivariateCubicSmoothingSpline`
+    `NdGridCubicSmoothingSpline`
+
     """
 
     if isinstance(xdata, c_abc.Sequence):
@@ -149,6 +155,6 @@ def csaps(xdata: _XDataType,
         auto_smooth = any(sm is None for sm in smooth)
 
     if auto_smooth:
-        return SmoothedData(yidata, sp.smooth)
+        return SmoothingResult(yidata, sp.smooth)
     else:
         return yidata
