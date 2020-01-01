@@ -74,7 +74,7 @@ html_theme_options = {
     'github_repo': 'csaps',
     'github_type': 'star',
 
-    'description': 'cubic spline approximation',
+    'description': 'Cubic spline approximation (smoothing)',
 
     'extra_nav_links': {
         'GitHub repository': 'https://github.com/espdev/csaps',
