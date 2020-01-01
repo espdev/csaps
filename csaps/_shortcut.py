@@ -5,21 +5,21 @@ The module provised `csaps` shortcut function for smoothing data
 
 """
 
+from collections import abc as c_abc
 from typing import Optional, Union, Sequence, NamedTuple
 
 import numpy as np
 
 from csaps._base import ISmoothingSpline
 from csaps._sspumv import UnivariateCubicSmoothingSpline
-from csaps._sspndg import NdGridCubicSmoothingSpline
+from csaps._sspndg import ndgrid_prepare_data_sites, NdGridCubicSmoothingSpline
 from csaps._types import (
     UnivariateDataType,
     UnivariateVectorizedDataType,
-    MultivariateDataType,
     NdGridDataType,
 )
 
-_XDataType = Union[UnivariateDataType, MultivariateDataType, NdGridDataType]
+_XDataType = Union[UnivariateDataType, NdGridDataType]
 _YDataType = Union[UnivariateVectorizedDataType, np.ndarray]
 _XiDataType = Optional[Union[UnivariateDataType, NdGridDataType]]
 _WeightsDataType = Optional[Union[UnivariateDataType, NdGridDataType]]
@@ -111,18 +111,22 @@ def csaps(xdata: _XDataType,
         yi = csaps(x, y, xi, smooth=0.85)
 
     """
-    try:
+
+    if isinstance(xdata, c_abc.Sequence):
+        try:
+            ndgrid_prepare_data_sites(xdata, 'xdata')
+        except ValueError:
+            umv = True
+        else:
+            umv = False
+    else:
+        umv = True
+
+    if umv:
         axis = -1 if axis is None else axis
         sp = UnivariateCubicSmoothingSpline(xdata, ydata, weights, smooth, axis)
-    except ValueError as univariate_error:
-        try:
-            sp = NdGridCubicSmoothingSpline(xdata, ydata, weights, smooth)
-        except (ValueError, TypeError) as ndgrid_error:
-            ndgrid_error.__cause__ = univariate_error
-
-            raise ValueError(
-                'Invalid input data for all cases:\n  [univariate/multivariate]: {}\n  [nd-gridded]: {}'.format(
-                    univariate_error, ndgrid_error)) from ndgrid_error
+    else:
+        sp = NdGridCubicSmoothingSpline(xdata, ydata, weights, smooth)
 
     if xidata is None:
         return sp

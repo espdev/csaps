@@ -15,6 +15,24 @@ from csaps._types import UnivariateDataType, NdGridDataType
 from csaps._sspumv import SplinePPForm, UnivariateCubicSmoothingSpline
 
 
+def ndgrid_prepare_data_sites(data, name) -> ty.Tuple[np.ndarray, ...]:
+    if not isinstance(data, c_abc.Sequence):
+        raise TypeError("'{}' must be a sequence of the vectors.".format(name))
+
+    data = list(data)
+
+    for i, di in enumerate(data):
+        di = np.array(di, dtype=np.float64)
+        if di.ndim > 1:
+            raise ValueError("All '{}' elements must be a vector.".format(name))
+        if di.size < 2:
+            raise ValueError(
+                "'{}' must contain at least 2 data points.".format(name))
+        data[i] = di
+
+    return tuple(data)
+
+
 class NdGridSplinePPForm(SplinePPFormBase[ty.Sequence[np.ndarray], ty.Tuple[int, ...]]):
     """N-D grid spline representation in PP-form
 
@@ -53,7 +71,7 @@ class NdGridSplinePPForm(SplinePPFormBase[ty.Sequence[np.ndarray], ty.Tuple[int,
     def ndim(self) -> int:
         return self._ndim
 
-    def evaluate(self, xi: ty.Sequence[np.ndarray]) -> np.ndarray:
+    def evaluate(self, xi: NdGridDataType) -> np.ndarray:
         yi = self.coeffs.copy()
         sizey = list(yi.shape)
         nsize = tuple(x.size for x in xi)
@@ -134,27 +152,9 @@ class NdGridCubicSmoothingSpline(ISmoothingSpline[NdGridSplinePPForm, ty.Tuple[f
         """
         return self._spline
 
-    @staticmethod
-    def _prepare_grid_vectors(data, name) -> ty.Tuple[np.ndarray, ...]:
-        if not isinstance(data, c_abc.Sequence):
-            raise TypeError('{} must be sequence of vectors'.format(name))
-
-        data = list(data)
-
-        for i, di in enumerate(data):
-            di = np.array(di, dtype=np.float64)
-            if di.ndim > 1:
-                raise ValueError('All {} elements must be vector'.format(name))
-            if di.size < 2:
-                raise ValueError(
-                    '{} must contain at least 2 data points'.format(name))
-            data[i] = di
-
-        return tuple(data)
-
     @classmethod
     def _prepare_data(cls, xdata, ydata, weights, smooth):
-        xdata = cls._prepare_grid_vectors(xdata, 'xdata')
+        xdata = ndgrid_prepare_data_sites(xdata, 'xdata')
         data_ndim = len(xdata)
 
         if ydata.ndim != data_ndim:
@@ -169,7 +169,7 @@ class NdGridCubicSmoothingSpline(ISmoothingSpline[NdGridSplinePPForm, ty.Tuple[f
         if not weights:
             weights = [None] * data_ndim
         else:
-            weights = cls._prepare_grid_vectors(weights, 'weights')
+            weights = ndgrid_prepare_data_sites(weights, 'weights')
 
         if len(weights) != data_ndim:
             raise ValueError(
@@ -197,7 +197,7 @@ class NdGridCubicSmoothingSpline(ISmoothingSpline[NdGridSplinePPForm, ty.Tuple[f
         return xdata, ydata, weights, smooth
 
     def __call__(self, xi: NdGridDataType) -> np.ndarray:
-        xi = self._prepare_grid_vectors(xi, 'xi')
+        xi = ndgrid_prepare_data_sites(xi, 'xi')
 
         if len(xi) != self._ndim:
             raise ValueError(
