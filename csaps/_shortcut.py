@@ -91,13 +91,17 @@ def csaps(xdata: _XDataType,
     smoothed_data : SmoothedData
         The named tuple with two fileds:
             - 'values' -- smoothed data values
-            - 'smooth' -- smooth value
+            - 'smooth' -- computed smoothing factor
         This result will be returned if `xidata` was set and `smooth` was not set.
     sspobj : ISmoothingSpline
-        Smoothing spline object if `xidata` was not set.
+        Smoothing spline object if `xidata` was not set:
+            - `UnivariateCubicSmoothingSpline` instance for univariate/multivariate data
+            - `NdGridCubicSmoothingSpline` instance for nd-gridded data
 
     Examples
     --------
+
+    Univariate data smoothing
 
     .. code-block:: python
 
@@ -108,7 +112,14 @@ def csaps(xdata: _XDataType,
         y = np.exp(-(x/2.5)**2) + (np.random.rand(25) - 0.2) * 0.3
         xi = np.linspace(-5., 5., 150)
 
+        # Smooth data with smoothing factor 0.85
         yi = csaps(x, y, xi, smooth=0.85)
+
+        # Smooth data and compute smoothing factor automatically
+        yi, smooth = csaps(x, y, xi)
+
+        # Do not evaluate the spline, only compute it
+        sp = csaps(x, y, smooth=0.98)
 
     """
 
