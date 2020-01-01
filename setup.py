@@ -30,7 +30,7 @@ setup(
     ],
     extras_require={
         'docs': [
-            'sphinx',
+            'sphinx >=2.3',
             'numpydoc',
         ],
         'tests': [
