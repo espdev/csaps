@@ -28,6 +28,15 @@ setup(
         'numpy >=0.12.1, <1.20.0',
         'scipy >=0.19.1, <1.6.0',
     ],
+    extras_require={
+        'docs': [
+            'sphinx',
+            'numpydoc',
+        ],
+        'tests': [
+            'pytest',
+        ],
+    },
     package_data={"csaps": ["py.typed"]},
     url='https://github.com/espdev/csaps',
     project_urls={
