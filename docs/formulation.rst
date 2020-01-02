@@ -25,3 +25,18 @@ By deafult, the smoothing parameter p is computed automatically based on the giv
 **csaps** is implemented as a Python modified port of MATLAB `CSAPS <https://www.mathworks.com/help/curvefit/csaps.html>`_ function
 that is an implementation of Fortran routine SMOOTH from `PGS <http://pages.cs.wisc.edu/~deboor/pgs/>`_
 (originally written by Carl de Boor).
+
+Differences from SciPy UnivariateSpline
+---------------------------------------
+
+`scipy.interpolate <https://docs.scipy.org/doc/scipy/reference/interpolate.html>`_ package contains
+`UnivariateSpline <https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.UnivariateSpline.html>`_ class.
+
+This spline can be computed as :math:`k`-ordered (0-5) spline and its smoothing parameter :math:`s` specifies
+the number of knots by specifying a smoothing condition. Also it is only univariate spline.
+The algrorithm cannot be used for vectorized computing splines for multivariate and gridded cases.
+
+**csaps** spline is cubic only and it has natural boundary condition type. The computation algorithm
+is vectorized to compute splines for multivariate/gridded data. The smoothing parameter :math:`p` determines
+the weighted sum of terms and limited by the range :math:`[0, 1]`. This is more convenient in practice
+to control smoothing.
