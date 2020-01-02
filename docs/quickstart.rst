@@ -10,124 +10,107 @@ Using csaps() function
 multivariate and nd-gridded splines, but in most cases we can use
 a shortcut function :func:`csaps` for smoothing data and computing splines.
 
-.. code-block::
+Firstly, we import :func:`csaps` function (and other modules for our examples)
 
-    # Import csaps function
+.. jupyter-execute::
+
+    import numpy as np
+    import matplotlib.pyplot as plt
+    from mpl_toolkits.mplot3d import Axes3D
+
     from csaps import csaps
+
+    np.random.seed(1234)
+
+Smoothing
+~~~~~~~~~
 
 It is a simple example how to smooth univariate data:
 
-.. plot::
-    :include-source:
+.. jupyter-execute::
 
-    >>> import numpy as np
-    >>> import matplotlib.pyplot as plt
-    >>> from csaps import csaps
+    x = np.linspace(-5., 5., 25)
+    y = np.exp(-(x/2.5)**2) + (np.random.rand(25) - 0.2) * 0.3
+    xi = np.linspace(x[0], x[-1], 150)
 
-    >>> np.random.seed(1234)
-    >>> x = np.linspace(-5., 5., 25)
-    >>> y = np.exp(-(x/2.5)**2) + (np.random.rand(25) - 0.2) * 0.3
-    >>> xi = np.linspace(x[0], x[-1], 150)
+    yi = csaps(x, y, xi, smooth=0.85)
 
-    >>> yi = csaps(x, y, xi, smooth=0.85)
-
-    >>> plt.plot(x, y, 'o', xi, yi, '-')
-    >>> plt.legend(['input data', 'smoothed data'])
-    >>> plt.title('Smoothing univariate data')
-    >>> plt.show()
+    plt.plot(x, y, 'o', xi, yi, '-')
+    plt.legend(['input data', 'smoothed data'])
+    plt.title('Smoothing univariate data')
+    plt.show()
 
 
 Also we can smooth multivariate data using the same function:
 
-.. plot::
-    :include-source:
+**2-D data**
 
-    2-D data
+.. jupyter-execute::
 
-    >>> import numpy as np
-    >>> import matplotlib.pyplot as plt
-    >>> from csaps import csaps
+    theta = np.linspace(0, 2*np.pi, 35)
+    x = np.cos(theta) + np.random.randn(35) * 0.1
+    y = np.sin(theta) + np.random.randn(35) * 0.1
+    data = [x, y]
+    theta_i = np.linspace(0, 2*np.pi, 200)
 
-    >>> np.random.seed(1234)
-    >>> theta = np.linspace(0, 2*np.pi, 35)
-    >>> x = np.cos(theta) + np.random.randn(35) * 0.1
-    >>> y = np.sin(theta) + np.random.randn(35) * 0.1
-    >>> data = [x, y]
-    >>> theta_i = np.linspace(0, 2*np.pi, 200)
+    data_i = csaps(theta, data, theta_i, smooth=0.95)
+    xi = data_i[0, :]
+    yi = data_i[1, :]
 
-    >>> data_i = csaps(theta, data, theta_i, smooth=0.95)
-    >>> xi = data_i[0, :]
-    >>> yi = data_i[1, :]
+    plt.plot(x, y, ':o', xi, yi, '-')
+    plt.legend(['input data', 'smoothed data'])
+    plt.title('Smoothing 2-d data')
+    plt.show()
 
-    >>> plt.plot(x, y, ':o', xi, yi, '-')
-    >>> plt.legend(['input data', 'smoothed data'])
-    >>> plt.title('Smoothing 2-d data')
-    >>> plt.show()
+**3-D data**
 
-.. plot::
-    :include-source:
+.. jupyter-execute::
 
-    3-D data
+    n = 100
+    theta = np.linspace(-4 * np.pi, 4 * np.pi, n)
+    z = np.linspace(-2, 2, n)
+    r = z ** 2 + 1
+    x = r * np.sin(theta) + np.random.randn(n) * 0.3
+    y = r * np.cos(theta) + np.random.randn(n) * 0.3
+    data = [x, y, z]
+    theta_i = np.linspace(-4 * np.pi, 4 * np.pi, 250)
 
-    >>> import numpy as np
-    >>> import matplotlib.pyplot as plt
-    >>> from mpl_toolkits.mplot3d import Axes3D
-    >>> from csaps import csaps
+    data_i = csaps(theta, data, theta_i, smooth=0.95)
+    xi = data_i[0, :]
+    yi = data_i[1, :]
+    zi = data_i[2, :]
 
-    >>> n = 100
-    >>> theta = np.linspace(-4 * np.pi, 4 * np.pi, n)
-    >>> z = np.linspace(-2, 2, n)
-    >>> r = z ** 2 + 1
-    >>> np.random.seed(1234)
-    >>> x = r * np.sin(theta) + np.random.randn(n) * 0.3
-    >>> np.random.seed(5678)
-    >>> y = r * np.cos(theta) + np.random.randn(n) * 0.3
-    >>> data = [x, y, z]
-    >>> theta_i = np.linspace(-4 * np.pi, 4 * np.pi, 250)
-
-    >>> data_i = csaps(theta, data, theta_i, smooth=0.95)
-    >>> xi = data_i[0, :]
-    >>> yi = data_i[1, :]
-    >>> zi = data_i[2, :]
-
-    >>> fig = plt.figure()
-    >>> ax = fig.gca(projection='3d')
-    >>> ax.plot(x, y, z, '.:', label='parametric curve')
-    >>> ax.plot(xi, yi, zi, '-', label='spline curve')
-    >>> plt.legend(['input data', 'smoothed data'])
-    >>> plt.title('Smoothing 3-d data')
-    >>> plt.show()
+    fig = plt.figure(figsize=(8, 6))
+    ax = fig.add_subplot(111, projection='3d')
+    ax.plot(x, y, z, '.:', label='parametric curve')
+    ax.plot(xi, yi, zi, '-', label='spline curve')
+    plt.legend(['input data', 'smoothed data'])
+    plt.title('Smoothing 3-d data')
+    plt.show()
 
 Finally, using the same function we can smooth nd-gridded data:
 
-.. plot::
-    :include-source:
+**A surface data**
 
-    A surface data
+.. jupyter-execute::
 
-    >>> import numpy as np
-    >>> import matplotlib.pyplot as plt
-    >>> from mpl_toolkits.mplot3d import Axes3D
-    >>> from csaps import csaps
+    xdata = [np.linspace(-3, 3, 41), np.linspace(-3.5, 3.5, 31)]
+    i, j = np.meshgrid(*xdata, indexing='ij')
+    ydata = (3 * (1 - j)**2. * np.exp(-(j**2) - (i + 1)**2)
+             - 10 * (j / 5 - j**3 - i**5) * np.exp(-j**2 - i**2)
+             - 1 / 3 * np.exp(-(j + 1)**2 - i**2))
+    ydata = ydata + (np.random.randn(*ydata.shape) * 0.5)
 
-    >>> np.random.seed(12345)
-    >>> xdata = [np.linspace(-3, 3, 41), np.linspace(-3.5, 3.5, 31)]
-    >>> i, j = np.meshgrid(*xdata, indexing='ij')
-    >>> ydata = (3 * (1 - j)**2. * np.exp(-(j**2) - (i + 1)**2)
-    >>>          - 10 * (j / 5 - j**3 - i**5) * np.exp(-j**2 - i**2)
-    >>>          - 1 / 3 * np.exp(-(j + 1)**2 - i**2))
-    >>> ydata = ydata + (np.random.randn(*ydata.shape) * 0.75)
+    ydata_s = csaps(xdata, ydata, xdata, smooth=0.988)
 
-    >>> ydata_s = csaps(xdata, ydata, xdata, smooth=0.988)
-
-    >>> fig = plt.figure(figsize=(13, 10))
-    >>> ax = fig.add_subplot(111, projection='3d')
-    >>> ax.plot_wireframe(j, i, ydata, linewidths=0.5, color='r')
-    >>> ax.scatter(j, i, ydata, s=10, c='r')
-    >>> ax.plot_surface(j, i, ydata_s, linewidth=0, alpha=1.0)
-    >>> ax.view_init(elev=9., azim=290)
-    >>> plt.title('Smoothing surface data')
-    >>> plt.show()
+    fig = plt.figure(figsize=(8, 6))
+    ax = fig.add_subplot(111, projection='3d')
+    ax.plot_wireframe(j, i, ydata, linewidths=0.5, color='r', alpha=0.3)
+    ax.scatter(j, i, ydata, s=10, c='r', alpha=0.3)
+    ax.plot_surface(j, i, ydata_s, linewidth=0, alpha=1.0)
+    ax.view_init(elev=9., azim=290)
+    plt.title('Smoothing surface data')
+    plt.show()
 
 In all the examples above we used the following ``csaps`` signature::
 
@@ -144,3 +127,49 @@ where
     - ``xi`` -- the data sites for smoothed data. Usually, it in the same range as ``x``,
       but has more interpolated points
     - ``smooth`` -- the smoothing factor in the range ``[0, 1]``
+
+Automatic smoothing
+~~~~~~~~~~~~~~~~~~~
+
+If we want to smooth the data without specifying the smoothing parameter we can use the following
+signature::
+
+    yi, smooth = csaps(x, y, xi)
+
+In this case the smoothing parameter will be computed automatically and will be returned in the
+function result. In this case the function will return `SmoothingResult` named tuple: ``SmoothingResult(values, smooth)``.
+
+.. jupyter-execute::
+
+    x = np.linspace(-5., 5., 25)
+    y = np.exp(-(x/2.5)**2) + (np.random.rand(25) - 0.2) * 0.3
+    xi = np.linspace(x[0], x[-1], 51)
+
+    smoothing_result = csaps(x, y, xi)
+    yi = smoothing_result.values
+
+    print('Computed smoothing parameter:', smoothing_result.smooth)
+
+    plt.plot(x, y, 'o', xi, yi, '-')
+    plt.show()
+
+Computing spline without evaluating
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If we want to compute spline only without evaluating (smoothing data), we can use the following signatures::
+
+    spline = csaps(x, y)
+    spline = csaps(x, y, smooth)
+
+In this case the smoothing spline will be computed and returned.
+
+.. jupyter-execute::
+
+    x = np.linspace(-5., 5., 11)
+    y = np.exp(-(x/2.5)**2) + (np.random.rand(11) - 0.2) * 0.3
+
+    spline = csaps(x, y)
+
+    print('Spline class name:', type(spline).__name__)
+    print('Spline smoothing parameter:', spline.smooth)
+    print('Spline description:', spline.spline)

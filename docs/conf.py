@@ -43,7 +43,7 @@ release = _get_version()
 extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.autodoc',
-    'matplotlib.sphinxext.plot_directive',
+    'jupyter_sphinx.execute',
     'numpydoc',
 ]
 
@@ -56,14 +56,6 @@ templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 master_doc = 'index'
-
-plot_apply_rcparams = True
-plot_rcparams = {
-    'axes.facecolor': "None",
-    'figure.autolayout': "True",
-    'savefig.bbox': "tight",
-    'savefig.facecolor': "None",
-}
 
 # -- Options for HTML output -------------------------------------------------
 

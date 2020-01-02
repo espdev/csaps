@@ -32,6 +32,7 @@ setup(
         'docs': [
             'sphinx >=2.3',
             'matplotlib >=3.1',
+            'jupyter-sphinx',
             'numpydoc',
         ],
         'tests': [
