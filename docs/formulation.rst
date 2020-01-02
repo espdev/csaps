@@ -22,6 +22,6 @@ The smoothing parameter :math:`p` should be in range :math:`[0, 1]` where bounds
 
 By deafult, the smoothing parameter p is computed automatically based on the given data sites :math:`x`.
 
-In other words, **csaps** is a Python modified port of MATLAB `CSAPS <https://www.mathworks.com/help/curvefit/csaps.html>`_ function
+**csaps** is implemented as a Python modified port of MATLAB `CSAPS <https://www.mathworks.com/help/curvefit/csaps.html>`_ function
 that is an implementation of Fortran routine SMOOTH from `PGS <http://pages.cs.wisc.edu/~deboor/pgs/>`_
 (originally written by Carl de Boor).
