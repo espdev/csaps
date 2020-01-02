@@ -3,8 +3,9 @@
 Quickstart
 ==========
 
-**csaps** package provides a shortcut function :func:`csaps` for smoothing univariate,
-multivariate and nd-gridded data.
+**csaps** package provides object-oriented API for smoothing univariate,
+multivariate and nd-gridded data, but all these data can be smoothed using
+shortcut function :func:`csaps`.
 
 .. code-block::
 
@@ -124,3 +125,19 @@ Finally, using the same function we can smooth nd-gridded data:
     >>> ax.view_init(elev=9., azim=290)
     >>> plt.title('Smoothing surface data')
     >>> plt.show()
+
+In all the examples above we use the following ``csaps`` signature::
+
+    yi = csaps(x, y, xi, smooth)
+
+where
+
+    - ``x`` -- the data sites 1-d vector for univariate/multivariate cases and
+      a sequence of 1-d vectors for nd-gridded case. ``x``-values must satisfy the
+      condition: ``x1 < x2 < ... < xN``
+    - ``y`` -- the data values. For univariate case it is vector with the same size as ``x``,
+      for multivariate case it is a sequence of vectors or nd-array, and for nd-gridded data
+      it is nd-array
+    - ``xi`` -- the data sites for smoothed data. Usually, it in the same range as ``x``,
+      but has more interpolated points
+    - ``smooth`` -- the smoothing factor in the range ``[0, 1]``
