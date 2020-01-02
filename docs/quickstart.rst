@@ -3,9 +3,12 @@
 Quickstart
 ==========
 
-**csaps** package provides object-oriented API for smoothing univariate,
-multivariate and nd-gridded data, but all these data can be smoothed using
-shortcut function :func:`csaps`.
+Using csaps() function
+----------------------
+
+**csaps** provides object-oriented API for computing and evaluating univariate,
+multivariate and nd-gridded splines, but in most cases we can use
+a shortcut function :func:`csaps` for smoothing data and computing splines.
 
 .. code-block::
 
@@ -34,7 +37,7 @@ It is a simple example how to smooth univariate data:
     >>> plt.show()
 
 
-Also we can smooth multivariate data using the same function ``csaps``:
+Also we can smooth multivariate data using the same function:
 
 .. plot::
     :include-source:
@@ -126,7 +129,7 @@ Finally, using the same function we can smooth nd-gridded data:
     >>> plt.title('Smoothing surface data')
     >>> plt.show()
 
-In all the examples above we use the following ``csaps`` signature::
+In all the examples above we used the following ``csaps`` signature::
 
     yi = csaps(x, y, xi, smooth)
 
