@@ -31,6 +31,7 @@ setup(
     extras_require={
         'docs': [
             'sphinx >=2.3',
+            'matplotlib >=3.1',
             'numpydoc',
         ],
         'tests': [
