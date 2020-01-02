@@ -17,9 +17,29 @@ In other words, **csaps** is a Python modified port of MATLAB `CSAPS <https://ww
 that is an implementation of Fortran routine SMOOTH from `PGS <http://pages.cs.wisc.edu/~deboor/pgs/>`_
 (originally written by Carl de Boor).
 
+Installing
+----------
+
+You can install and update csaps using pip:
+
+.. code-block:: bash
+
+    pip install -U csaps
+
+Python 3.5 or above is supported.
+
+The module depends only on NumPy and SciPy.
+On Windows we highly recommend to use unofficial builds
+`NumPy+MKL <https://www.lfd.uci.edu/~gohlke/pythonlibs/#numpy>`_ and
+`SciPy <https://www.lfd.uci.edu/~gohlke/pythonlibs/#scipy>`_ from Christoph Gohlke.
+
+Documentation
+-------------
+
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+    :maxdepth: 2
+
+    quickstart
 
 
 Indices and tables
