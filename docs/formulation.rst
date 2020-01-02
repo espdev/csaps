@@ -40,3 +40,29 @@ The algrorithm cannot be used for vectorized computing splines for multivariate 
 is vectorized to compute splines for multivariate/gridded data. The smoothing parameter :math:`p` determines
 the weighted sum of terms and limited by the range :math:`[0, 1]`. This is more convenient in practice
 to control smoothing.
+
+It is an example plot of comparison ``csaps`` and ``scipy.UnivariateSpline`` (k=3) with defaults (auto smoothing):
+
+.. jupyter-execute::
+    :hide-code:
+
+    import numpy as np
+    import matplotlib.pyplot as plt
+    from scipy.interpolate import UnivariateSpline
+    from csaps import UnivariateCubicSmoothingSpline
+
+    np.random.seed(1234)
+
+    x = np.linspace(-5., 5., 25)
+    y = np.exp(-(x/2.5)**2) + (np.random.rand(25) - 0.2) * 0.3
+    xi = np.linspace(x[0], x[-1], 150)
+
+    scipy_spline = UnivariateSpline(x, y, k=3)
+    csaps_spline = UnivariateCubicSmoothingSpline(x, y)
+
+    yi_scipy_1 = scipy_spline(xi)
+    yi_csaps = csaps_spline(xi)
+
+    plt.plot(x, y, 'o', xi, yi_scipy_1, '-', xi, yi_csaps, '-')
+    plt.legend(['input data', 'smoothed (scipy)', 'smoothed (csaps)'])
+    plt.show()
