@@ -124,8 +124,8 @@ def csaps(xdata: _XDataType,
     See Also
     --------
 
-    `UnivariateCubicSmoothingSpline`
-    `NdGridCubicSmoothingSpline`
+    UnivariateCubicSmoothingSpline
+    NdGridCubicSmoothingSpline
 
     """
 
