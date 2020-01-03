@@ -49,6 +49,7 @@ def csaps(xdata: _XDataType,
 
     Parameters
     ----------
+
     xdata : np.ndarray, array-like
         [required] The data sites ``x1 < x2 < ... < xN``:
             - 1-D data vector/sequence (array-like) for univariate/multivariate ydata case
@@ -86,13 +87,16 @@ def csaps(xdata: _XDataType,
 
     Returns
     -------
+
     yidata : np.ndarray
         Smoothed data values if `xidata` and `smooth` were set.
+
     smoothed_data : SmoothingResult
         The named tuple with two fileds:
             - 'values' -- smoothed data values
             - 'smooth' -- computed smoothing factor
         This result will be returned if `xidata` was set and `smooth` was not set.
+
     sspobj : ISmoothingSpline
         Smoothing spline object if `xidata` was not set:
             - `UnivariateCubicSmoothingSpline` instance for univariate/multivariate data
