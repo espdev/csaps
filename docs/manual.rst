@@ -177,8 +177,8 @@ In this case the smoothing spline will be computed and returned.
     print('Spline smoothing parameter:', spline.smooth)
     print('Spline description:', spline.spline)
 
-Using weights
-~~~~~~~~~~~~~
+Weighted smoothing
+~~~~~~~~~~~~~~~~~~
 
 If we want to use error measure weights while computing spline,
 we can use the following signatures::
