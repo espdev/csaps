@@ -42,8 +42,9 @@ setup(
     package_data={"csaps": ["py.typed"]},
     url='https://github.com/espdev/csaps',
     project_urls={
-        "Code": 'https://github.com/espdev/csaps',
-        "Issue tracker": 'https://github.com/espdev/csaps/issues',
+        'Documentation': 'https://csaps.readthedocs.io',
+        'Code': 'https://github.com/espdev/csaps',
+        'Issue tracker': 'https://github.com/espdev/csaps/issues',
     },
     license='MIT',
     author='Eugene Prilepin',
