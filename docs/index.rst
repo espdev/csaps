@@ -34,6 +34,7 @@ Documentation
 
     formulation
     manual
+    api
 
 
 Indices and tables
