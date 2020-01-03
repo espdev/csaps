@@ -1,7 +1,7 @@
-.. _quickstart:
+.. _manual:
 
-Quickstart
-==========
+Manual
+======
 
 Using csaps() function
 ----------------------
@@ -29,8 +29,13 @@ It is a simple example how to smooth univariate data:
 
 .. jupyter-execute::
 
-    x = np.linspace(-5., 5., 25)
-    y = np.exp(-(x/2.5)**2) + (np.random.rand(25) - 0.2) * 0.3
+    def univariate_data(n=25):
+        np.random.seed(1234)
+        x = np.linspace(-5., 5., n)
+        y = np.exp(-(x/2.5)**2) + (np.random.rand(n) - 0.2) * 0.3
+        return x, y
+
+    x, y = univariate_data()
     xi = np.linspace(x[0], x[-1], 150)
 
     yi = csaps(x, y, xi, smooth=0.85)
@@ -141,8 +146,7 @@ function result. In this case the function will return `SmoothingResult` named t
 
 .. jupyter-execute::
 
-    x = np.linspace(-5., 5., 25)
-    y = np.exp(-(x/2.5)**2) + (np.random.rand(25) - 0.2) * 0.3
+    x, y = univariate_data()
     xi = np.linspace(x[0], x[-1], 51)
 
     smoothing_result = csaps(x, y, xi)
@@ -165,11 +169,43 @@ In this case the smoothing spline will be computed and returned.
 
 .. jupyter-execute::
 
-    x = np.linspace(-5., 5., 11)
-    y = np.exp(-(x/2.5)**2) + (np.random.rand(11) - 0.2) * 0.3
+    x, y = univariate_data(n=11)
 
     spline = csaps(x, y)
 
     print('Spline class name:', type(spline).__name__)
     print('Spline smoothing parameter:', spline.smooth)
     print('Spline description:', spline.spline)
+
+Using weights
+~~~~~~~~~~~~~
+
+If we want to use error measure weights while computing spline,
+we can use the following signatures::
+
+    yi = csaps(x, y, xi, weights, smooth)
+    yi, smooth = csaps(x, y, xi, weights)
+    spline = csaps(x, y, weights)
+    spline = csaps(x, y, weights, smooth)
+
+For example:
+
+.. jupyter-execute::
+
+    x, y = univariate_data()
+    xi = np.linspace(x[0], x[-1], 150)
+
+    w = np.ones_like(x) * 0.5
+    w[-7:] = 0.1
+    w[:7] = 0.1
+    w[[10,13]] = 1.0
+    w[[11,12]] = 0.1
+
+    print('Weights:', w)
+
+    yi = csaps(x, y, xi, smooth=0.85)
+    yi_w = csaps(x, y, xi, weights=w, smooth=0.85)
+
+    plt.plot(x, y, 'o', xi, yi, '-', xi, yi_w, '-')
+    plt.legend(['input data', 'smoothed data', 'weighted smoothed data'])
+    plt.show()

@@ -33,7 +33,7 @@ Documentation
     :maxdepth: 2
 
     formulation
-    quickstart
+    manual
 
 
 Indices and tables
