@@ -3,6 +3,9 @@
 Smoothing spline formulation
 ============================
 
+Definition
+----------
+
 The package implements cubic smooting spline algorithm proposed by Carl de Boor in his book
 "A Practical Guide to Splines" (`Springer <https://www.springer.com/gp/book/9780387953663>`_).
 
@@ -20,7 +23,16 @@ The smoothing parameter :math:`p` should be in range :math:`[0, 1]` where bounds
     - 0: The smoothing spline is the least-squares straight line fit to the data
     - 1: The natural cubic spline interpolant
 
-By deafult, the smoothing parameter p is computed automatically based on the given data sites :math:`x`.
+The smoothing parameter p can be computed automatically based on the given data sites :math:`x`.
+
+.. note::
+
+    The calculation of the smoothing spline requires the solution of a linear system whose coefficient matrix
+    has the form :math:`pA + (1 - p)B`, with the matrices :math:`A` and :math:`B` depending on the
+    data sites :math:`X`. The automatically computed smoothing parameter makes ``p*trace(A) equal (1 - p)*trace(B)``.
+
+Implementation
+--------------
 
 **csaps** is implemented as a Python modified port of MATLAB `CSAPS <https://www.mathworks.com/help/curvefit/csaps.html>`_ function
 that is an implementation of Fortran routine SMOOTH from `PGS <http://pages.cs.wisc.edu/~deboor/pgs/>`_
