@@ -47,7 +47,6 @@ It is a simple example how to smooth univariate data:
 
     plt.plot(x, y, 'o', xi, yi, '-')
     plt.legend(['input data', 'smoothed data'])
-    plt.title('Smoothing univariate data')
     plt.show()
 
 
@@ -81,7 +80,7 @@ set the data values axis for Y array.
 In this case the smoothing spline will be computed for all Y data vectors at a time.
 The same weights vector and the same smoothing parameter will be used for all Y data.
 
-**2-D data**
+2-D data example:
 
 .. jupyter-execute::
 
@@ -98,10 +97,9 @@ The same weights vector and the same smoothing parameter will be used for all Y 
 
     plt.plot(x, y, ':o', xi, yi, '-')
     plt.legend(['input data', 'smoothed data'])
-    plt.title('Smoothing 2-d data')
     plt.show()
 
-**3-D data**
+3-D data example:
 
 .. jupyter-execute::
 
@@ -125,7 +123,6 @@ The same weights vector and the same smoothing parameter will be used for all Y 
     ax.plot(x, y, z, '.:', label='parametric curve')
     ax.plot(xi, yi, zi, '-', label='spline curve')
     plt.legend(['input data', 'smoothed data'])
-    plt.title('Smoothing 3-d data')
     plt.show()
 
 
@@ -181,7 +178,6 @@ Also you can set the smoothing parameter for each dimension:
     ax.scatter(j, i, ydata, s=10, c='r', alpha=0.5)
     ax.plot_surface(j, i, ydata_s, linewidth=0, alpha=1.0)
     ax.view_init(elev=9., azim=290)
-    plt.title('Smoothing surface data')
     plt.show()
 
 
@@ -222,6 +218,8 @@ signature::
 In this case the smoothing parameter will be computed automatically and will be returned in the
 function result. In this case the function will return `SmoothingResult` named tuple: ``SmoothingResult(values, smooth)``.
 
+The example of auto smoothing univariate data:
+
 .. jupyter-execute::
 
     x, y = univariate_data()
@@ -261,7 +259,7 @@ we can use the following signatures::
     spline = csaps(x, y, weights)
     spline = csaps(x, y, weights, smooth)
 
-For example:
+The example of weighted smoothing univariate data:
 
 .. jupyter-execute::
 
@@ -290,10 +288,11 @@ weights for each dimension.
 Using axis parameter
 ~~~~~~~~~~~~~~~~~~~~
 
-**axis** parameter specifies :math:`y`-data axis for computing spline in multivariate/vectorize data cases.
+**axis** parameter specifies Y-data axis for computing spline in multivariate/vectorize data cases
+(axis along which Y-data is assumed to be varying).
 By default axis is equal to -1 (the last axis). In other words, ``y.shape[axis]`` must be equal to ``x.size``.
 
-The following example will raise ``ValueError``:
+For example, the following code will raise ``ValueError``:
 
 .. jupyter-execute::
     :raises: ValueError
@@ -310,7 +309,7 @@ The following example will raise ``ValueError``:
     xi = np.linspace(x[0], x[-1], 150)
     yi = csaps(x, y, xi, smooth=0.8)
 
-We can use ``axis`` parameter ``==0`` to fix it:
+We can set ``axis`` parameter is equal to zero (the first axis) to fix it:
 
 .. jupyter-execute::
 
@@ -332,7 +331,10 @@ If we want to compute spline only without evaluating (smoothing data), we can us
     spline = csaps(x, y)
     spline = csaps(x, y, smooth)
 
-In this case the smoothing spline will be computed and returned.
+In this case the smoothing spline will be computed for given data and returned as an instance of
+`ISmoothingSpline` based class.
+
+The example for univariate data:
 
 .. jupyter-execute::
 
@@ -344,7 +346,7 @@ In this case the smoothing spline will be computed and returned.
     print('Spline smoothing parameter:', spline.smooth)
     print('Spline description:', spline.spline)
 
-Now we can use the computed spline to evaluate (smoothing) data for given data sites repeatedly:
+After we can use the computed spline to evaluate (smoothing) data for given data sites repeatedly:
 
 .. jupyter-execute::
 
