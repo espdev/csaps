@@ -74,7 +74,7 @@ The example of data:
     ]
 
 By default, the shape of Y array must be: ``(d0, d1, ..., dN)``
-where ``dN`` must equal to X vector size. Also you can use ``axis`` parameter to
+where ``dN`` must equal to X vector size. Also you can use :ref:`axis parameter <manual-using-axis>` to
 set the data values axis for Y array.
 
 In this case the smoothing spline will be computed for all Y data vectors at a time.
@@ -158,7 +158,7 @@ Also you can set the smoothing parameter for each dimension:
         0.51,  # the smoothing parameter for Z
     ]
 
-**A surface data**
+Surface data example:
 
 .. jupyter-execute::
 
@@ -284,6 +284,8 @@ The example of weighted smoothing univariate data:
 In ND-gridded data case we can use the same weights for all dimensions or different
 weights for each dimension.
 
+
+.. _manual-using-axis:
 
 Using axis parameter
 ~~~~~~~~~~~~~~~~~~~~
