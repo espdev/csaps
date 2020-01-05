@@ -3,8 +3,11 @@
 Manual
 ======
 
-Using csaps() function
-----------------------
+
+.. _manual-quickstart:
+
+Quickstart
+----------
 
 **csaps** provides object-oriented API for computing and evaluating univariate,
 multivariate and nd-gridded splines, but in most cases we recommend to use
@@ -20,8 +23,12 @@ Firstly, we import :func:`csaps` function (and other modules for our examples)
 
     from csaps import csaps
 
-Smoothing
-~~~~~~~~~
+
+Univariate smoothing
+~~~~~~~~~~~~~~~~~~~~
+
+Univariate data are two vectors: X and Y with the same size. X is data sites, Y is data values.
+X-values must satisfy the condition: :math:`x1 < x2 < ... < xN`
 
 It is a simple example how to smooth univariate data:
 
@@ -44,7 +51,35 @@ It is a simple example how to smooth univariate data:
     plt.show()
 
 
-Also we can smooth multivariate data using the same function:
+Multivariate smoothing
+~~~~~~~~~~~~~~~~~~~~~~
+
+Also we can smooth multivariate (n-dimensional) data using the same function.
+
+The algorithm supports computing and evaluating spline for multivariate data with vectorization.
+You can compute smoothing splines for X, Y data where X is data site vector and Y is
+ND-array of data value vectors.
+
+The example of data:
+
+.. code-block:: python
+
+    # data sites
+    x = [1, 2, 3, 4]
+
+    # 3 data vectors (3-D)
+    y = [
+        (2, 4, 6, 8),
+        (1, 3, 5, 7),
+        (5, 1, 3, 9),
+    ]
+
+By default, the shape of Y array must be: ``(d0, d1, ..., dN)``
+where ``dN`` must equal to X vector size. Also you can use ``axis`` parameter to
+set the data values axis for Y array.
+
+In this case the smoothing spline will be computed for all Y data vectors at a time.
+The same weights vector and the same smoothing parameter will be used for all Y data.
 
 **2-D data**
 
@@ -93,7 +128,38 @@ Also we can smooth multivariate data using the same function:
     plt.title('Smoothing 3-d data')
     plt.show()
 
-Finally, using the same function we can smooth nd-gridded data:
+
+ND-grid smoothing
+~~~~~~~~~~~~~~~~~
+
+Finally, using the same function we can smooth nd-gridded data.
+
+The algorithm can make smoothing splines for ND-gridded data smoothing.
+In this case the algorithm makes coordinatewise smoothing (tensor-product of univariate splines coefficients).
+
+X-data must be a sequence of vectors for each dimension. Y-data must be ND-array.
+
+The example of data:
+
+.. code-block:: python
+
+    x = [
+        (-2, -1, 0, 1, 2),    # X-grid data sites
+        (-2, -1, 0, 1, 2),    # Y-grid data sites
+        (-2, -1, 0, 1, 2),    # Z-grid data sites
+    ]
+
+    y = np.random.rand(5, 5, 5)  # 5x5x5 3-D grid data values
+
+Also you can set the smoothing parameter for each dimension:
+
+.. code-block:: python
+
+    smooth = [
+        0.95,  # the smoothing parameter for X
+        0.83,  # the smoothing parameter for Y
+        0.51,  # the smoothing parameter for Z
+    ]
 
 **A surface data**
 
@@ -118,21 +184,32 @@ Finally, using the same function we can smooth nd-gridded data:
     plt.title('Smoothing surface data')
     plt.show()
 
-In all the examples above we used the following ``csaps`` signature::
+
+Summary
+~~~~~~~
+
+In all the smoothing examples above we are used the following :func:`csaps` signature::
 
     yi = csaps(x, y, xi, smooth)
 
 where
 
-    - ``x`` -- the data sites 1-d vector for univariate/multivariate cases and
-      a sequence of 1-d vectors for nd-gridded case. ``x``-values must satisfy the
+    - ``x`` -- the data sites vector for univariate/multivariate data and
+      a sequence of vectors for nd-gridded data. ``x``-values **must** satisfy the
       condition: ``x1 < x2 < ... < xN``
     - ``y`` -- the data values. For univariate case it is vector with the same size as ``x``,
       for multivariate case it is a sequence of vectors or nd-array, and for nd-gridded data
       it is nd-array
-    - ``xi`` -- the data sites for smoothed data. Usually, it in the same range as ``x``,
-      but has more interpolated points
-    - ``smooth`` -- the smoothing factor in the range ``[0, 1]``
+    - ``xi`` -- the data sites for smoothed data. It is shape-like ``x`` data and in the same
+      range as ``x``, but usually has more interpolated points
+    - ``smooth`` -- the smoothing parameter in the range ``[0, 1]``
+
+
+.. _manual-advanced:
+
+Advanced usage
+--------------
+
 
 Automatic smoothing
 ~~~~~~~~~~~~~~~~~~~
@@ -158,40 +235,20 @@ function result. In this case the function will return `SmoothingResult` named t
     plt.plot(x, y, 'o', xi, yi, '-')
     plt.show()
 
-Computing spline without evaluating
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In ND-gridded data case we can use auto smoothing for all dimensions or the particular dimensions:
 
-If we want to compute spline only without evaluating (smoothing data), we can use the following signatures::
+.. code-block:: python
 
-    spline = csaps(x, y)
-    spline = csaps(x, y, smooth)
+    smooth = [
+        0.95,
+        None,  # auto smoothing only for Y
+        0.85,
+    ]
 
-In this case the smoothing spline will be computed and returned.
+    ...
 
-.. jupyter-execute::
+    smoothing_result = csaps(x, y, xi, smooth=smooth)
 
-    x, y = univariate_data(n=11)
-
-    spline = csaps(x, y)
-
-    print('Spline class name:', type(spline).__name__)
-    print('Spline smoothing parameter:', spline.smooth)
-    print('Spline description:', spline.spline)
-
-Now we can use the computed spline to evaluate (smoothing) data for given data sites repeatedly:
-
-.. jupyter-execute::
-
-    xi1 = np.linspace(x[0], x[-1], 20)
-    xi2 = np.linspace(x[0], x[-1], 50)
-
-    yi1 = spline(xi1)
-    yi2 = spline(xi2)
-
-    f, (ax1, ax2) = plt.subplots(2, 1)
-    ax1.plot(x, y, 's', xi1, yi1, 'o-')
-    ax2.plot(x, y, 's', xi2, yi2, 'o-')
-    plt.show()
 
 Weighted smoothing
 ~~~~~~~~~~~~~~~~~~
@@ -226,6 +283,10 @@ For example:
     plt.legend(['input data', 'smoothed data', 'weighted smoothed data'])
     plt.show()
 
+In ND-gridded data case we can use the same weights for all dimensions or different
+weights for each dimension.
+
+
 Using axis parameter
 ~~~~~~~~~~~~~~~~~~~~
 
@@ -256,4 +317,44 @@ We can use ``axis`` parameter ``==0`` to fix it:
     yi = csaps(x, y, xi, smooth=0.8, axis=0)
 
     plt.plot(x, y, 'o', xi, yi, '-')
+    plt.show()
+
+.. note::
+
+    ``axis`` parameter is ignored in ND-gridded data cases.
+
+
+Computing spline without evaluating
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If we want to compute spline only without evaluating (smoothing data), we can use the following signatures::
+
+    spline = csaps(x, y)
+    spline = csaps(x, y, smooth)
+
+In this case the smoothing spline will be computed and returned.
+
+.. jupyter-execute::
+
+    x, y = univariate_data(n=11)
+
+    spline = csaps(x, y)
+
+    print('Spline class name:', type(spline).__name__)
+    print('Spline smoothing parameter:', spline.smooth)
+    print('Spline description:', spline.spline)
+
+Now we can use the computed spline to evaluate (smoothing) data for given data sites repeatedly:
+
+.. jupyter-execute::
+
+    xi1 = np.linspace(x[0], x[-1], 20)
+    xi2 = np.linspace(x[0], x[-1], 50)
+
+    yi1 = spline(xi1)
+    yi2 = spline(xi2)
+
+    f, (ax1, ax2) = plt.subplots(2, 1)
+    ax1.plot(x, y, 's', xi1, yi1, 'o-')
+    ax2.plot(x, y, 's', xi2, yi2, 'o-')
     plt.show()
