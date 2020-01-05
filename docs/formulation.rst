@@ -36,7 +36,8 @@ Implementation
 
 **csaps** is implemented as a Python modified port of MATLAB `CSAPS <https://www.mathworks.com/help/curvefit/csaps.html>`_ function
 that is an implementation of Fortran routine SMOOTH from `PGS <http://pages.cs.wisc.edu/~deboor/pgs/>`_
-(originally written by Carl de Boor).
+(originally written by Carl de Boor). The implementation based on linear algebra routines and uses NumPy and sparse
+matrices from SciPy.
 
 Differences from SciPy UnivariateSpline
 ---------------------------------------
