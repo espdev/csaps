@@ -206,7 +206,6 @@ where
 Advanced usage
 --------------
 
-
 Automatic smoothing
 ~~~~~~~~~~~~~~~~~~~
 
@@ -246,6 +245,29 @@ In ND-gridded data case we can use auto smoothing for all dimensions or the part
     ...
 
     smoothing_result = csaps(x, y, xi, smooth=smooth)
+
+
+Bounds of smoothing parameter
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The smoothing parameter :math:`p` should be in range :math:`[0, 1]` where bounds are:
+    - 0: The smoothing spline is the least-squares straight line fit to the data
+    - 1: The cubic spline interpolant with natural boundary condition
+
+The following example demonstartes these two boundary cases:
+
+.. jupyter-execute::
+
+    x = np.linspace(-5., 5., 7)
+    y = 1 / (1 + x**2)
+    xi = np.linspace(x[0], x[-1], 150)
+
+    yi_0 = csaps(x, y, xi, smooth=0)
+    yi_1 = csaps(x, y, xi, smooth=1)
+
+    plt.plot(x, y, 'o:', xi, yi_0, '-', xi, yi_1, '-')
+    plt.legend(['input data', 'smooth == 0', 'smooth == 1'])
+    plt.show()
 
 
 Weighted smoothing
@@ -361,26 +383,4 @@ After we can use the computed spline to evaluate (smoothing) data for given data
     f, (ax1, ax2) = plt.subplots(2, 1)
     ax1.plot(x, y, 's', xi1, yi1, 'o-')
     ax2.plot(x, y, 's', xi2, yi2, 'o-')
-    plt.show()
-
-Bounds of smoothing parameter
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-The smoothing parameter :math:`p` should be in range :math:`[0, 1]` where bounds are:
-    - 0: The smoothing spline is the least-squares straight line fit to the data
-    - 1: The cubic spline interpolant with natural boundary condition
-
-The following example demonstartes these two boundary cases:
-
-.. jupyter-execute::
-
-    x = np.linspace(-5., 5., 7)
-    y = 1 / (1 + x**2)
-    xi = np.linspace(x[0], x[-1], 150)
-
-    yi_0 = csaps(x, y, xi, smooth=0)
-    yi_1 = csaps(x, y, xi, smooth=1)
-
-    plt.plot(x, y, 'o:', xi, yi_0, '-', xi, yi_1, '-')
-    plt.legend(['input data', 'smooth == 0', 'smooth == 1'])
     plt.show()
