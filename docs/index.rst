@@ -35,12 +35,9 @@ You can install and update csaps using pip:
 
     pip install -U csaps
 
+The module depends only on NumPy and SciPy.
 Python 3.5 or above is supported.
 
-The module depends only on NumPy and SciPy.
-On Windows we highly recommend to use unofficial builds
-`NumPy+MKL <https://www.lfd.uci.edu/~gohlke/pythonlibs/#numpy>`_ and
-`SciPy <https://www.lfd.uci.edu/~gohlke/pythonlibs/#scipy>`_ from Christoph Gohlke.
 
 Documentation
 -------------
