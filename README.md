@@ -7,7 +7,7 @@
 ![Supported Python versions](https://img.shields.io/pypi/pyversions/csaps.svg)
 [![License](https://img.shields.io/pypi/l/csaps.svg)](LICENSE)
 
-**csaps** is a package for univariate/multivariate/nd-gridded data approximation using cubic smoothing splines.
+**csaps** is a package for univariate, multivariate and nd-gridded data approximation using cubic smoothing splines.
 
 ## Installation
 

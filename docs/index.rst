@@ -3,8 +3,7 @@ csaps
 
 CSAPS -- Cubic Spline Approximation (Smoothing)
 
-**csaps** is a package to approxime univariate, multivariate and n-dimensional gridded data
-via cubic smoothing splines.
+**csaps** is a package for univariate, multivariate and nd-gridded data approximation using cubic smoothing splines.
 
 The package provides functionality for computing and evaluating splines.
 It does not contain any spline analysis functions. Therefore, the package can be useful
