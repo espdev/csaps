@@ -50,7 +50,7 @@ Documentation
     api
 
 
-Indices and tables
+Indices and Tables
 ==================
 
 * :ref:`genindex`

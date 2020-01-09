@@ -1,6 +1,6 @@
 .. _formulation:
 
-Smoothing spline formulation
+Smoothing Spline Formulation
 ============================
 
 Definition

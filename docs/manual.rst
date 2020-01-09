@@ -24,7 +24,7 @@ Firstly, we import :func:`csaps` function (and other modules for our examples)
     from csaps import csaps
 
 
-Univariate smoothing
+Univariate Smoothing
 ~~~~~~~~~~~~~~~~~~~~
 
 Univariate data are two vectors: X and Y with the same size. X is data sites, Y is data values.
@@ -50,7 +50,7 @@ It is a simple example how to smooth univariate data:
     plt.show()
 
 
-Multivariate smoothing
+Multivariate Smoothing
 ~~~~~~~~~~~~~~~~~~~~~~
 
 Also we can smooth multivariate (n-dimensional) data using the same function.
@@ -126,7 +126,7 @@ The same weights vector and the same smoothing parameter will be used for all Y 
     plt.show()
 
 
-ND-grid smoothing
+ND-grid Smoothing
 ~~~~~~~~~~~~~~~~~
 
 Finally, using the same function we can smooth nd-gridded data.
@@ -203,10 +203,10 @@ where
 
 .. _manual-advanced:
 
-Advanced usage
+Advanced Usage
 --------------
 
-Automatic smoothing
+Automatic Smoothing
 ~~~~~~~~~~~~~~~~~~~
 
 If we want to smooth the data without specifying the smoothing parameter we can use the following
@@ -247,7 +247,7 @@ In ND-gridded data case we can use auto smoothing for all dimensions or the part
     smoothing_result = csaps(x, y, xi, smooth=smooth)
 
 
-Bounds of smoothing parameter
+Bounds of Smoothing Parameter
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The smoothing parameter :math:`p` should be in range :math:`[0, 1]` where bounds are:
@@ -270,7 +270,7 @@ The following example demonstartes these two boundary cases:
     plt.show()
 
 
-Weighted smoothing
+Weighted Smoothing
 ~~~~~~~~~~~~~~~~~~
 
 If we want to use error measure weights while computing spline,
@@ -309,8 +309,8 @@ weights for each dimension.
 
 .. _manual-using-axis:
 
-Using axis parameter
-~~~~~~~~~~~~~~~~~~~~
+Axis Parameter
+~~~~~~~~~~~~~~
 
 **axis** parameter specifies Y-data axis for computing spline in multivariate/vectorize data cases
 (axis along which Y-data is assumed to be varying).
@@ -347,7 +347,7 @@ We can set ``axis`` parameter is equal to zero (the first axis) to fix it:
     ``axis`` parameter is ignored in ND-gridded data cases.
 
 
-Computing spline without evaluating
+Computing Spline Without Evaluating
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If we want to compute spline only without evaluating (smoothing data), we can use the following signatures::
