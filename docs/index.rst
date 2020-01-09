@@ -47,6 +47,7 @@ Documentation
 
     formulation
     manual
+    benchmark
     api
 
 
