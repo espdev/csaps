@@ -53,7 +53,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
-import csaps
+from csaps import csaps
 
 xdata = [np.linspace(-3, 3, 61), np.linspace(-3.5, 3.5, 51)]
 i, j = np.meshgrid(*xdata, indexing='ij')
@@ -65,15 +65,13 @@ ydata = (3 * (1 - j)**2. * np.exp(-(j**2) - (i + 1)**2)
 np.random.seed(12345)
 noisy = ydata + (np.random.randn(*ydata.shape) * 0.75)
 
-sp = csaps.NdGridCubicSmoothingSpline(xdata, noisy, smooth=0.988)
-ysmth = sp(xdata)
+ysmth = csaps(xdata, noisy, xdata, smooth=0.988)
 
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
 
 ax.plot_wireframe(j, i, noisy, linewidths=0.5, color='r')
 ax.scatter(j, i, noisy, s=5, c='r')
-
 ax.plot_surface(j, i, ysmth, linewidth=0, alpha=1.0)
 
 plt.show()
