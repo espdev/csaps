@@ -1,7 +1,5 @@
-.. _benchmark:
-
-Benchmarks
-==========
+Windows-CPython-3.7-AMD64
+=========================
 
 Benchmark environment info:
 
@@ -33,17 +31,17 @@ Make Spline
 
 Normal scale
 
-.. image:: _static/benchmark/univariate_make_spline.png
+.. image:: ../_static/benchmarks/windows-cpython-3.7-amd64/univariate_make_spline.png
     :align: left
 
 Logarithmic X scale
 
-.. image:: _static/benchmark/univariate_make_spline_semilogx.png
+.. image:: ../_static/benchmarks/windows-cpython-3.7-amd64/univariate_make_spline_semilogx.png
     :align: left
 
 Logarithmic X,Y scale
 
-.. image:: _static/benchmark/univariate_make_spline_loglog.png
+.. image:: ../_static/benchmarks/windows-cpython-3.7-amd64/univariate_make_spline_loglog.png
     :align: left
 
 Multivariate Data
@@ -54,15 +52,15 @@ Make Spline
 
 Normal scale
 
-.. image:: _static/benchmark/multivariate_make_spline.png
+.. image:: ../_static/benchmarks/windows-cpython-3.7-amd64/multivariate_make_spline.png
     :align: left
 
 Logarithmic X scale
 
-.. image:: _static/benchmark/multivariate_make_spline_semilogx.png
+.. image:: ../_static/benchmarks/windows-cpython-3.7-amd64/multivariate_make_spline_semilogx.png
     :align: left
 
 Logarithmic X,Y scale
 
-.. image:: _static/benchmark/multivariate_make_spline_loglog.png
+.. image:: ../_static/benchmarks/windows-cpython-3.7-amd64/multivariate_make_spline_loglog.png
     :align: left

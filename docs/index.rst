@@ -47,7 +47,7 @@ Documentation
 
     formulation
     manual
-    benchmark
+    benchmarks
     api
 
 
