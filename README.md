@@ -21,7 +21,7 @@ The module depends only on NumPy and SciPy.
 
 ## Simple Examples
 
-Here is a couple of examples of smoothing data.
+Here are a couple of examples of smoothing data.
 
 An univariate data smoothing:
 
