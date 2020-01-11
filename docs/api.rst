@@ -3,10 +3,10 @@
 API Reference
 =============
 
-.. currentmodule:: csaps
-
 Summary
 -------
+
+.. currentmodule:: csaps
 
 .. autosummary::
     :nosignatures:
@@ -25,6 +25,8 @@ Summary
 
 Main API
 --------
+
+.. py:module:: csaps
 
 .. autofunction:: csaps
 
