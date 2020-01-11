@@ -16,7 +16,11 @@ def _get_version():
 
 def _get_long_description():
     readme = ROOT_DIR / 'README.md'
-    return readme.read_text(encoding='utf-8')
+    changelog = ROOT_DIR / 'CHANGELOG.md'
+    return '{}\n{}'.format(
+        readme.read_text(encoding='utf-8'),
+        changelog.read_text(encoding='utf-8')
+    )
 
 
 setup(
