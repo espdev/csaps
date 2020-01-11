@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.8.0.dev1
+
+* Add `csaps` function that can be used as the main API
+* Refactor the internal structure of the package
+* Add the [documentation](https://csaps.readthedocs.io)
+
 ## v0.7.0
 
 * Add Generic-based type-hints and mypy-compatibility
