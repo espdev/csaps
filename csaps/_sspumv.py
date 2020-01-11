@@ -22,13 +22,17 @@ class SplinePPForm(SplinePPFormBase[np.ndarray, int]):
     Parameters
     ----------
     breaks : np.ndarray
-        Breaks values 1-d array
+        Breaks values 1-D array
+
     coeffs : np.ndarray
-        Spline coefficients 2-d array
+        Spline coefficients 2-D array
+
     ndim : int
         Spline dimension
+
     shape : Sequence[int]
         It determines Y data shape
+
     axis : int
         Axis along which values are assumed to be varying
     """
@@ -114,18 +118,23 @@ class UnivariateCubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, Univa
 
     Parameters
     ----------
-    xdata : np.ndarray, list
-        X input 1D data vector (data sites: x1 < x2 < ... < xN)
-    ydata : np.ndarray, list
-        Y input 1D data vector or ND-array with shape[axis] equal of X data size)
-    weights : np.ndarray, list
-        [Optional] Weights 1D vector with size equal of xdata size
-    smooth : float
-        [Optional] Smoothing parameter in range [0, 1] where:
+
+    xdata : np.ndarray, sequence, vector-like
+        X input 1-D data vector (data sites: ``x1 < x2 < ... < xN``)
+
+    ydata : np.ndarray, vector-like, sequence[vector-like]
+        Y input 1-D data vector or ND-array with shape[axis] equal of `xdata` size)
+
+    weights : [*Optional*] np.ndarray, list
+        Weights 1-D vector with size equal of ``xdata`` size
+
+    smooth : [*Optional*] float
+        Smoothing parameter in range [0, 1] where:
             - 0: The smoothing spline is the least-squares straight line fit
             - 1: The cubic spline interpolant with natural condition
+
     axis : int
-        Axis along which "ydata" is assumed to be varying.
+        Axis along which ``ydata`` is assumed to be varying.
         Meaning that for x[i] the corresponding values are np.take(ydata, i, axis=axis).
         By default is -1 (the last axis).
     """
@@ -148,7 +157,7 @@ class UnivariateCubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, Univa
         self._spline, self._smooth = self._make_spline(smooth)
 
     def __call__(self, xi: UnivariateDataType) -> np.ndarray:
-        """Evaluate the spline's approximation for given data
+        """Evaluate the spline for given data
         """
         xi = ty.cast(np.ndarray, np.asarray(xi, dtype=np.float64))
 
@@ -159,7 +168,7 @@ class UnivariateCubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, Univa
 
     @property
     def smooth(self) -> float:
-        """Returns smooth factor
+        """Returns the smoothing parameter
 
         Returns
         -------
@@ -170,12 +179,12 @@ class UnivariateCubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, Univa
 
     @property
     def spline(self) -> SplinePPForm:
-        """Returns the spline description in 'SplinePPForm' instance
+        """Returns the spline description in `SplinePPForm` instance
 
         Returns
         -------
         spline : SplinePPForm
-            The spline description in 'SplinePPForm' instance
+            The spline description in :class:`SplinePPForm` instance
         """
         return self._spline
 
@@ -312,6 +321,8 @@ class MultivariateCubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, Uni
 
     For example:
 
+    .. code-block:: python
+
         # 3D data
         data = [
             # Data vectors   Dimension
@@ -337,15 +348,19 @@ class MultivariateCubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, Uni
 
     ydata : np.ndarray, array-like
         Input multivariate data vectors. N-D array.
-    tdata : np.ndarray, list
-        [Optional] Parametric vector of data sites with condition: `t1 < t2 < ... < tN`.
+
+    tdata : [*Optional*] np.ndarray, list
+        Parametric vector of data sites with condition: `t1 < t2 < ... < tN`.
         If it is not set will be computed automatically.
-    weights : np.ndarray, list
-        [Optional] Weights 1D vector with size equal of N
-    smooth : float
-        [Optional] Smoothing parameter in range [0, 1] where:
+
+    weights : [*Optional*] np.ndarray, list
+        Weights 1D vector with size equal of N
+
+    smooth : [*Optional*] float
+        Smoothing parameter in range [0, 1] where:
             - 0: The smoothing spline is the least-squares straight line fit
             - 1: The cubic spline interpolant with natural condition
+
     axis : int
         Axis along which "ydata" is assumed to be varying.
         Meaning that for x[i] the corresponding values are np.take(ydata, i, axis=axis).
@@ -391,7 +406,7 @@ class MultivariateCubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, Uni
 
     @property
     def smooth(self) -> float:
-        """Returns smooth factor
+        """Returns the smoothing parameter
 
         Returns
         -------
@@ -402,12 +417,12 @@ class MultivariateCubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, Uni
 
     @property
     def spline(self) -> SplinePPForm:
-        """Returns the spline description in 'SplinePPForm' instance
+        """Returns the spline description in `SplinePPForm` instance
 
         Returns
         -------
         spline : SplinePPForm
-            The spline description in 'SplinePPForm' instance
+            The spline description in :class:`SplinePPForm` instance
         """
         return self._univariate_spline.spline
 

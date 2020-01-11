@@ -25,14 +25,15 @@ _XiDataType = Optional[Union[UnivariateDataType, NdGridDataType]]
 _WeightsDataType = Optional[Union[UnivariateDataType, NdGridDataType]]
 _SmoothDataType = Optional[Union[float, Sequence[Optional[float]]]]
 
-SmoothingResult = NamedTuple('SmoothingResult', [
+AutoSmoothingResult = NamedTuple('AutoSmoothingResult', [
     ('values', _YDataType),
     ('smooth', _SmoothDataType),
 ])
+"""The result for auto smoothing for `csaps` function"""
 
 _ReturnType = Union[
     _YDataType,
-    SmoothingResult,
+    AutoSmoothingResult,
     ISmoothingSpline,
 ]
 
@@ -45,62 +46,67 @@ def csaps(xdata: _XDataType,
           axis: Optional[int] = None) -> _ReturnType:
     """Smooths the univariate/multivariate/gridded data or computes the corresponding splines
 
-    This function might be used in procedural code.
+    This function might be used as the main API for smoothing any data.
 
     Parameters
     ----------
 
     xdata : np.ndarray, array-like
-        [required] The data sites ``x1 < x2 < ... < xN``:
-            - 1-D data vector/sequence (array-like) for univariate/multivariate ydata case
-            - The sequence of 1-D data vectors for nd-gridded ydata case
+        The data sites ``x1 < x2 < ... < xN``:
+            - 1-D data vector/sequence (array-like) for univariate/multivariate ``ydata`` case
+            - The sequence of 1-D data vectors for nd-gridded ``ydata`` case
 
     ydata : np.ndarray, array-like
-        [required] The data values:
+        The data values:
             - 1-D data vector/sequence (array-like) for univariate data case
             - N-D array/array-like for multivariate data case
             - N-D array for nd-gridded data case
 
-    xidata : np.ndarray, array-like, sequence[array-like]
-        [optional] The data sites for output smoothed data:
-            - 1-D data vector/sequence (array-like) for univariate/multivariate ydata case
-            - The sequence of 1-D data vectors for nd-gridded ydata case
-        If this argument was not set, the function will return computed spline for given data
-        in `ISmoothingSpline` object.
+    xidata : [*Optional*] np.ndarray, array-like, Sequence[array-like]
+        The data sites for output smoothed data:
+            - 1-D data vector/sequence (array-like) for univariate/multivariate ``ydata`` case
+            - The sequence of 1-D data vectors for nd-gridded ``ydata`` case
 
-    weights : np.ndarray, array-like, sequence[array-like]
-        [optional] The weights data vectors:
-            - 1-D data vector/sequence (array-like) for univariate/multivariate ydata case
-            - The sequence of 1-D data vectors for nd-gridded ydata case
+        If this argument was not set, the function will return computed spline
+        for given data in :class:`ISmoothingSpline` object.
 
-    smooth : float, sequence[float]
-        [optional] The smoothing factor value(s):
-            - float value in the range ``[0, 1]`` for univariate/multivariate ydata case
-            - the sequence of float in the range ``[0, 1]`` or None for nd-gridded ydata case
+    weights : [*Optional*] np.ndarray, array-like, Sequence[array-like]
+        The weights data vectors:
+            - 1-D data vector/sequence (array-like) for univariate/multivariate ``ydata`` case
+            - The sequence of 1-D data vectors for nd-gridded ``ydata`` case
+
+    smooth : [*Optional*] float, Sequence[float]
+        The smoothing factor value(s):
+            - float value in the range ``[0, 1]`` for univariate/multivariate ``ydata`` case
+            - the sequence of float in the range ``[0, 1]`` or None for nd-gridded ``ydata`` case
+
         If this argument was not set or None or sequence with None-items, the function will return
-        named tuple `SmoothingResult` with computed smoothed data values and smoothing factor value(s).
+        named tuple :class:`AutoSmoothingResult` with computed smoothed data values and smoothing factor value(s).
 
-    axis : int
-        [optional] The ydata axis. Axis along which "ydata" is assumed to be varying.
-        If this argument was not set the last axis will be used.
-        Currently, `axis` will be ignored for nd-gridded ydata case.
+    axis : [*Optional*] int
+        The ``ydata`` axis. Axis along which ``ydata`` is assumed to be varying.
+        If this argument was not set the last axis will be used (``axis == -1``).
+
+        .. note::
+            Currently, `axis` will be ignored for nd-gridded ``ydata`` case.
 
     Returns
     -------
 
     yidata : np.ndarray
-        Smoothed data values if `xidata` and `smooth` were set.
+        Smoothed data values if ``xidata`` and ``smooth`` were set.
 
-    smoothed_data : SmoothingResult
-        The named tuple with two fileds:
+    autosmoothing_result : AutoSmoothingResult
+        The named tuple object with two fileds:
             - 'values' -- smoothed data values
             - 'smooth' -- computed smoothing factor
-        This result will be returned if `xidata` was set and `smooth` was not set.
 
-    sspobj : ISmoothingSpline
-        Smoothing spline object if `xidata` was not set:
-            - `UnivariateCubicSmoothingSpline` instance for univariate/multivariate data
-            - `NdGridCubicSmoothingSpline` instance for nd-gridded data
+        This result will be returned if ``xidata`` was set and ``smooth`` was not set.
+
+    ssp_obj : ISmoothingSpline
+        Smoothing spline object if ``xidata`` was not set:
+            - :class:`UnivariateCubicSmoothingSpline` instance for univariate/multivariate data
+            - :class:`NdGridCubicSmoothingSpline` instance for nd-gridded data
 
     Examples
     --------
@@ -159,6 +165,6 @@ def csaps(xdata: _XDataType,
         auto_smooth = any(sm is None for sm in smooth)
 
     if auto_smooth:
-        return SmoothingResult(yidata, sp.smooth)
+        return AutoSmoothingResult(yidata, sp.smooth)
     else:
         return yidata

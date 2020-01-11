@@ -39,9 +39,9 @@ class NdGridSplinePPForm(SplinePPFormBase[ty.Sequence[np.ndarray], ty.Tuple[int,
     Parameters
     ----------
     breaks : np.ndarray
-        Breaks values 1-d array
+        Breaks values 1-D array
     coeffs : np.ndarray
-        Spline coefficients 2-d array
+        Spline coefficients 2-D array
     """
 
     def __init__(self, breaks: ty.Sequence[np.ndarray], coeffs: np.ndarray) -> None:
@@ -94,26 +94,33 @@ class NdGridSplinePPForm(SplinePPFormBase[ty.Sequence[np.ndarray], ty.Tuple[int,
 class NdGridCubicSmoothingSpline(ISmoothingSpline[NdGridSplinePPForm, ty.Tuple[float, ...], NdGridDataType]):
     """ND-Gridded cubic smoothing spline
 
-    Class implments ND-gridded data approximation via cubic smoothing spline
-    (piecewise tensor product polynomial).
+    Class implements ND-gridded data smoothing (piecewise tensor product polynomial).
 
     Parameters
     ----------
-    xdata : list, tuple
+
+    xdata : list, tuple, Sequence[vector-like]
         X data site vectors for each dimensions. These vectors determine ND-grid.
         For example::
 
             # 2D grid
-            x = [np.linspace(0, 5, 21), np.linspace(0, 6, 25)]
+            x = [
+                np.linspace(0, 5, 21),
+                np.linspace(0, 6, 25),
+            ]
 
     ydata : np.ndarray
-        Y input data ND-array with shape equal X data vector sizes
-    weights : list, tuple
-        [Optional] Weights data vectors for all dimensions with size equal xdata sizes
-    smooth : float
-        [Optional] Smoothing parameter (or list of parameters for each dimension) in range [0, 1] where:
+        Y data ND-array with shape equal ``xdata`` vector sizes
+
+    weights : [*Optional*] list, tuple, Sequence[vector-like]
+        Weights data vector(s) for all dimensions or each dimension with
+        size(s) equal to ``xdata`` sizes
+
+    smooth : [*Optional*] float, Sequence[float]
+        The smoothing parameter (or a sequence of parameters for each dimension) in range ``[0, 1]`` where:
             - 0: The smoothing spline is the least-squares straight line fit
             - 1: The cubic spline interpolant with natural condition
+
     """
 
     def __init__(self,
@@ -132,12 +139,12 @@ class NdGridCubicSmoothingSpline(ISmoothingSpline[NdGridSplinePPForm, ty.Tuple[f
 
     @property
     def smooth(self) -> ty.Tuple[float, ...]:
-        """Returns smooth factor for every axis
+        """Returns a tuple of smoothing parameters for each axis
 
         Returns
         -------
         smooth : Tuple[float, ...]
-            Smooth factor in the range [0, 1] for every axis
+            The smoothing parameter in the range ``[0, 1]`` for each axis
         """
         return self._smooth
 
@@ -147,8 +154,8 @@ class NdGridCubicSmoothingSpline(ISmoothingSpline[NdGridSplinePPForm, ty.Tuple[f
 
         Returns
         -------
-        spline : SplinePPForm
-            The spline description in 'SplinePPForm' instance
+        spline : NdGridSplinePPForm
+            The spline description in :class:`NdGridSplinePPForm` instance
         """
         return self._spline
 
@@ -197,6 +204,8 @@ class NdGridCubicSmoothingSpline(ISmoothingSpline[NdGridSplinePPForm, ty.Tuple[f
         return xdata, ydata, weights, smooth
 
     def __call__(self, xi: NdGridDataType) -> np.ndarray:
+        """Evaluate the spline for given data
+        """
         xi = ndgrid_prepare_data_sites(xi, 'xi')
 
         if len(xi) != self._ndim:

@@ -26,12 +26,12 @@ from csaps._types import (
     MultivariateDataType,
     NdGridDataType,
 )
-from csaps._shortcut import csaps, SmoothingResult
+from csaps._shortcut import csaps, AutoSmoothingResult
 
 __all__ = [
     # Shortcut
     'csaps',
-    'SmoothingResult',
+    'AutoSmoothingResult',
 
     # Classes
     'SplinePPFormBase',
