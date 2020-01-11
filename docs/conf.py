@@ -76,12 +76,14 @@ html_theme = 'alabaster'
 html_static_path = ['_static']
 
 html_theme_options = {
+    'fixed_sidebar': 'true',
     'show_powered_by': 'false',
+
+    'description': 'Cubic spline approximation (smoothing)',
+
     'github_user': 'espdev',
     'github_repo': 'csaps',
     'github_type': 'star',
-
-    'description': 'Cubic spline approximation (smoothing)',
 
     'extra_nav_links': {
         'GitHub repository': 'https://github.com/espdev/csaps',

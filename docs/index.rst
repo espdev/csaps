@@ -1,7 +1,12 @@
+.. _index:
+
 csaps
 =====
 
 CSAPS -- Cubic Spline Approximation (Smoothing)
+
+Overview
+--------
 
 **csaps** is a package for univariate, multivariate and nd-gridded data approximation using cubic smoothing splines.
 
@@ -35,11 +40,11 @@ You can install and update csaps using pip:
     pip install -U csaps
 
 The module depends only on NumPy and SciPy.
+
 Python 3.5 or above is supported.
 
-
-Documentation
--------------
+Content
+-------
 
 .. toctree::
     :maxdepth: 2
