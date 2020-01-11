@@ -34,6 +34,7 @@ setup(
             'matplotlib >=3.1',
             'jupyter-sphinx',
             'numpydoc',
+            'm2r',
         ],
         'tests': [
             'pytest',

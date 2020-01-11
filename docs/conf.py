@@ -46,6 +46,7 @@ extensions = [
     'sphinx.ext.autosummary',
     'jupyter_sphinx.execute',
     'numpydoc',
+    'm2r',
 ]
 
 # Extension settings

@@ -48,6 +48,7 @@ Documentation
     manual
     benchmarks
     api
+    changelog
 
 
 Indices and Tables
