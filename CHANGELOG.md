@@ -6,6 +6,11 @@
 * Refactor the internal structure of the package
 * Add the [documentation](https://csaps.readthedocs.io)
 
+**Attention**
+
+This is the last version that supports Python 3.5. 
+The next versions will support Python 3.6 or above.
+
 ## v0.7.0
 
 * Add Generic-based type-hints and mypy-compatibility
