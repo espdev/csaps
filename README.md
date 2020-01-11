@@ -81,7 +81,9 @@ plt.show()
 
 ## Documentation
 
-More examples of usage and the full documentation can be found at ReadTheDocs: https://csaps.readthedocs.io
+More examples of usage and the full documentation can be found at ReadTheDocs.
+
+https://csaps.readthedocs.io
 
 ## Testing
 
