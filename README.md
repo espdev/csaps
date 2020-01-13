@@ -43,41 +43,40 @@ plt.plot(x, y, 'o', xs, ys, '-')
 plt.show()
 ```
 
-![csaps1d](https://user-images.githubusercontent.com/1299189/27611703-f3093c14-5b9b-11e7-9f18-6d0c3cc7633a.png)
+![univariate](https://user-images.githubusercontent.com/1299189/72231304-cd774380-35cb-11ea-821d-d5662cc1eedf.png)
 
 A surface data smoothing:
 
 ```python
 import numpy as np
-
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
 from csaps import csaps
 
-xdata = [np.linspace(-3, 3, 61), np.linspace(-3.5, 3.5, 51)]
+np.random.seed(1234)
+xdata = [np.linspace(-3, 3, 41), np.linspace(-3.5, 3.5, 31)]
 i, j = np.meshgrid(*xdata, indexing='ij')
-
 ydata = (3 * (1 - j)**2. * np.exp(-(j**2) - (i + 1)**2)
          - 10 * (j / 5 - j**3 - i**5) * np.exp(-j**2 - i**2)
          - 1 / 3 * np.exp(-(j + 1)**2 - i**2))
+ydata = ydata + (np.random.randn(*ydata.shape) * 0.75)
 
-np.random.seed(12345)
-noisy = ydata + (np.random.randn(*ydata.shape) * 0.75)
+ydata_s = csaps(xdata, ydata, xdata, smooth=0.988)
 
-ysmth = csaps(xdata, noisy, xdata, smooth=0.988)
-
-fig = plt.figure()
+fig = plt.figure(figsize=(7, 4.5))
 ax = fig.add_subplot(111, projection='3d')
-
-ax.plot_wireframe(j, i, noisy, linewidths=0.5, color='r')
-ax.scatter(j, i, noisy, s=5, c='r')
-ax.plot_surface(j, i, ysmth, linewidth=0, alpha=1.0)
+ax.set_facecolor('none')
+c = [s['color'] for s in plt.rcParams['axes.prop_cycle']]
+ax.plot_wireframe(j, i, ydata, linewidths=0.5, color=c[0], alpha=0.5)
+ax.scatter(j, i, ydata, s=10, c=c[0], alpha=0.5)
+ax.plot_surface(j, i, ydata_s, color=c[1], linewidth=0, alpha=1.0)
+ax.view_init(elev=9., azim=290)
 
 plt.show()
 ```
 
-<img width="653" alt="2019-03-22_10-22-59" src="https://user-images.githubusercontent.com/1299189/54817564-2ff30200-4c8f-11e9-8afd-9055efcd6ea0.png">
+![surface](https://user-images.githubusercontent.com/1299189/72231252-7a9d8c00-35cb-11ea-8890-487b8a7dbd1d.png)
 
 ## Documentation
 
