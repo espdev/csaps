@@ -371,3 +371,17 @@ The example for univariate data:
     f, (ax1, ax2) = plt.subplots(2, 1, figsize=(5, 6))
     ax1.plot(x, y, 'o', xi1, yi1, '.-')
     ax2.plot(x, y, 'o', xi2, yi2, '.-')
+
+.. code-block:: python
+
+    >>> print('Spline class name:', type(spline).__name__)
+    ... print('Spline smoothing parameter:', spline.smooth)
+    ... print('Spline description:', spline.spline)
+    Spline class name: UnivariateCubicSmoothingSpline
+    Spline smoothing parameter: 0.8999999999999999
+    Spline description: SplinePPForm
+      breaks: [-5. -4. -3. -2. -1.  0.  1.  2.  3.  4.  5.]
+      coeffs: (10, 4) shape
+      pieces: 10
+      order: 4
+      ndim: 1
