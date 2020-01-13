@@ -3,7 +3,7 @@
 import pytest
 import numpy as np
 
-from csaps import csaps, SmoothingResult, UnivariateCubicSmoothingSpline, NdGridCubicSmoothingSpline
+from csaps import csaps, AutoSmoothingResult, UnivariateCubicSmoothingSpline, NdGridCubicSmoothingSpline
 
 
 @pytest.fixture(scope='module')
@@ -53,7 +53,7 @@ def test_shortcut_output(data):
     assert isinstance(yi, np.ndarray)
 
     smoothed_data = csaps(x, y, xi)
-    assert isinstance(smoothed_data, SmoothingResult)
+    assert isinstance(smoothed_data, AutoSmoothingResult)
 
     sp = csaps(x, y)
     assert isinstance(sp, sp_cls)
@@ -62,10 +62,10 @@ def test_shortcut_output(data):
 @pytest.mark.parametrize('smooth, cls', [
     (0.85, np.ndarray),
     ([0.85, 0.85], np.ndarray),
-    (None, SmoothingResult),
-    ([None, 0.85], SmoothingResult),
-    ([0.85, None], SmoothingResult),
-    ([None, None], SmoothingResult),
+    (None, AutoSmoothingResult),
+    ([None, 0.85], AutoSmoothingResult),
+    ([0.85, None], AutoSmoothingResult),
+    ([None, None], AutoSmoothingResult),
 ])
 def test_shortcut_ndgrid_smooth_output(surface, smooth, cls):
     x, y = surface

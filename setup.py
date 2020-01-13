@@ -16,7 +16,11 @@ def _get_version():
 
 def _get_long_description():
     readme = ROOT_DIR / 'README.md'
-    return readme.read_text(encoding='utf-8')
+    changelog = ROOT_DIR / 'CHANGELOG.md'
+    return '{}\n{}'.format(
+        readme.read_text(encoding='utf-8'),
+        changelog.read_text(encoding='utf-8')
+    )
 
 
 setup(
@@ -28,11 +32,23 @@ setup(
         'numpy >=0.12.1, <1.20.0',
         'scipy >=0.19.1, <1.6.0',
     ],
+    extras_require={
+        'docs': [
+            'sphinx >=2.3',
+            'matplotlib >=3.1',
+            'numpydoc',
+            'm2r',
+        ],
+        'tests': [
+            'pytest',
+        ],
+    },
     package_data={"csaps": ["py.typed"]},
     url='https://github.com/espdev/csaps',
     project_urls={
-        "Code": 'https://github.com/espdev/csaps',
-        "Issue tracker": 'https://github.com/espdev/csaps/issues',
+        'Documentation': 'https://csaps.readthedocs.io',
+        'Code': 'https://github.com/espdev/csaps',
+        'Issue tracker': 'https://github.com/espdev/csaps/issues',
     },
     license='MIT',
     author='Eugene Prilepin',
