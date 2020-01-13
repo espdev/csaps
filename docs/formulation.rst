@@ -59,8 +59,8 @@ to control smoothing.
 
 It is an example plot of comparison ``csaps`` and ``scipy.UnivariateSpline`` (k=3) with defaults (auto smoothing):
 
-.. jupyter-execute::
-    :hide-code:
+.. plot::
+    :include-source: False
 
     import numpy as np
     import matplotlib.pyplot as plt
@@ -76,9 +76,10 @@ It is an example plot of comparison ``csaps`` and ``scipy.UnivariateSpline`` (k=
     scipy_spline = UnivariateSpline(x, y, k=3)
     csaps_spline = UnivariateCubicSmoothingSpline(x, y)
 
-    yi_scipy_1 = scipy_spline(xi)
+    yi_scipy = scipy_spline(xi)
     yi_csaps = csaps_spline(xi)
 
-    plt.plot(x, y, 'o', xi, yi_scipy_1, '-', xi, yi_csaps, '-')
-    plt.legend(['input data', 'smoothed (scipy)', 'smoothed (csaps)'])
-    plt.show()
+    plt.plot(x, y, 'o')
+    plt.plot(xi, yi_scipy, '-', label='scipy UnivariateSpline')
+    plt.plot(xi, yi_csaps, '-', label='csaps')
+    plt.legend()

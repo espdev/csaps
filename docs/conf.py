@@ -44,12 +44,42 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
-    'jupyter_sphinx.execute',
+    'matplotlib.sphinxext.plot_directive',
     'numpydoc',
     'm2r',
 ]
 
 # Extension settings
+plot_apply_rcparams = True
+plot_rcparams = {
+    'figure.autolayout': 'True',
+    'figure.figsize': '5, 3.5',
+    'savefig.bbox': 'tight',
+    'savefig.facecolor': "None",
+}
+
+plot_formats = [("png", 90)]
+plot_include_source = True
+plot_html_show_source_link = False
+plot_html_show_formats = False
+
+plot_pre_code = """
+import numpy as np
+from matplotlib import pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+from csaps import csaps
+
+plt.style.use('seaborn-darkgrid')
+plt.style.use('seaborn-whitegrid')
+plt.style.use('ggplot')
+
+def univariate_data(n=25, seed=1234):
+    np.random.seed(seed)
+    x = np.linspace(-5., 5., n)
+    y = np.exp(-(x/2.5)**2) + (np.random.rand(n) - 0.2) * 0.3
+    return x, y
+"""
+
 autodoc_member_order = 'bysource'
 numpydoc_show_class_members = False
 

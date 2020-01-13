@@ -13,15 +13,24 @@ Quickstart
 multivariate and nd-gridded splines, but in most cases we recommend to use
 a shortcut function :func:`csaps` for smoothing data and computing splines.
 
-Firstly, we import :func:`csaps` function (and other modules for our examples)
+Firstly, we import :func:`csaps` function and other modules for our examples
+and also define the function that will produce univariate data:
 
-.. jupyter-execute::
+.. code-block:: python
+    :emphasize-lines: 5
 
     import numpy as np
     import matplotlib.pyplot as plt
     from mpl_toolkits.mplot3d import Axes3D
 
     from csaps import csaps
+
+
+    def univariate_data(n=25, seed=1234):
+        np.random.seed(seed)
+        x = np.linspace(-5., 5., n)
+        y = np.exp(-(x/2.5)**2) + (np.random.rand(n) - 0.2) * 0.3
+        return x, y
 
 
 Univariate Smoothing
@@ -32,13 +41,7 @@ X-values must satisfy the condition: :math:`x1 < x2 < ... < xN`
 
 It is a simple example how to smooth univariate data:
 
-.. jupyter-execute::
-
-    def univariate_data(n=25, seed=1234):
-        np.random.seed(seed)
-        x = np.linspace(-5., 5., n)
-        y = np.exp(-(x/2.5)**2) + (np.random.rand(n) - 0.2) * 0.3
-        return x, y
+.. plot::
 
     x, y = univariate_data()
     xi = np.linspace(x[0], x[-1], 150)
@@ -46,8 +49,6 @@ It is a simple example how to smooth univariate data:
     yi = csaps(x, y, xi, smooth=0.85)
 
     plt.plot(x, y, 'o', xi, yi, '-')
-    plt.legend(['input data', 'smoothed data'])
-    plt.show()
 
 
 Multivariate Smoothing
@@ -82,7 +83,7 @@ The same weights vector and the same smoothing parameter will be used for all Y 
 
 2-D data example:
 
-.. jupyter-execute::
+.. plot::
 
     np.random.seed(1234)
     theta = np.linspace(0, 2*np.pi, 35)
@@ -96,12 +97,10 @@ The same weights vector and the same smoothing parameter will be used for all Y 
     yi = data_i[1, :]
 
     plt.plot(x, y, ':o', xi, yi, '-')
-    plt.legend(['input data', 'smoothed data'])
-    plt.show()
 
 3-D data example:
 
-.. jupyter-execute::
+.. plot::
 
     np.random.seed(1234)
     n = 100
@@ -118,12 +117,11 @@ The same weights vector and the same smoothing parameter will be used for all Y 
     yi = data_i[1, :]
     zi = data_i[2, :]
 
-    fig = plt.figure(figsize=(8, 6))
+    fig = plt.figure(figsize=(7, 4.5))
     ax = fig.add_subplot(111, projection='3d')
-    ax.plot(x, y, z, '.:', label='parametric curve')
-    ax.plot(xi, yi, zi, '-', label='spline curve')
-    plt.legend(['input data', 'smoothed data'])
-    plt.show()
+    ax.set_facecolor('none')
+    ax.plot(x, y, z, '.:')
+    ax.plot(xi, yi, zi, '-')
 
 
 ND-grid Smoothing
@@ -160,7 +158,7 @@ Also you can set the smoothing parameter for each dimension:
 
 Surface data example:
 
-.. jupyter-execute::
+.. plot::
 
     np.random.seed(1234)
     xdata = [np.linspace(-3, 3, 41), np.linspace(-3.5, 3.5, 31)]
@@ -172,13 +170,14 @@ Surface data example:
 
     ydata_s = csaps(xdata, ydata, xdata, smooth=0.988)
 
-    fig = plt.figure(figsize=(8, 6))
+    fig = plt.figure(figsize=(7, 4.5))
     ax = fig.add_subplot(111, projection='3d')
-    ax.plot_wireframe(j, i, ydata, linewidths=0.5, color='r', alpha=0.5)
-    ax.scatter(j, i, ydata, s=10, c='r', alpha=0.5)
-    ax.plot_surface(j, i, ydata_s, linewidth=0, alpha=1.0)
+    ax.set_facecolor('none')
+    c = [s['color'] for s in plt.rcParams['axes.prop_cycle']]
+    ax.plot_wireframe(j, i, ydata, linewidths=0.5, color=c[0], alpha=0.5)
+    ax.scatter(j, i, ydata, s=10, c=c[0], alpha=0.5)
+    ax.plot_surface(j, i, ydata_s, color=c[1], linewidth=0, alpha=1.0)
     ax.view_init(elev=9., azim=290)
-    plt.show()
 
 
 Summary
@@ -219,18 +218,19 @@ function result. In this case the function will return `SmoothingResult` named t
 
 The example of auto smoothing univariate data:
 
-.. jupyter-execute::
+.. plot::
 
     x, y = univariate_data()
     xi = np.linspace(x[0], x[-1], 51)
 
     smoothing_result = csaps(x, y, xi)
+
     yi = smoothing_result.values
+    smooth = smoothing_result.smooth
 
-    print('Computed smoothing parameter:', smoothing_result.smooth)
-
-    plt.plot(x, y, 'o', xi, yi, '-')
-    plt.show()
+    plt.plot(x, y, 'o')
+    plt.plot(xi, yi, '-', label=f'smooth={smooth:.3f}')
+    plt.legend()
 
 In ND-gridded data case we can use auto smoothing for all dimensions or the particular dimensions:
 
@@ -256,7 +256,7 @@ The smoothing parameter :math:`p` should be in range :math:`[0, 1]` where bounds
 
 The following example demonstartes these two boundary cases:
 
-.. jupyter-execute::
+.. plot::
 
     x = np.linspace(-5., 5., 7)
     y = 1 / (1 + x**2)
@@ -265,9 +265,10 @@ The following example demonstartes these two boundary cases:
     yi_0 = csaps(x, y, xi, smooth=0)
     yi_1 = csaps(x, y, xi, smooth=1)
 
-    plt.plot(x, y, 'o:', xi, yi_0, '-', xi, yi_1, '-')
-    plt.legend(['input data', 'smooth == 0', 'smooth == 1'])
-    plt.show()
+    plt.plot(x, y, 'o:')
+    plt.plot(xi, yi_0, '-', label='smooth=0')
+    plt.plot(xi, yi_1, '-', label='smooth=1')
+    plt.legend()
 
 
 Weighted Smoothing
@@ -283,7 +284,7 @@ we can use the following signatures::
 
 The example of weighted smoothing univariate data:
 
-.. jupyter-execute::
+.. plot::
 
     x, y = univariate_data()
     xi = np.linspace(x[0], x[-1], 150)
@@ -294,14 +295,13 @@ The example of weighted smoothing univariate data:
     w[[10,13]] = 1.0
     w[[11,12]] = 0.1
 
-    print('Weights:', w)
-
     yi = csaps(x, y, xi, smooth=0.85)
     yi_w = csaps(x, y, xi, weights=w, smooth=0.85)
 
-    plt.plot(x, y, 'o', xi, yi, '-', xi, yi_w, '-')
-    plt.legend(['input data', 'smoothed data', 'weighted smoothed data'])
-    plt.show()
+    plt.plot(x, y, 'o')
+    plt.plot(xi, yi, '-', label='unweighted')
+    plt.plot(xi, yi_w, '-', label='weighted')
+    plt.legend()
 
 In ND-gridded data case we can use the same weights for all dimensions or different
 weights for each dimension.
@@ -316,10 +316,9 @@ Axis Parameter
 (axis along which Y-data is assumed to be varying).
 By default axis is equal to -1 (the last axis). In other words, ``y.shape[axis]`` must be equal to ``x.size``.
 
-For example, the following code will raise ``ValueError``:
+For example, the following code will raise ``ValueError`` without ``axis`` parameter:
 
-.. jupyter-execute::
-    :raises: ValueError
+.. plot::
 
     x, y1 = univariate_data(seed=1327)
     x, y2 = univariate_data(seed=2451)
@@ -331,16 +330,12 @@ For example, the following code will raise ``ValueError``:
     print('y.shape:', y.shape)
 
     xi = np.linspace(x[0], x[-1], 150)
-    yi = csaps(x, y, xi, smooth=0.8)
 
-We can set ``axis`` parameter is equal to zero (the first axis) to fix it:
-
-.. jupyter-execute::
-
+    # yi = csaps(x, y, xi, smooth=0.8)  # --> ValueError: invalid "ydata" shape for given "xdata"
     yi = csaps(x, y, xi, smooth=0.8, axis=0)
 
     plt.plot(x, y, 'o', xi, yi, '-')
-    plt.show()
+
 
 .. note::
 
@@ -356,23 +351,16 @@ If we want to compute spline only without evaluating (smoothing data), we can us
     spline = csaps(x, y, smooth)
 
 In this case the smoothing spline will be computed for given data and returned as an instance of
-`ISmoothingSpline` based class.
+`ISmoothingSpline` based class. After we can use the computed spline to evaluate (smoothing)
+data for given data sites repeatedly.
 
 The example for univariate data:
 
-.. jupyter-execute::
+.. plot::
 
     x, y = univariate_data(n=11)
 
     spline = csaps(x, y)
-
-    print('Spline class name:', type(spline).__name__)
-    print('Spline smoothing parameter:', spline.smooth)
-    print('Spline description:', spline.spline)
-
-After we can use the computed spline to evaluate (smoothing) data for given data sites repeatedly:
-
-.. jupyter-execute::
 
     xi1 = np.linspace(x[0], x[-1], 20)
     xi2 = np.linspace(x[0], x[-1], 50)
@@ -380,7 +368,6 @@ After we can use the computed spline to evaluate (smoothing) data for given data
     yi1 = spline(xi1)
     yi2 = spline(xi2)
 
-    f, (ax1, ax2) = plt.subplots(2, 1)
-    ax1.plot(x, y, 's', xi1, yi1, 'o-')
-    ax2.plot(x, y, 's', xi2, yi2, 'o-')
-    plt.show()
+    f, (ax1, ax2) = plt.subplots(2, 1, figsize=(5, 6))
+    ax1.plot(x, y, 'o', xi1, yi1, '.-')
+    ax2.plot(x, y, 'o', xi2, yi2, '.-')
