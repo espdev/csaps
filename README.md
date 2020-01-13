@@ -86,7 +86,7 @@ https://csaps.readthedocs.io
 
 ## Testing
 
-pytest, tox and Travis CI are used for testing. Please see [test_csaps.py](tests).
+pytest, tox and Travis CI are used for testing. Please see [tests](tests).
 
 ## Algorithms and implementations
 
