@@ -1,6 +1,6 @@
 # Changelog
 
-## v0.8.0.dev1
+## v0.8.0
 
 * Add `csaps` function that can be used as the main API
 * Refactor the internal structure of the package
