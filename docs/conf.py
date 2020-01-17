@@ -117,5 +117,6 @@ html_theme_options = {
 
     'extra_nav_links': {
         'GitHub repository': 'https://github.com/espdev/csaps',
+        'PyPI': 'https://pypi.org/project/csaps',
     },
 }
