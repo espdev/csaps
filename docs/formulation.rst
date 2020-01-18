@@ -34,7 +34,7 @@ The smoothing parameter p can be computed automatically based on the given data 
 Implementation
 --------------
 
-**csaps** is implemented as a Python modified port of MATLAB `CSAPS <https://www.mathworks.com/help/curvefit/csaps.html>`_ function
+**csaps** is implemented as a pure (without C-extensions) Python modified port of MATLAB `CSAPS <https://www.mathworks.com/help/curvefit/csaps.html>`_ function
 that is an implementation of Fortran routine SMOOTH from `PGS <http://pages.cs.wisc.edu/~deboor/pgs/>`_
 (originally written by Carl de Boor). The implementation based on linear algebra routines and uses NumPy and sparse
 matrices from SciPy.
@@ -49,8 +49,12 @@ This spline can be computed as :math:`k`-ordered (0-5) spline and its smoothing 
 the number of knots by specifying a smoothing condition. Also it is only univariate spline.
 The algrorithm cannot be used for vectorized computing splines for multivariate and gridded cases.
 
-Also the performance of ``UnivariateSpline`` depends on the data size and smoothing parameter ``s``.
-The performance of csaps algorithm only depends on the data size and the data dimension.
+Also the performance of ``UnivariateSpline`` depends on the data size and smoothing parameter ``s`` because
+the number of knots will be iterative increased until the smoothing condition is satisfied::
+
+    sum((w[i] * (y[i]-spl(x[i])))**2, axis=0) <= s
+
+Unlike ``UnivariateSpline`` the performance of csaps algorithm only depends on the data size and the data dimension.
 
 **csaps** spline is cubic only and it has natural boundary condition type. The computation algorithm
 is vectorized to compute splines for multivariate/gridded data. The smoothing parameter :math:`p` determines
