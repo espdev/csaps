@@ -1,5 +1,7 @@
 .. _manual:
 
+.. currentmodule:: csaps
+
 Manual
 ======
 
@@ -214,7 +216,8 @@ signature::
     yi, smooth = csaps(x, y, xi)
 
 In this case the smoothing parameter will be computed automatically and will be returned in the
-function result. In this case the function will return `SmoothingResult` named tuple: ``SmoothingResult(values, smooth)``.
+function result. In this case the function will return :class:`AutoSmoothingResult` named
+tuple: ``AutoSmoothingResult(values, smooth)``.
 
 The example of auto smoothing univariate data:
 
@@ -351,7 +354,7 @@ If we want to compute spline only without evaluating (smoothing data), we can us
     spline = csaps(x, y, smooth)
 
 In this case the smoothing spline will be computed for given data and returned as an instance of
-`ISmoothingSpline` based class. After we can use the computed spline to evaluate (smoothing)
+:class:`ISmoothingSpline` based class. After we can use the computed spline to evaluate (smoothing)
 data for given data sites repeatedly.
 
 The example for univariate data:
