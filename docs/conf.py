@@ -69,8 +69,6 @@ from matplotlib import pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from csaps import csaps
 
-plt.style.use('seaborn-darkgrid')
-plt.style.use('seaborn-whitegrid')
 plt.style.use('ggplot')
 
 def univariate_data(n=25, seed=1234):
