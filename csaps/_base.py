@@ -10,7 +10,7 @@ import typing as ty
 
 import numpy as np
 
-from csaps._types import TData, TProps, TSmooth, TXi, TSpline
+from ._types import TData, TProps, TSmooth, TXi, TSpline
 
 
 class SplinePPFormBase(abc.ABC, ty.Generic[TData, TProps]):

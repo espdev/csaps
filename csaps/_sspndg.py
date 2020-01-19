@@ -10,9 +10,9 @@ import typing as ty
 
 import numpy as np
 
-from csaps._base import SplinePPFormBase, ISmoothingSpline
-from csaps._types import UnivariateDataType, NdGridDataType
-from csaps._sspumv import SplinePPForm, UnivariateCubicSmoothingSpline
+from ._base import SplinePPFormBase, ISmoothingSpline
+from ._types import UnivariateDataType, NdGridDataType
+from ._sspumv import SplinePPForm, UnivariateCubicSmoothingSpline
 
 
 def ndgrid_prepare_data_sites(data, name) -> ty.Tuple[np.ndarray, ...]:

@@ -10,10 +10,10 @@ from typing import Optional, Union, Sequence, NamedTuple
 
 import numpy as np
 
-from csaps._base import ISmoothingSpline
-from csaps._sspumv import UnivariateCubicSmoothingSpline
-from csaps._sspndg import ndgrid_prepare_data_sites, NdGridCubicSmoothingSpline
-from csaps._types import (
+from ._base import ISmoothingSpline
+from ._sspumv import UnivariateCubicSmoothingSpline
+from ._sspndg import ndgrid_prepare_data_sites, NdGridCubicSmoothingSpline
+from ._types import (
     UnivariateDataType,
     UnivariateVectorizedDataType,
     NdGridDataType,
@@ -25,11 +25,13 @@ _XiDataType = Optional[Union[UnivariateDataType, NdGridDataType]]
 _WeightsDataType = Optional[Union[UnivariateDataType, NdGridDataType]]
 _SmoothDataType = Optional[Union[float, Sequence[Optional[float]]]]
 
-AutoSmoothingResult = NamedTuple('AutoSmoothingResult', [
-    ('values', _YDataType),
-    ('smooth', _SmoothDataType),
-])
-"""The result for auto smoothing for `csaps` function"""
+
+class AutoSmoothingResult(NamedTuple):
+    """The result for auto smoothing for `csaps` function"""
+
+    values: _YDataType
+    smooth: _SmoothDataType
+
 
 _ReturnType = Union[
     _YDataType,

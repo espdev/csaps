@@ -11,9 +11,9 @@ import numpy as np
 import scipy.sparse as sp
 import scipy.sparse.linalg as la
 
-from csaps._base import SplinePPFormBase, ISmoothingSpline
-from csaps._types import UnivariateDataType, UnivariateVectorizedDataType, MultivariateDataType
-from csaps._utils import from_2d, to_2d
+from ._base import SplinePPFormBase, ISmoothingSpline
+from ._types import UnivariateDataType, UnivariateVectorizedDataType, MultivariateDataType
+from ._utils import from_2d, to_2d
 
 
 class SplinePPForm(SplinePPFormBase[np.ndarray, int]):
