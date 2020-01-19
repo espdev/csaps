@@ -41,7 +41,7 @@ You can install and update csaps using pip:
 
 The module depends only on NumPy and SciPy.
 
-Python 3.5 or above is supported.
+Python 3.6 or above is supported.
 
 Content
 -------
