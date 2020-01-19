@@ -43,6 +43,7 @@ _ReturnType = Union[
 def csaps(xdata: _XDataType,
           ydata: _YDataType,
           xidata: _XiDataType = None,
+          *,
           weights: _WeightsDataType = None,
           smooth: _SmoothDataType = None,
           axis: Optional[int] = None) -> _ReturnType:
