@@ -13,7 +13,7 @@ import scipy.sparse.linalg as la
 
 from ._base import SplinePPFormBase, ISmoothingSpline
 from ._types import UnivariateDataType, UnivariateVectorizedDataType, MultivariateDataType
-from ._utils import from_2d, to_2d
+from ._reshape import from_2d, to_2d
 
 
 class SplinePPForm(SplinePPFormBase[np.ndarray, int]):
