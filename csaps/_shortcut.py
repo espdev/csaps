@@ -11,7 +11,7 @@ from typing import Optional, Union, Sequence, NamedTuple
 import numpy as np
 
 from ._base import ISmoothingSpline
-from ._sspumv import UnivariateCubicSmoothingSpline
+from ._sspumv import CubicSmoothingSpline
 from ._sspndg import ndgrid_prepare_data_sites, NdGridCubicSmoothingSpline
 from ._types import (
     UnivariateDataType,
@@ -154,7 +154,7 @@ def csaps(xdata: _XDataType,
 
     if umv:
         axis = -1 if axis is None else axis
-        sp = UnivariateCubicSmoothingSpline(xdata, ydata, weights, smooth, axis)
+        sp = CubicSmoothingSpline(xdata, ydata, weights, smooth, axis)
     else:
         sp = NdGridCubicSmoothingSpline(xdata, ydata, weights, smooth)
 

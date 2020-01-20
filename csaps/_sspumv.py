@@ -6,13 +6,14 @@ Univariate/multivariate cubic smoothing spline implementation
 """
 
 import typing as ty
+import warnings
 
 import numpy as np
 import scipy.sparse as sp
 import scipy.sparse.linalg as la
 
 from ._base import SplinePPFormBase, ISmoothingSpline
-from ._types import UnivariateDataType, UnivariateVectorizedDataType, MultivariateDataType
+from ._types import UnivariateDataType, UnivariateVectorizedDataType, MultivariateDataType, TSmooth, TSpline, TXi
 from ._reshape import from_2d, to_2d
 
 
@@ -113,8 +114,10 @@ class SplinePPForm(SplinePPFormBase[np.ndarray, int]):
         return values
 
 
-class UnivariateCubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, UnivariateDataType]):
-    """Univariate cubic smoothing spline
+class CubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, UnivariateDataType]):
+    """Cubic smoothing spline
+
+    The cubic spline implementation for univariate/multivariate data.
 
     Parameters
     ----------
@@ -310,6 +313,41 @@ class UnivariateCubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, Univa
         return spline, p
 
 
+class UnivariateCubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, UnivariateDataType]):
+    __doc__ = CubicSmoothingSpline.__doc__
+
+    def __init__(self,
+                 xdata: UnivariateDataType,
+                 ydata: UnivariateVectorizedDataType,
+                 weights: ty.Optional[UnivariateDataType] = None,
+                 smooth: ty.Optional[float] = None,
+                 axis: int = -1) -> None:
+        with warnings.catch_warnings():
+            warnings.simplefilter('always', DeprecationWarning)
+            warnings.warn(
+                "'UnivariateCubicSmoothingSpline' class is deprecated "
+                "and will be removed in the future version. "
+                "Use 'CubicSmoothingSpline' class instead.", stacklevel=2)
+
+        self._cssp = CubicSmoothingSpline(
+            xdata, ydata, weights=weights, smooth=smooth, axis=axis)
+
+    @property
+    def smooth(self) -> TSmooth:
+        return self._cssp.smooth
+
+    @property
+    def spline(self) -> TSpline:
+        return self._cssp.spline
+
+    def __call__(self, xi: TXi) -> np.ndarray:
+        return self._cssp(xi)
+
+
+# For case isinstance(CubicSmoothingSpline(...), UnivariateCubicSmoothingSpline)
+UnivariateCubicSmoothingSpline.register(CubicSmoothingSpline)
+
+
 class MultivariateCubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, UnivariateDataType]):
     """Multivariate parametrized cubic smoothing spline
 
@@ -378,6 +416,13 @@ class MultivariateCubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, Uni
                  weights: ty.Optional[UnivariateDataType] = None,
                  smooth: ty.Optional[float] = None,
                  axis: int = -1):
+
+        with warnings.catch_warnings():
+            warnings.simplefilter('always', DeprecationWarning)
+            warnings.warn(
+                "'MultivariateCubicSmoothingSpline' class is deprecated "
+                "and will be removed in the future version. "
+                "Use 'CubicSmoothingSpline' class instead.", stacklevel=2)
 
         ydata = ty.cast(np.ndarray, np.asarray(ydata, dtype=np.float64))
 

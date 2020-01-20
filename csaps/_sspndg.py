@@ -12,7 +12,7 @@ import numpy as np
 
 from ._base import SplinePPFormBase, ISmoothingSpline
 from ._types import UnivariateDataType, NdGridDataType
-from ._sspumv import SplinePPForm, UnivariateCubicSmoothingSpline
+from ._sspumv import SplinePPForm, CubicSmoothingSpline
 
 
 def ndgrid_prepare_data_sites(data, name) -> ty.Tuple[np.ndarray, ...]:
@@ -224,8 +224,8 @@ class NdGridCubicSmoothingSpline(ISmoothingSpline[NdGridSplinePPForm, ty.Tuple[f
             shape_i = (np.prod(sizey[:-1]), sizey[-1])
             ydata_i = ydata.reshape(shape_i, order='F')
 
-            s = UnivariateCubicSmoothingSpline(
-                self._xdata[i], ydata_i, self._weights[i], smooth[i])
+            s = CubicSmoothingSpline(
+                self._xdata[i], ydata_i, weights=self._weights[i], smooth=smooth[i])
 
             _smooth.append(s.smooth)
             sizey[-1] = s.spline.pieces * s.spline.order
