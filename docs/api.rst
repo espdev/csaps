@@ -15,8 +15,7 @@ Summary
     AutoSmoothingResult
 
     ISmoothingSpline
-    UnivariateCubicSmoothingSpline
-    MultivariateCubicSmoothingSpline
+    CubicSmoothingSpline
     NdGridCubicSmoothingSpline
 
     SplinePPFormBase
@@ -39,13 +38,7 @@ Main API
 Object-Oriented API
 -------------------
 
-.. autoclass:: UnivariateCubicSmoothingSpline
-    :members:
-    :special-members: __call__
-
-----
-
-.. autoclass:: MultivariateCubicSmoothingSpline
+.. autoclass:: CubicSmoothingSpline
     :members:
     :special-members: __call__
 
