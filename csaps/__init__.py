@@ -13,6 +13,7 @@ from csaps._base import (
 )
 from csaps._sspumv import (
     SplinePPForm,
+    CubicSmoothingSpline,
     UnivariateCubicSmoothingSpline,
     MultivariateCubicSmoothingSpline,
 )
@@ -38,6 +39,7 @@ __all__ = [
     'ISmoothingSpline',
     'SplinePPForm',
     'NdGridSplinePPForm',
+    'CubicSmoothingSpline',
     'UnivariateCubicSmoothingSpline',
     'MultivariateCubicSmoothingSpline',
     'NdGridCubicSmoothingSpline',

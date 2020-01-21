@@ -10,10 +10,10 @@ from typing import Optional, Union, Sequence, NamedTuple
 
 import numpy as np
 
-from csaps._base import ISmoothingSpline
-from csaps._sspumv import UnivariateCubicSmoothingSpline
-from csaps._sspndg import ndgrid_prepare_data_sites, NdGridCubicSmoothingSpline
-from csaps._types import (
+from ._base import ISmoothingSpline
+from ._sspumv import CubicSmoothingSpline
+from ._sspndg import ndgrid_prepare_data_sites, NdGridCubicSmoothingSpline
+from ._types import (
     UnivariateDataType,
     UnivariateVectorizedDataType,
     NdGridDataType,
@@ -25,11 +25,16 @@ _XiDataType = Optional[Union[UnivariateDataType, NdGridDataType]]
 _WeightsDataType = Optional[Union[UnivariateDataType, NdGridDataType]]
 _SmoothDataType = Optional[Union[float, Sequence[Optional[float]]]]
 
-AutoSmoothingResult = NamedTuple('AutoSmoothingResult', [
-    ('values', _YDataType),
-    ('smooth', _SmoothDataType),
-])
-"""The result for auto smoothing for `csaps` function"""
+
+class AutoSmoothingResult(NamedTuple):
+    """The result for auto smoothing for `csaps` function"""
+
+    values: _YDataType
+    """Smoothed data values"""
+
+    smooth: _SmoothDataType
+    """The calculated smoothing parameter"""
+
 
 _ReturnType = Union[
     _YDataType,
@@ -41,6 +46,7 @@ _ReturnType = Union[
 def csaps(xdata: _XDataType,
           ydata: _YDataType,
           xidata: _XiDataType = None,
+          *,
           weights: _WeightsDataType = None,
           smooth: _SmoothDataType = None,
           axis: Optional[int] = None) -> _ReturnType:
@@ -105,7 +111,7 @@ def csaps(xdata: _XDataType,
 
     ssp_obj : ISmoothingSpline
         Smoothing spline object if ``xidata`` was not set:
-            - :class:`UnivariateCubicSmoothingSpline` instance for univariate/multivariate data
+            - :class:`CubicSmoothingSpline` instance for univariate/multivariate data
             - :class:`NdGridCubicSmoothingSpline` instance for nd-gridded data
 
     Examples
@@ -134,7 +140,7 @@ def csaps(xdata: _XDataType,
     See Also
     --------
 
-    UnivariateCubicSmoothingSpline
+    CubicSmoothingSpline
     NdGridCubicSmoothingSpline
 
     """
@@ -151,7 +157,7 @@ def csaps(xdata: _XDataType,
 
     if umv:
         axis = -1 if axis is None else axis
-        sp = UnivariateCubicSmoothingSpline(xdata, ydata, weights, smooth, axis)
+        sp = CubicSmoothingSpline(xdata, ydata, weights, smooth, axis)
     else:
         sp = NdGridCubicSmoothingSpline(xdata, ydata, weights, smooth)
 

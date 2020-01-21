@@ -14,4 +14,8 @@ def test_auto_tdata():
     t = [0., 3.74165739, 8.10055633, 12.68313203]
 
     sp = csaps.MultivariateCubicSmoothingSpline(data)
+
+    assert isinstance(sp.spline, csaps.SplinePPForm)
+    assert 0 < sp.smooth < 1
+    assert sp(t).shape == (3, 4)
     np.testing.assert_allclose(sp.t, t)

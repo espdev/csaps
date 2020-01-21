@@ -11,7 +11,7 @@
 
 ## Installation
 
-Python 3.5 or above is supported.
+Python 3.6 or above is supported.
 
 ```
 pip install -U csaps

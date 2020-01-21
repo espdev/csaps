@@ -23,7 +23,7 @@ import csaps
 ])
 def test_invalid_data(x, y, w):
     with pytest.raises(ValueError):
-        csaps.UnivariateCubicSmoothingSpline(x, y, w)
+        csaps.UnivariateCubicSmoothingSpline(x, y, weights=w)
 
 
 @pytest.mark.parametrize('y', [
@@ -160,6 +160,7 @@ def test_auto_smooth():
     xi = np.linspace(x[0], x[-1], 120)
     yi = sp(xi)
 
+    assert isinstance(sp.spline, csaps.SplinePPForm)
     np.testing.assert_almost_equal(sp.smooth, 0.996566686)
 
     desired_yi = [
@@ -238,7 +239,7 @@ def test_weighted(w, yid):
     y = [2., 4., 5., 7.]
     xi = np.linspace(1., 6., 10)
 
-    sp = csaps.UnivariateCubicSmoothingSpline(x, y, w)
+    sp = csaps.UnivariateCubicSmoothingSpline(x, y, weights=w)
     yi = sp(xi)
 
     np.testing.assert_allclose(yi, yid)

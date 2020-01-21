@@ -6,14 +6,15 @@ Univariate/multivariate cubic smoothing spline implementation
 """
 
 import typing as ty
+import warnings
 
 import numpy as np
 import scipy.sparse as sp
 import scipy.sparse.linalg as la
 
-from csaps._base import SplinePPFormBase, ISmoothingSpline
-from csaps._types import UnivariateDataType, UnivariateVectorizedDataType, MultivariateDataType
-from csaps._utils import from_2d, to_2d
+from ._base import SplinePPFormBase, ISmoothingSpline
+from ._types import UnivariateDataType, UnivariateVectorizedDataType, MultivariateDataType
+from ._reshape import from_2d, to_2d
 
 
 class SplinePPForm(SplinePPFormBase[np.ndarray, int]):
@@ -113,8 +114,10 @@ class SplinePPForm(SplinePPFormBase[np.ndarray, int]):
         return values
 
 
-class UnivariateCubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, UnivariateDataType]):
-    """Univariate cubic smoothing spline
+class CubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, UnivariateDataType]):
+    """Cubic smoothing spline
+
+    The cubic spline implementation for univariate/multivariate data.
 
     Parameters
     ----------
@@ -161,7 +164,7 @@ class UnivariateCubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, Univa
         """
         xi = ty.cast(np.ndarray, np.asarray(xi, dtype=np.float64))
 
-        if xi.ndim > 1:
+        if xi.ndim > 1:  # pragma: no cover
             raise ValueError('"xi" data must be a 1-d array.')
 
         return self._spline.evaluate(xi)
@@ -202,8 +205,8 @@ class UnivariateCubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, Univa
 
         if yshape[axis] != xdata.size:
             raise ValueError(
-                '"ydata" data must be a 1-D or N-D array with shape[{}] that is equal to "xdata" size ({})'.format(
-                    axis, xdata.size))
+                f'"ydata" data must be a 1-D or N-D array with shape[{axis}] '
+                f'that is equal to "xdata" size ({xdata.size})')
 
         # Reshape ydata N-D array to 2-D NxM array where N is the data
         # dimension and M is the number of data points.
@@ -214,8 +217,7 @@ class UnivariateCubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, Univa
         else:
             weights = np.asarray(weights, dtype=np.float64)
             if weights.size != xdata.size:
-                raise ValueError(
-                    'Weights vector size must be equal of xdata size')
+                raise ValueError('Weights vector size must be equal of xdata size')
 
         return xdata, ydata, weights, yshape
 
@@ -237,9 +239,8 @@ class UnivariateCubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, Univa
         pcount = self._xdata.size
         dx = np.diff(self._xdata)
 
-        if not all(dx > 0):
-            raise ValueError(
-                'Items of xdata vector must satisfy the condition: x1 < x2 < ... < xN')
+        if not all(dx > 0):  # pragma: no cover
+            raise ValueError('Items of xdata vector must satisfy the condition: x1 < x2 < ... < xN')
 
         dy = np.diff(self._ydata, axis=1)
         dy_dx = dy / dx
@@ -308,6 +309,41 @@ class UnivariateCubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, Univa
         )
 
         return spline, p
+
+
+class UnivariateCubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, UnivariateDataType]):
+    __doc__ = CubicSmoothingSpline.__doc__
+
+    def __init__(self,
+                 xdata: UnivariateDataType,
+                 ydata: UnivariateVectorizedDataType,
+                 weights: ty.Optional[UnivariateDataType] = None,
+                 smooth: ty.Optional[float] = None,
+                 axis: int = -1) -> None:
+        with warnings.catch_warnings():
+            warnings.simplefilter('always', DeprecationWarning)
+            warnings.warn(
+                "'UnivariateCubicSmoothingSpline' class is deprecated "
+                "and will be removed in the future version. "
+                "Use 'CubicSmoothingSpline' class instead.", stacklevel=2)
+
+        self._cssp = CubicSmoothingSpline(
+            xdata, ydata, weights=weights, smooth=smooth, axis=axis)
+
+    @property
+    def smooth(self) -> float:
+        return self._cssp.smooth
+
+    @property
+    def spline(self) -> SplinePPForm:
+        return self._cssp.spline
+
+    def __call__(self, xi: UnivariateDataType) -> np.ndarray:
+        return self._cssp(xi)
+
+
+# For case isinstance(CubicSmoothingSpline(...), UnivariateCubicSmoothingSpline)
+UnivariateCubicSmoothingSpline.register(CubicSmoothingSpline)
 
 
 class MultivariateCubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, UnivariateDataType]):
@@ -379,6 +415,13 @@ class MultivariateCubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, Uni
                  smooth: ty.Optional[float] = None,
                  axis: int = -1):
 
+        with warnings.catch_warnings():
+            warnings.simplefilter('always', DeprecationWarning)
+            warnings.warn(
+                "'MultivariateCubicSmoothingSpline' class is deprecated "
+                "and will be removed in the future version. "
+                "Use 'CubicSmoothingSpline' class instead.", stacklevel=2)
+
         ydata = ty.cast(np.ndarray, np.asarray(ydata, dtype=np.float64))
 
         if tdata is None:
@@ -386,14 +429,13 @@ class MultivariateCubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, Uni
 
         tdata = ty.cast(np.ndarray, np.asarray(tdata, dtype=np.float64))
 
-        if tdata.size != ydata.shape[-1]:
-            raise ValueError('"tdata" size must be equal to "ydata" shape[{}] size ({})'.format(
-                axis, ydata.shape[axis]))
+        if tdata.size != ydata.shape[-1]:  # pragma: no cover
+            raise ValueError(f'"tdata" size must be equal to "ydata" shape[{axis}] size ({ydata.shape[axis]})')
 
         self._tdata = tdata
 
         # Use vectorization for compute spline for every dimension from t
-        self._univariate_spline = UnivariateCubicSmoothingSpline(
+        self._univariate_spline = CubicSmoothingSpline(
             xdata=tdata,
             ydata=ydata,
             weights=weights,

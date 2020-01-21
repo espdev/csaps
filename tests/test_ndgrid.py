@@ -14,7 +14,9 @@ import csaps
     ([[1, 2, 3], [1, 2, 3]], np.ones((3, 3)), [1, 2, 3], None),
     ([[1, 2, 3], [1, 2, 3]], np.ones((3, 3)), [[1, 2, 3]], None),
     ([[1, 2, 3], [1, 2, 3]], np.ones((3, 3)), [[1, 2], [1, 2]], None),
-    ([[1, 2, 3], [1, 2, 3]], np.ones((3, 3)), None, [0.5, 0.4, 0.2])
+    ([[1, 2, 3], [1, 2, 3]], np.ones((3, 3)), None, [0.5, 0.4, 0.2]),
+    (np.array([[1, 2, 3], [4, 5, 6]]), np.ones((3, 3)), None, None),
+    ([np.arange(6).reshape(2, 3), np.arange(6).reshape(2, 3)], np.ones((6, 6)), None, None),
 ])
 def test_invalid_data(x, y, w, p):
     with pytest.raises((ValueError, TypeError)):
@@ -33,4 +35,9 @@ def test_surface():
     noisy = ydata + (np.random.randn(*ydata.shape) * 0.75)
 
     sp = csaps.NdGridCubicSmoothingSpline(xdata, noisy)
-    _ = sp(xdata)
+    noisy_s = sp(xdata)
+
+    assert isinstance(sp.smooth, tuple)
+    assert len(sp.smooth) == 2
+    assert isinstance(sp.spline, csaps.NdGridSplinePPForm)
+    assert noisy_s.shape == noisy.shape

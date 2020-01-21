@@ -27,7 +27,7 @@ setup(
     name='csaps',
     version=_get_version(),
     packages=['csaps'],
-    python_requires='>=3.5, <4',
+    python_requires='>=3.6, <4',
     install_requires=[
         'numpy >=0.12.1, <1.20.0',
         'scipy >=0.19.1, <1.6.0',
@@ -41,6 +41,7 @@ setup(
         ],
         'tests': [
             'pytest',
+            'coverage',
         ],
     },
     package_data={"csaps": ["py.typed"]},
@@ -67,7 +68,6 @@ setup(
         'Programming Language :: Python',
         'Programming Language :: Python :: 3 :: Only',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',

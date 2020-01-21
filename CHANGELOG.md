@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.9.0
+
+* Drop support of Python 3.5
+* `weights`, `smooth` and `axis` arguments in `csaps` function are keyword-only now
+* `UnivariateCubicSmoothingSpline` and `MultivariateCubicSmoothingSpline` classes are deprecated 
+  and will be removed in 1.0.0 version. Use `CubicSmoothingSpline` instead.
+
 ## v0.8.0
 
 * Add `csaps` function that can be used as the main API
