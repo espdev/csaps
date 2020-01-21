@@ -205,8 +205,8 @@ class CubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, UnivariateDataT
 
         if yshape[axis] != xdata.size:
             raise ValueError(
-                '"ydata" data must be a 1-D or N-D array with shape[{}] that is equal to "xdata" size ({})'.format(
-                    axis, xdata.size))
+                f'"ydata" data must be a 1-D or N-D array with shape[{axis}] '
+                f'that is equal to "xdata" size ({xdata.size})')
 
         # Reshape ydata N-D array to 2-D NxM array where N is the data
         # dimension and M is the number of data points.
@@ -217,8 +217,7 @@ class CubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, UnivariateDataT
         else:
             weights = np.asarray(weights, dtype=np.float64)
             if weights.size != xdata.size:
-                raise ValueError(
-                    'Weights vector size must be equal of xdata size')
+                raise ValueError('Weights vector size must be equal of xdata size')
 
         return xdata, ydata, weights, yshape
 
@@ -241,8 +240,7 @@ class CubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, UnivariateDataT
         dx = np.diff(self._xdata)
 
         if not all(dx > 0):
-            raise ValueError(
-                'Items of xdata vector must satisfy the condition: x1 < x2 < ... < xN')
+            raise ValueError('Items of xdata vector must satisfy the condition: x1 < x2 < ... < xN')
 
         dy = np.diff(self._ydata, axis=1)
         dy_dx = dy / dx
@@ -432,13 +430,12 @@ class MultivariateCubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, Uni
         tdata = ty.cast(np.ndarray, np.asarray(tdata, dtype=np.float64))
 
         if tdata.size != ydata.shape[-1]:
-            raise ValueError('"tdata" size must be equal to "ydata" shape[{}] size ({})'.format(
-                axis, ydata.shape[axis]))
+            raise ValueError(f'"tdata" size must be equal to "ydata" shape[{axis}] size ({ydata.shape[axis]})')
 
         self._tdata = tdata
 
         # Use vectorization for compute spline for every dimension from t
-        self._univariate_spline = UnivariateCubicSmoothingSpline(
+        self._univariate_spline = CubicSmoothingSpline(
             xdata=tdata,
             ydata=ydata,
             weights=weights,

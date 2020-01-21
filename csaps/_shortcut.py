@@ -30,7 +30,10 @@ class AutoSmoothingResult(NamedTuple):
     """The result for auto smoothing for `csaps` function"""
 
     values: _YDataType
+    """Smoothed data values"""
+
     smooth: _SmoothDataType
+    """The calculated smoothing parameter"""
 
 
 _ReturnType = Union[
@@ -108,7 +111,7 @@ def csaps(xdata: _XDataType,
 
     ssp_obj : ISmoothingSpline
         Smoothing spline object if ``xidata`` was not set:
-            - :class:`UnivariateCubicSmoothingSpline` instance for univariate/multivariate data
+            - :class:`CubicSmoothingSpline` instance for univariate/multivariate data
             - :class:`NdGridCubicSmoothingSpline` instance for nd-gridded data
 
     Examples
@@ -137,7 +140,7 @@ def csaps(xdata: _XDataType,
     See Also
     --------
 
-    UnivariateCubicSmoothingSpline
+    CubicSmoothingSpline
     NdGridCubicSmoothingSpline
 
     """

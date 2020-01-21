@@ -17,17 +17,16 @@ from ._sspumv import SplinePPForm, CubicSmoothingSpline
 
 def ndgrid_prepare_data_sites(data, name) -> ty.Tuple[np.ndarray, ...]:
     if not isinstance(data, c_abc.Sequence):
-        raise TypeError("'{}' must be a sequence of the vectors.".format(name))
+        raise TypeError(f"'{name}' must be a sequence of the vectors.")
 
     data = list(data)
 
     for i, di in enumerate(data):
         di = np.array(di, dtype=np.float64)
         if di.ndim > 1:
-            raise ValueError("All '{}' elements must be a vector.".format(name))
+            raise ValueError(f"All '{name}' elements must be a vector.")
         if di.size < 2:
-            raise ValueError(
-                "'{}' must contain at least 2 data points.".format(name))
+            raise ValueError(f"'{name}' must contain at least 2 data points.")
         data[i] = di
 
     return tuple(data)
@@ -165,13 +164,11 @@ class NdGridCubicSmoothingSpline(ISmoothingSpline[NdGridSplinePPForm, ty.Tuple[f
         data_ndim = len(xdata)
 
         if ydata.ndim != data_ndim:
-            raise ValueError(
-                'ydata must have dimension {} according to xdata'.format(data_ndim))
+            raise ValueError(f'ydata must have dimension {data_ndim} according to xdata')
 
         for yd, xs in zip(ydata.shape, map(len, xdata)):
             if yd != xs:
-                raise ValueError(
-                    'ydata ({}) and xdata ({}) dimension size mismatch'.format(yd, xs))
+                raise ValueError(f'ydata ({yd}) and xdata ({xs}) dimension size mismatch')
 
         if not weights:
             weights = [None] * data_ndim
@@ -179,14 +176,12 @@ class NdGridCubicSmoothingSpline(ISmoothingSpline[NdGridSplinePPForm, ty.Tuple[f
             weights = ndgrid_prepare_data_sites(weights, 'weights')
 
         if len(weights) != data_ndim:
-            raise ValueError(
-                'weights ({}) and xdata ({}) dimensions mismatch'.format(len(weights), data_ndim))
+            raise ValueError(f'weights ({len(weights)}) and xdata ({data_ndim}) dimensions mismatch')
 
         for w, x in zip(weights, xdata):
             if w is not None:
                 if w.size != x.size:
-                    raise ValueError(
-                        'weights ({}) and xdata ({}) dimension size mismatch'.format(w, x))
+                    raise ValueError(f'weights ({w}) and xdata ({x}) dimension size mismatch')
 
         if not smooth:
             smooth = [None] * data_ndim
@@ -198,8 +193,8 @@ class NdGridCubicSmoothingSpline(ISmoothingSpline[NdGridSplinePPForm, ty.Tuple[f
 
         if len(smooth) != data_ndim:
             raise ValueError(
-                'Number of smoothing parameter values must be equal '
-                'number of dimensions ({})'.format(data_ndim))
+                f'Number of smoothing parameter values must '
+                f'be equal number of dimensions ({data_ndim})')
 
         return xdata, ydata, weights, smooth
 
@@ -209,8 +204,7 @@ class NdGridCubicSmoothingSpline(ISmoothingSpline[NdGridSplinePPForm, ty.Tuple[f
         xi = ndgrid_prepare_data_sites(xi, 'xi')
 
         if len(xi) != self._ndim:
-            raise ValueError(
-                'xi ({}) and xdata ({}) dimensions mismatch'.format(len(xi), self._ndim))
+            raise ValueError(f'xi ({len(xi)}) and xdata ({self._ndim}) dimensions mismatch')
 
         return self._spline.evaluate(xi)
 

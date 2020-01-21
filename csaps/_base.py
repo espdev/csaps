@@ -89,15 +89,13 @@ class SplinePPFormBase(abc.ABC, ty.Generic[TData, TProps]):
 
     def __repr__(self):
         return (
-            '{}\n'
-            '  breaks: {}\n'
-            '  coeffs: {} shape\n'
-            '  pieces: {}\n'
-            '  order: {}\n'
-            '  ndim: {}\n'
-        ).format(
-            type(self).__name__, self.breaks, self.coeffs.shape,
-            self.pieces, self.order, self.ndim)
+            f'{type(self).__name__}\n'
+            f'  breaks: {self.breaks}\n'
+            f'  coeffs: {self.coeffs.shape} shape\n'
+            f'  pieces: {self.pieces}\n'
+            f'  order: {self.order}\n'
+            f'  ndim: {self.ndim}\n'
+        )
 
 
 class ISmoothingSpline(abc.ABC, ty.Generic[TSpline, TSmooth, TXi]):

@@ -65,7 +65,7 @@ def to_2d(arr: np.ndarray, axis: int) -> np.ndarray:
     axis = arr.ndim + axis if axis < 0 else axis
 
     if axis >= arr.ndim:
-        raise ValueError('axis {} is out of array axes {}'.format(axis, arr.ndim))
+        raise ValueError(f'axis {axis} is out of array axes {arr.ndim}')
 
     tr_axes = list(range(arr.ndim))
     tr_axes.pop(axis)
@@ -136,7 +136,7 @@ def from_2d(arr: np.ndarray, shape: ty.Sequence[int], axis: int) -> np.ndarray:
     axis = ndim + axis if axis < 0 else axis
 
     if axis >= ndim:
-        raise ValueError('axis {} is out of N-D array axes {}'.format(axis, ndim))
+        raise ValueError(f'axis {axis} is out of N-D array axes {ndim}')
 
     new_shape = list(shape)
     new_shape.pop(axis)
