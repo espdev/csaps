@@ -203,7 +203,7 @@ class NdGridCubicSmoothingSpline(ISmoothingSpline[NdGridSplinePPForm, ty.Tuple[f
         """
         xi = ndgrid_prepare_data_sites(xi, 'xi')
 
-        if len(xi) != self._ndim:
+        if len(xi) != self._ndim:  # pragma: no cover
             raise ValueError(f'xi ({len(xi)}) and xdata ({self._ndim}) dimensions mismatch')
 
         return self._spline.evaluate(xi)

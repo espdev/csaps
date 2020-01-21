@@ -3,7 +3,7 @@
 import pytest
 import numpy as np
 
-from csaps import csaps, AutoSmoothingResult, UnivariateCubicSmoothingSpline, NdGridCubicSmoothingSpline
+from csaps import csaps, AutoSmoothingResult, CubicSmoothingSpline, NdGridCubicSmoothingSpline
 
 
 @pytest.fixture(scope='module')
@@ -34,7 +34,7 @@ def data(curve, surface, request):
     if request.param == 'univariate':
         x, y = curve
         xi = np.linspace(x[0], x[-1], 150)
-        return x, y, xi, 0.85, UnivariateCubicSmoothingSpline
+        return x, y, xi, 0.85, CubicSmoothingSpline
 
     elif request.param == 'ndgrid':
         x, y = surface
@@ -46,8 +46,14 @@ def data(curve, surface, request):
     'univariate',
     'ndgrid',
 ], indirect=True)
-def test_shortcut_output(data):
+@pytest.mark.parametrize('tolist', [True, False])
+def test_shortcut_output(data, tolist):
     x, y, xi, smooth, sp_cls = data
+
+    if tolist and isinstance(x, np.ndarray):
+        x = x.tolist()
+        y = y.tolist()
+        xi = xi.tolist()
 
     yi = csaps(x, y, xi, smooth=smooth)
     assert isinstance(yi, np.ndarray)

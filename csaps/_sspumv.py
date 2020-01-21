@@ -331,14 +331,14 @@ class UnivariateCubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, Univa
             xdata, ydata, weights=weights, smooth=smooth, axis=axis)
 
     @property
-    def smooth(self) -> TSmooth:
+    def smooth(self) -> float:
         return self._cssp.smooth
 
     @property
-    def spline(self) -> TSpline:
+    def spline(self) -> SplinePPForm:
         return self._cssp.spline
 
-    def __call__(self, xi: TXi) -> np.ndarray:
+    def __call__(self, xi: UnivariateDataType) -> np.ndarray:
         return self._cssp(xi)
 
 

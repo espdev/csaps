@@ -87,7 +87,7 @@ class SplinePPFormBase(abc.ABC, ty.Generic[TData, TProps]):
             Interpolated/smoothed data
         """
 
-    def __repr__(self):
+    def __repr__(self):  # pragma: no cover
         return (
             f'{type(self).__name__}\n'
             f'  breaks: {self.breaks}\n'

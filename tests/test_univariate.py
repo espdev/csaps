@@ -160,6 +160,7 @@ def test_auto_smooth():
     xi = np.linspace(x[0], x[-1], 120)
     yi = sp(xi)
 
+    assert isinstance(sp.spline, csaps.SplinePPForm)
     np.testing.assert_almost_equal(sp.smooth, 0.996566686)
 
     desired_yi = [
