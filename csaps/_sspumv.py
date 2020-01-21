@@ -164,7 +164,7 @@ class CubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, UnivariateDataT
         """
         xi = ty.cast(np.ndarray, np.asarray(xi, dtype=np.float64))
 
-        if xi.ndim > 1:
+        if xi.ndim > 1:  # pragma: no cover
             raise ValueError('"xi" data must be a 1-d array.')
 
         return self._spline.evaluate(xi)
@@ -239,7 +239,7 @@ class CubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, UnivariateDataT
         pcount = self._xdata.size
         dx = np.diff(self._xdata)
 
-        if not all(dx > 0):
+        if not all(dx > 0):  # pragma: no cover
             raise ValueError('Items of xdata vector must satisfy the condition: x1 < x2 < ... < xN')
 
         dy = np.diff(self._ydata, axis=1)
@@ -429,7 +429,7 @@ class MultivariateCubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, Uni
 
         tdata = ty.cast(np.ndarray, np.asarray(tdata, dtype=np.float64))
 
-        if tdata.size != ydata.shape[-1]:
+        if tdata.size != ydata.shape[-1]:  # pragma: no cover
             raise ValueError(f'"tdata" size must be equal to "ydata" shape[{axis}] size ({ydata.shape[axis]})')
 
         self._tdata = tdata

@@ -41,6 +41,7 @@ setup(
         ],
         'tests': [
             'pytest',
+            'coverage',
         ],
     },
     package_data={"csaps": ["py.typed"]},
