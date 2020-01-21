@@ -13,7 +13,7 @@ import scipy.sparse as sp
 import scipy.sparse.linalg as la
 
 from ._base import SplinePPFormBase, ISmoothingSpline
-from ._types import UnivariateDataType, UnivariateVectorizedDataType, MultivariateDataType, TSmooth, TSpline, TXi
+from ._types import UnivariateDataType, UnivariateVectorizedDataType, MultivariateDataType
 from ._reshape import from_2d, to_2d
 
 
