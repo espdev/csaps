@@ -51,6 +51,7 @@ Content
 
     formulation
     manual
+    benchmarks
     api
     changelog
 
