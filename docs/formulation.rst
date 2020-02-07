@@ -7,7 +7,7 @@ Definition
 ----------
 
 The package implements cubic smooting spline algorithm proposed by Carl de Boor in his book
-"A Practical Guide to Splines" (`Springer <https://www.springer.com/gp/book/9780387953663>`_).
+"A Practical Guide to Splines" [#]_.
 
 The smoothing spline :math:`f` minimizes
 
@@ -87,3 +87,8 @@ It is an example plot of comparison ``csaps`` and ``scipy.UnivariateSpline`` (k=
     plt.plot(xi, yi_scipy, '-', label='scipy UnivariateSpline')
     plt.plot(xi, yi_csaps, '-', label='csaps')
     plt.legend()
+
+
+.. rubric:: Footnotes
+
+.. [#] C. de Boor, A Practical Guide to Splines, Springer-Verlag, 1978 (`link <https://www.springer.com/gp/book/9780387953663>`_)
