@@ -41,6 +41,9 @@ coverage.xml
 *,cover
 .hypothesis/
 
+# Profiling
+*.lprof
+
 # Sphinx documentation
 docs/_build/
 
