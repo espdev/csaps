@@ -75,7 +75,7 @@ class NdGridSplinePPForm(SplinePPFormBase[ty.Sequence[np.ndarray], ty.Tuple[int,
         sizey = list(yi.shape)
         nsize = tuple(x.size for x in xi)
 
-        for i in range(self.ndim - 1, -1, -1):
+        for i in reversed(range(self.ndim)):
             ndim = int(np.prod(sizey[:self.ndim]))
             coeffs = yi.reshape((ndim * self.pieces[i], self.order[i]), order='F')
 
@@ -214,7 +214,7 @@ class NdGridCubicSmoothingSpline(ISmoothingSpline[NdGridSplinePPForm, ty.Tuple[f
         _smooth = []
 
         # Perform coordinatewise smoothing spline computing
-        for i in range(self._ndim - 1, -1, -1):
+        for i in reversed(range(self._ndim)):
             shape_i = (np.prod(sizey[:-1]), sizey[-1])
             ydata_i = ydata.reshape(shape_i, order='F')
 
