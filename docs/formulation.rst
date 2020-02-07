@@ -72,7 +72,7 @@ It is an example plot of comparison ``csaps`` and ``scipy.UnivariateSpline`` (k=
     import numpy as np
     import matplotlib.pyplot as plt
     from scipy.interpolate import UnivariateSpline
-    from csaps import UnivariateCubicSmoothingSpline
+    from csaps import CubicSmoothingSpline
 
     np.random.seed(1234)
 
@@ -81,7 +81,7 @@ It is an example plot of comparison ``csaps`` and ``scipy.UnivariateSpline`` (k=
     xi = np.linspace(x[0], x[-1], 150)
 
     scipy_spline = UnivariateSpline(x, y, k=3)
-    csaps_spline = UnivariateCubicSmoothingSpline(x, y)
+    csaps_spline = CubicSmoothingSpline(x, y)
 
     yi_scipy = scipy_spline(xi)
     yi_csaps = csaps_spline(xi)
