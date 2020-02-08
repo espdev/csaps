@@ -165,7 +165,7 @@ class CubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, UnivariateDataT
         xi = ty.cast(np.ndarray, np.asarray(xi, dtype=np.float64))
 
         if xi.ndim > 1:  # pragma: no cover
-            raise ValueError('"xi" data must be a 1-d array.')
+            raise ValueError("'xi' data must be a 1-d array.")
 
         return self._spline.evaluate(xi)
 
@@ -197,16 +197,16 @@ class CubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, UnivariateDataT
         ydata = np.asarray(ydata, dtype=np.float64)
 
         if xdata.ndim > 1:
-            raise ValueError('xdata must be a vector')
+            raise ValueError("'xdata' must be a vector")
         if xdata.size < 2:
-            raise ValueError('xdata must contain at least 2 data points.')
+            raise ValueError("'xdata' must contain at least 2 data points.")
 
         yshape = list(ydata.shape)
 
         if yshape[axis] != xdata.size:
             raise ValueError(
-                f'"ydata" data must be a 1-D or N-D array with shape[{axis}] '
-                f'that is equal to "xdata" size ({xdata.size})')
+                f"'ydata' data must be a 1-D or N-D array with shape[{axis}] "
+                f"that is equal to 'xdata' size ({xdata.size})")
 
         # Reshape ydata N-D array to 2-D NxM array where N is the data
         # dimension and M is the number of data points.
@@ -240,7 +240,8 @@ class CubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, UnivariateDataT
         dx = np.diff(self._xdata)
 
         if not all(dx > 0):  # pragma: no cover
-            raise ValueError('Items of xdata vector must satisfy the condition: x1 < x2 < ... < xN')
+            raise ValueError(
+                "Items of 'xdata' vector must satisfy the condition: x1 < x2 < ... < xN")
 
         dy = np.diff(self._ydata, axis=1)
         dy_dx = dy / dx
