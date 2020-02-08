@@ -235,7 +235,6 @@ class CubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, UnivariateDataT
 
         return 1. / (1. + trace(a) / (6. * trace(b)))
 
-    @profile
     def _make_spline(self, smooth: ty.Optional[float]) -> ty.Tuple[SplinePPForm, float]:
         pcount = self._xdata.size
         dx = np.diff(self._xdata)
