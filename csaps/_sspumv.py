@@ -89,23 +89,19 @@ class SplinePPForm(SplinePPFormBase[np.ndarray, int]):
         lx = len(xi)
 
         if d > 1:
-            xi_shape = (1, d * lx)
-            xi_ndm = np.array(xi, ndmin=2)
-            xi = np.reshape(np.repeat(xi_ndm, d, axis=0), xi_shape, order='F')
-
-            index_rep = (np.repeat(np.array(1 + d * index, ndmin=2), d, axis=0)
-                         + np.repeat(np.array(np.r_[-d:0], ndmin=2).T, lx, axis=1))
-            index = np.reshape(index_rep, (d * lx, 1), order='F')
+            xi = np.repeat(xi, d, axis=0).T.flatten()
+            index_mat = (1 + d * index)[np.newaxis] + np.r_[-d:0][np.newaxis].T
+            index = index_mat.T.flatten()
 
         index -= 1
 
         # Apply nested multiplication
-        values = self._coeffs[index, 0].T
+        values = self._coeffs[index, 0]
 
         for i in range(1, self._coeffs.shape[1]):
-            values = xi * values + self._coeffs[index, i].T
+            values = xi * values + self._coeffs[index, i]
 
-        values = values.reshape((d, lx), order='F').squeeze()
+        values = values.reshape((lx, d)).T
 
         if values.shape != shape:
             # Reshape values 2-D NxM array to N-D array with original shape
