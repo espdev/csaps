@@ -89,7 +89,7 @@ class SplinePPForm(SplinePPFormBase[np.ndarray, int]):
         lx = len(xi)
 
         if d > 1:
-            xi = np.repeat(xi, d, axis=0).T.flatten()
+            xi = np.repeat(xi, d)
             index_mat = (1 + d * index)[np.newaxis] + np.r_[-d:0][np.newaxis].T
             index = index_mat.T.flatten()
 
