@@ -235,6 +235,7 @@ class CubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, UnivariateDataT
 
         return 1. / (1. + trace(a) / (6. * trace(b)))
 
+    @profile
     def _make_spline(self, smooth: ty.Optional[float]) -> ty.Tuple[SplinePPForm, float]:
         pcount = self._xdata.size
         dx = np.diff(self._xdata)
@@ -286,15 +287,12 @@ class CubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, UnivariateDataT
             c3 = np.vstack((d_pad, p * u, d_pad))
             c2 = np.diff(yi, axis=0) / dx - dx * (2. * c3[:-1, :] + c3[1:, :])
 
-            coeffs = np.hstack((
-                (np.diff(c3, axis=0) / dx).T,
-                3. * c3[:-1, :].T,
-                c2.T,
-                yi[:-1, :].T
-            ))
-
-            cf_shape = ((pcount - 1) * self._ydim, 4)
-            coeffs = coeffs.reshape(cf_shape, order='F')
+            coeffs = np.stack((
+                (np.diff(c3, axis=0) / dx).ravel(),
+                3. * c3[:-1, :].ravel(),
+                c2.ravel(),
+                yi[:-1, :].ravel()
+            ), axis=1)
         else:
             p = 1.
             yi = self._ydata[:, 0][:, np.newaxis]
