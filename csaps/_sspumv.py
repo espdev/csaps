@@ -277,13 +277,13 @@ class CubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, UnivariateDataT
                 u = u.T
 
             dx = dx[:, np.newaxis]
-            d_pad = np.zeros((1, self._ydim))
 
-            d1 = np.diff(np.vstack((d_pad, u, d_pad)), axis=0) / dx
-            d2 = np.diff(np.vstack((d_pad, d1, d_pad)), axis=0)
+            pad_width = [(1, 1), (0, 0)]
+            d1 = np.diff(np.pad(u, pad_width), axis=0) / dx
+            d2 = np.diff(np.pad(d1, pad_width), axis=0)
 
             yi = self._ydata.T - ((6. * (1. - p)) * w) @ d2
-            c3 = np.vstack((d_pad, p * u, d_pad))
+            c3 = np.pad(p * u, pad_width)
             c2 = np.diff(yi, axis=0) / dx - dx * (2. * c3[:-1, :] + c3[1:, :])
 
             coeffs = np.stack((
