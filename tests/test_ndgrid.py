@@ -41,3 +41,19 @@ def test_surface():
     assert len(sp.smooth) == 2
     assert isinstance(sp.spline, csaps.NdGridSplinePPForm)
     assert noisy_s.shape == noisy.shape
+
+
+def test_volume():
+    xdata = [
+        np.linspace(-3, 3, 21),
+        np.linspace(-3.5, 3.5, 31),
+        np.linspace(-2.5, 2.5, 41),
+    ]
+
+    np.random.seed(12345)
+    ydata = np.random.randn(21, 31, 41)
+
+    sp = csaps.NdGridCubicSmoothingSpline(xdata, ydata)
+    ydata_s = sp(xdata)
+
+    assert ydata_s.shape == ydata.shape
