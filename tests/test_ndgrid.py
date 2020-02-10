@@ -57,3 +57,20 @@ def test_volume():
     ydata_s = sp(xdata)
 
     assert ydata_s.shape == ydata.shape
+
+
+@pytest.mark.parametrize('shape', [
+    (3, 4),
+    (3, 4, 5),
+    (3, 4, 5, 6),
+    (3, 4, 5, 6, 7),
+], ids=['2d', '3d', '4d', '5d'])
+def test_nd_array(shape: tuple):
+    xdata = [np.arange(s) for s in shape]
+    ydata = np.arange(0, np.prod(shape)).reshape(shape)
+
+    sp = csaps.NdGridCubicSmoothingSpline(xdata, ydata, smooth=1.0)
+    ydata_s = sp(xdata)
+
+    assert ydata_s.shape == ydata.shape
+    assert ydata_s == pytest.approx(ydata)
