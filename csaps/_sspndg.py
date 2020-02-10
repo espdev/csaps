@@ -13,7 +13,7 @@ import numpy as np
 from ._base import SplinePPFormBase, ISmoothingSpline
 from ._types import UnivariateDataType, NdGridDataType
 from ._sspumv import SplinePPForm, CubicSmoothingSpline
-from ._reshape import to_2d
+from ._reshape import to_2d, from_2d
 
 
 def ndgrid_prepare_data_sites(data, name) -> ty.Tuple[np.ndarray, ...]:
@@ -211,10 +211,10 @@ class NdGridCubicSmoothingSpline(ISmoothingSpline[NdGridSplinePPForm, ty.Tuple[f
         return self._spline.evaluate(xi)
 
     def _make_spline(self, smooth: ty.List[ty.Optional[float]]) -> ty.Tuple[NdGridSplinePPForm, ty.Tuple[float, ...]]:
-        shapey = list(self._ydata.shape)
         coeffs = self._ydata.copy()
-        smooths = []
+        shapey = list(coeffs.shape)
 
+        smooths = []
         permute_axes = (self._ndim - 1, *range(self._ndim - 1))
 
         # computing coordinatewise smoothing spline
