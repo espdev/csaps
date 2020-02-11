@@ -211,8 +211,8 @@ class NdGridCubicSmoothingSpline(ISmoothingSpline[NdGridSplinePPForm, ty.Tuple[f
         return self._spline.evaluate(xi)
 
     def _make_spline(self, smooth: ty.List[ty.Optional[float]]) -> ty.Tuple[NdGridSplinePPForm, ty.Tuple[float, ...]]:
-        coeffs = self._ydata.copy()
-        shapey = list(coeffs.shape)
+        coeffs = self._ydata
+        coeffs_shape = list(coeffs.shape)
 
         smooths = []
         permute_axes = (self._ndim - 1, *range(self._ndim - 1))
@@ -225,11 +225,11 @@ class NdGridCubicSmoothingSpline(ISmoothingSpline[NdGridSplinePPForm, ty.Tuple[f
                 self._xdata[i], ydata_i, weights=self._weights[i], smooth=smooth[i])
 
             smooths.append(s.smooth)
-            shapey[-1] = s.spline.pieces * s.spline.order
-            coeffs = s.spline.coeffs.reshape(shapey, order='F')
+            coeffs_shape[-1] = s.spline.pieces * s.spline.order
+            coeffs = s.spline.coeffs.reshape(coeffs_shape, order='F')
 
             if self._ndim > 1:
                 coeffs = coeffs.transpose(permute_axes)
-                shapey = list(coeffs.shape)
+                coeffs_shape = list(coeffs.shape)
 
         return NdGridSplinePPForm(breaks=self._xdata, coeffs=coeffs), tuple(smooths)
