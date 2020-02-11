@@ -60,11 +60,12 @@ def test_volume():
 
 
 @pytest.mark.parametrize('shape', [
+    (3,),
     (3, 4),
     (3, 4, 5),
     (3, 4, 5, 6),
     (3, 4, 5, 6, 7),
-], ids=['2d', '3d', '4d', '5d'])
+], ids=['1d', '2d', '3d', '4d', '5d'])
 def test_nd_array(shape: tuple):
     xdata = [np.arange(s) for s in shape]
     ydata = np.arange(0, np.prod(shape)).reshape(shape)
