@@ -115,6 +115,26 @@ def test_vectorize(y):
     np.testing.assert_allclose(ys, y)
 
 
+@pytest.mark.parametrize('y, order, pieces, ndim', [
+    ([1, 2], 2, 1, 1),
+    ([[1, 2], [1, 2]], 2, 1, 2),
+    ([1, 2, 3], 4, 2, 1),
+    ([[1, 2, 3], [1, 2, 3]], 4, 2, 2),
+    ([1, 2, 3, 4, 5, 6, 7], 4, 6, 1),
+    ([[1, 2, 3, 4, 5, 6, 7], [1, 2, 3, 4, 5, 6, 7]], 4, 6, 2),
+])
+def test_vectorize(y, order, pieces, ndim):
+    x = np.arange(np.array(y).shape[-1])
+    y = np.array(y)
+
+    s = csaps.UnivariateCubicSmoothingSpline(x, y).spline
+
+    assert s.order == order
+    assert s.pieces == pieces
+    assert s.ndim == ndim
+    assert s.shape == y.shape
+
+
 @pytest.mark.parametrize('shape, axis', chain(
     *map(product, [
         # shape
@@ -134,7 +154,12 @@ def test_axis(shape, axis):
     y = np.arange(int(np.prod(shape))).reshape(shape)
     x = np.arange(np.array(y).shape[axis])
 
-    ys = csaps.UnivariateCubicSmoothingSpline(x, y, axis=axis)(x)
+    s = csaps.UnivariateCubicSmoothingSpline(x, y, axis=axis)
+    ys = s(x)
+
+    assert s.spline.shape == y.shape
+    assert s.spline.axis == axis
+
     np.testing.assert_allclose(ys, y)
 
 

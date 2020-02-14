@@ -46,7 +46,7 @@ class SplinePPForm(SplinePPFormBase[np.ndarray, int]):
         self._pieces = pieces
         self._ndim = coeffs.shape[0]
 
-        self._shape = shape
+        self._shape = tuple(shape)
         self._axis = axis
 
     @property
@@ -69,9 +69,21 @@ class SplinePPForm(SplinePPFormBase[np.ndarray, int]):
     def ndim(self) -> int:
         return self._ndim
 
+    @property
+    def shape(self) -> ty.Tuple[int, ...]:
+        """Returns the original data shape
+        """
+        return self._shape
+
+    @property
+    def axis(self) -> int:
+        """Returns the data axis along the spline will be evaluated
+        """
+        return self._axis
+
     def evaluate(self, xi: np.ndarray) -> np.ndarray:
-        shape = list(self._shape)
-        shape[self._axis] = xi.size
+        shape = list(self.shape)
+        shape[self.axis] = xi.size
 
         # For each data site, compute its break interval
         mesh = self.breaks[1:-1]
@@ -88,15 +100,15 @@ class SplinePPForm(SplinePPFormBase[np.ndarray, int]):
         xi = xi - self.breaks[index]
 
         # Apply nested multiplication
-        values = self._coeffs[:, index]
+        values = self.coeffs[:, index]
 
-        for i in range(1, self._order):
-            index += self._pieces
-            values = xi * values + self._coeffs[:, index]
+        for i in range(1, self.order):
+            index += self.pieces
+            values = xi * values + self.coeffs[:, index]
 
         if values.shape != shape:
             # Reshape values 2-D NxM array to N-D array with original shape
-            values = from_2d(values, shape, self._axis)
+            values = from_2d(values, shape, self.axis)
 
         return values
 

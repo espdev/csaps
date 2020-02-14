@@ -75,6 +75,12 @@ class NdGridSplinePPForm(SplinePPFormBase[ty.Sequence[np.ndarray], ty.Tuple[int,
     def ndim(self) -> int:
         return self._ndim
 
+    @property
+    def shape(self) -> ty.Tuple[int, ...]:
+        """Returns the original data shape
+        """
+        return tuple(x.size for x in self.breaks)
+
     def evaluate(self, xi: ty.Sequence[np.ndarray]) -> np.ndarray:
         shape = tuple(x.size for x in xi)
 
