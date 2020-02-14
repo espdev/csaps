@@ -123,7 +123,7 @@ def test_vectorize(y):
     ([1, 2, 3, 4, 5, 6, 7], 4, 6, 1),
     ([[1, 2, 3, 4, 5, 6, 7], [1, 2, 3, 4, 5, 6, 7]], 4, 6, 2),
 ])
-def test_vectorize(y, order, pieces, ndim):
+def test_splineppform(y, order, pieces, ndim):
     x = np.arange(np.array(y).shape[-1])
     y = np.array(y)
 
