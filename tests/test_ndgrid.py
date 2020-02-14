@@ -44,6 +44,38 @@ def test_surface():
 
 
 @pytest.mark.parametrize('shape', [
+    (2,),
+
+    (2, 3),
+    (2, 2),
+
+    (2, 3, 4),
+    (2, 2, 3),
+    (2, 2, 2),
+
+    (2, 3, 4, 5),
+    (2, 2, 3, 4),
+    (2, 2, 2, 3),
+    (2, 2, 2, 2),
+
+    (2, 3, 4, 5, 6),
+    (2, 2, 3, 4, 5),
+    (2, 2, 2, 3, 4),
+    (2, 2, 2, 2, 3),
+    (2, 2, 2, 2, 2),
+])
+def test_nd_2pt_array(shape: tuple):
+    xdata = [np.arange(s) for s in shape]
+    ydata = np.arange(0, np.prod(shape)).reshape(shape)
+
+    sp = csaps.NdGridCubicSmoothingSpline(xdata, ydata, smooth=1.0)
+    ydata_s = sp(xdata)
+
+    assert ydata_s.shape == ydata.shape
+    assert ydata_s == pytest.approx(ydata)
+
+
+@pytest.mark.parametrize('shape', [
     (3,),
     (3, 4),
     (3, 4, 5),
