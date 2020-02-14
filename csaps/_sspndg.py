@@ -13,7 +13,7 @@ import numpy as np
 from ._base import SplinePPFormBase, ISmoothingSpline
 from ._types import UnivariateDataType, NdGridDataType
 from ._sspumv import SplinePPForm, CubicSmoothingSpline
-from ._reshape import to_2d, from_2d
+from ._reshape import to_2d
 
 
 def ndgrid_prepare_data_sites(data, name) -> ty.Tuple[np.ndarray, ...]:
