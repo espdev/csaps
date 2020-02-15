@@ -9,11 +9,12 @@ Spline Representation
 ---------------------
 
 The computed splines are represented by classes :class:`SplinePPForm` for univariate/multivariate
-and :class:`NdGridSplinePPForm` for nd-gridded data.
+and :class:`NdGridSplinePPForm` for nd-gridded data. This representation can be named as "PP-form"
+(piecewise-polynomial form).
 
-The spline coefficients are stored in the numpy array. It is 2D 1xM array for univariate data,
-2D NxM array for multivariate data and 2D/ND array (tensor-product of univariate spline coefficients)
-for nd-gridded data.
+The polynom coefficients for each piece of spline are stored in the numpy array.
+It is 2D 1xM array for univariate data, 2D NxM array for multivariate data and 2D/ND array
+(tensor-product of univariate spline coefficients) for nd-gridded data.
 
 Let's look at a simple example.
 
