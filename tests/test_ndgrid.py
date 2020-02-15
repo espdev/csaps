@@ -43,6 +43,60 @@ def test_surface():
     assert noisy_s.shape == noisy.shape
 
 
+@pytest.mark.parametrize('shape, smooth', [
+    ((4,), 0.0),
+    ((4,), 0.5),
+    ((4,), 1.0),
+
+    ((4,), (0.0,)),
+    ((4,), (0.5,)),
+    ((4,), (1.0,)),
+
+    ((4, 5), 0.0),
+    ((4, 5), 0.5),
+    ((4, 5), 1.0),
+    ((4, 5), (0.0, 0.0)),
+    ((4, 5), (0.0, 0.5)),
+    ((4, 5), (0.5, 0.0)),
+    ((4, 5), (0.5, 0.7)),
+    ((4, 5), (1.0, 0.0)),
+    ((4, 5), (0.0, 1.0)),
+    ((4, 5), (1.0, 1.0)),
+
+    ((4, 5, 6), 0.0),
+    ((4, 5, 6), 0.5),
+    ((4, 5, 6), 1.0),
+    ((4, 5, 6), (0.0, 0.0, 0.0)),
+    ((4, 5, 6), (0.5, 0.0, 0.0)),
+    ((4, 5, 6), (0.5, 0.6, 0.0)),
+    ((4, 5, 6), (0.0, 0.5, 0.6)),
+    ((4, 5, 6), (0.4, 0.5, 0.6)),
+
+    ((4, 5, 6, 7), 0.0),
+    ((4, 5, 6, 7), 0.5),
+    ((4, 5, 6, 7), 1.0),
+    ((4, 5, 6, 7), (0.0, 0.0, 0.0, 0.0)),
+    ((4, 5, 6, 7), (0.5, 0.0, 0.0, 0.0)),
+    ((4, 5, 6, 7), (0.0, 0.5, 0.0, 0.0)),
+    ((4, 5, 6, 7), (0.5, 0.6, 0.0, 0.0)),
+    ((4, 5, 6, 7), (0.0, 0.5, 0.6, 0.0)),
+    ((4, 5, 6, 7), (0.0, 0.5, 0.6, 0.7)),
+    ((4, 5, 6, 7), (0.4, 0.5, 0.6, 0.7)),
+])
+def test_smooth_factor(shape, smooth):
+    x = [np.arange(s) for s in shape]
+    y = np.arange(0, np.prod(shape)).reshape(shape)
+
+    sp = csaps.NdGridCubicSmoothingSpline(x, y, smooth=smooth)
+
+    if isinstance(smooth, tuple):
+        expected_smooth = smooth
+    else:
+        expected_smooth = tuple([smooth] * len(shape))
+
+    assert sp.smooth == pytest.approx(expected_smooth)
+
+
 @pytest.mark.parametrize('shape', [
     (2,),
 

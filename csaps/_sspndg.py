@@ -210,7 +210,7 @@ class NdGridCubicSmoothingSpline(ISmoothingSpline[NdGridSplinePPForm, ty.Tuple[f
                 if w.size != x.size:
                     raise ValueError(f'weights ({w}) and xdata ({x}) dimension size mismatch')
 
-        if not smooth:
+        if smooth is None:
             smooth = [None] * data_ndim
 
         if not isinstance(smooth, c_abc.Sequence):
@@ -261,4 +261,4 @@ class NdGridCubicSmoothingSpline(ISmoothingSpline[NdGridSplinePPForm, ty.Tuple[f
                 coeffs = coeffs.transpose(permute_axes)
                 coeffs_shape = list(coeffs.shape)
 
-        return NdGridSplinePPForm(breaks=self._xdata, coeffs=coeffs), tuple(smooths)
+        return NdGridSplinePPForm(breaks=self._xdata, coeffs=coeffs), tuple(reversed(smooths))
