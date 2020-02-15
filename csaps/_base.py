@@ -91,7 +91,7 @@ class SplinePPFormBase(abc.ABC, ty.Generic[TData, TProps]):
         return (
             f'{type(self).__name__}\n'
             f'  breaks: {self.breaks}\n'
-            f'  coeffs: {self.coeffs.shape} shape\n'
+            f'  coeffs: shape {self.coeffs.shape}\n'
             f'  pieces: {self.pieces}\n'
             f'  order: {self.order}\n'
             f'  ndim: {self.ndim}\n'
