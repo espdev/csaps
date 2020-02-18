@@ -38,15 +38,15 @@ class SplinePPForm(SplinePPFormBase[np.ndarray, int]):
         Axis along which values are assumed to be varying
     """
 
-    def __init__(self, breaks: np.ndarray, coeffs: np.ndarray, ndim: int,
+    def __init__(self, breaks: np.ndarray, coeffs: np.ndarray, order: int, pieces: int,
                  shape: ty.Sequence[int], axis: int = -1) -> None:
         self._breaks = breaks
         self._coeffs = coeffs
-        self._pieces = np.prod(coeffs.shape[:-1]) // ndim
-        self._order = coeffs.shape[-1]
-        self._ndim = ndim
+        self._order = order
+        self._pieces = pieces
+        self._ndim = coeffs.shape[0]
 
-        self._shape = shape
+        self._shape = tuple(shape)
         self._axis = axis
 
     @property
@@ -58,20 +58,32 @@ class SplinePPForm(SplinePPFormBase[np.ndarray, int]):
         return self._coeffs
 
     @property
-    def pieces(self) -> int:
-        return self._pieces
-
-    @property
     def order(self) -> int:
         return self._order
+
+    @property
+    def pieces(self) -> int:
+        return self._pieces
 
     @property
     def ndim(self) -> int:
         return self._ndim
 
+    @property
+    def shape(self) -> ty.Tuple[int, ...]:
+        """Returns the original data shape
+        """
+        return self._shape
+
+    @property
+    def axis(self) -> int:
+        """Returns the data axis along the spline will be evaluated
+        """
+        return self._axis
+
     def evaluate(self, xi: np.ndarray) -> np.ndarray:
-        shape = list(self._shape)
-        shape[self._axis] = xi.size
+        shape = list(self.shape)
+        shape[self.axis] = xi.size
 
         # For each data site, compute its break interval
         mesh = self.breaks[1:-1]
@@ -82,34 +94,21 @@ class SplinePPForm(SplinePPFormBase[np.ndarray, int]):
         nanx = np.flatnonzero(index == 0)
         index = np.fmin(index, mesh.size + 1)
         index[nanx] = 1
-
-        # Go to local coordinates
-        xi = xi - self.breaks[index - 1]
-        d = self.ndim
-        lx = len(xi)
-
-        if d > 1:
-            xi_shape = (1, d * lx)
-            xi_ndm = np.array(xi, ndmin=2)
-            xi = np.reshape(np.repeat(xi_ndm, d, axis=0), xi_shape, order='F')
-
-            index_rep = (np.repeat(np.array(1 + d * index, ndmin=2), d, axis=0)
-                         + np.repeat(np.array(np.r_[-d:0], ndmin=2).T, lx, axis=1))
-            index = np.reshape(index_rep, (d * lx, 1), order='F')
-
         index -= 1
 
+        # Go to local coordinates
+        xi = xi - self.breaks[index]
+
         # Apply nested multiplication
-        values = self._coeffs[index, 0].T
+        values = self.coeffs[:, index]
 
-        for i in range(1, self._coeffs.shape[1]):
-            values = xi * values + self._coeffs[index, i].T
-
-        values = values.reshape((d, lx), order='F').squeeze()
+        for i in range(1, self.order):
+            index += self.pieces
+            values = xi * values + self.coeffs[:, index]
 
         if values.shape != shape:
             # Reshape values 2-D NxM array to N-D array with original shape
-            values = from_2d(values, shape, self._axis)
+            values = from_2d(values, shape, self.axis)
 
         return values
 
@@ -165,7 +164,7 @@ class CubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, UnivariateDataT
         xi = ty.cast(np.ndarray, np.asarray(xi, dtype=np.float64))
 
         if xi.ndim > 1:  # pragma: no cover
-            raise ValueError('"xi" data must be a 1-d array.')
+            raise ValueError("'xi' data must be a 1-d array.")
 
         return self._spline.evaluate(xi)
 
@@ -197,16 +196,16 @@ class CubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, UnivariateDataT
         ydata = np.asarray(ydata, dtype=np.float64)
 
         if xdata.ndim > 1:
-            raise ValueError('xdata must be a vector')
+            raise ValueError("'xdata' must be a vector")
         if xdata.size < 2:
-            raise ValueError('xdata must contain at least 2 data points.')
+            raise ValueError("'xdata' must contain at least 2 data points.")
 
         yshape = list(ydata.shape)
 
         if yshape[axis] != xdata.size:
             raise ValueError(
-                f'"ydata" data must be a 1-D or N-D array with shape[{axis}] '
-                f'that is equal to "xdata" size ({xdata.size})')
+                f"'ydata' data must be a 1-D or N-D array with shape[{axis}] "
+                f"that is equal to 'xdata' size ({xdata.size})")
 
         # Reshape ydata N-D array to 2-D NxM array where N is the data
         # dimension and M is the number of data points.
@@ -240,7 +239,8 @@ class CubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, UnivariateDataT
         dx = np.diff(self._xdata)
 
         if not all(dx > 0):  # pragma: no cover
-            raise ValueError('Items of xdata vector must satisfy the condition: x1 < x2 < ... < xN')
+            raise ValueError(
+                "Items of 'xdata' vector must satisfy the condition: x1 < x2 < ... < xN")
 
         dy = np.diff(self._ydata, axis=1)
         dy_dx = dy / dx
@@ -277,33 +277,39 @@ class CubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, UnivariateDataT
                 u = u.T
 
             dx = dx[:, np.newaxis]
-            d_pad = np.zeros((1, self._ydim))
 
-            d1 = np.diff(np.vstack((d_pad, u, d_pad)), axis=0) / dx
-            d2 = np.diff(np.vstack((d_pad, d1, d_pad)), axis=0)
+            pad_width = [(1, 1), (0, 0)]
+            d1 = np.diff(np.pad(u, pad_width), axis=0) / dx
+            d2 = np.diff(np.pad(d1, pad_width), axis=0)
 
             yi = self._ydata.T - ((6. * (1. - p)) * w) @ d2
-            c3 = np.vstack((d_pad, p * u, d_pad))
+            c3 = np.pad(p * u, pad_width)
             c2 = np.diff(yi, axis=0) / dx - dx * (2. * c3[:-1, :] + c3[1:, :])
 
-            coeffs = np.hstack((
-                (np.diff(c3, axis=0) / dx).T,
-                3. * c3[:-1, :].T,
-                c2.T,
-                yi[:-1, :].T
-            ))
+            coeffs = np.vstack((
+                np.diff(c3, axis=0) / dx,
+                3. * c3[:-1, :],
+                c2,
+                yi[:-1, :],
+            )).T
 
-            cf_shape = ((pcount - 1) * self._ydim, 4)
-            coeffs = coeffs.reshape(cf_shape, order='F')
+            order = 4
+            pieces = coeffs.shape[1] // order
         else:
-            p = 1.
+            # The corner case for the data with 2 points.
             yi = self._ydata[:, 0][:, np.newaxis]
-            coeffs = np.array(np.hstack((dy_dx, yi)), ndmin=2)
+            coeffs = np.hstack((dy_dx, yi))
+
+            order = 2
+            pieces = 1
+
+            p = 1.
 
         spline = SplinePPForm(
             breaks=self._xdata,
             coeffs=coeffs,
-            ndim=self._ydim,
+            order=order,
+            pieces=pieces,
             shape=self._shape,
             axis=self._axis
         )

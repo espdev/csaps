@@ -71,9 +71,13 @@ ND-Grid
 Make Spline
 ~~~~~~~~~~~
 
-.. image:: _static/benchmarks/ndgrid-make.png
+.. image:: _static/benchmarks/ndgrid-make-ndim2.png
+
+.. image:: _static/benchmarks/ndgrid-make-ndim3.png
 
 Evaluate Spline
 ~~~~~~~~~~~~~~~
 
-.. image:: _static/benchmarks/ndgrid-evaluate.png
+.. image:: _static/benchmarks/ndgrid-evaluate-ndim2.png
+
+.. image:: _static/benchmarks/ndgrid-evaluate-ndim3.png

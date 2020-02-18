@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.10.0
+
+* Significant performance improvements for make/evaluate splines and memory consumption optimization
+* Change format for storing spline coefficients (reshape coeffs array) to improve performance
+* Add shape property to `SplinePPForm`/`NdGridSplinePPForm` and axis property to `SplinePPForm`
+* Fix issues with the smoothing factor in nd-grid case: inverted ordering and unnable to use 0.0 value
+* Update documentation
+
 ## v0.9.0
 
 * Drop support of Python 3.5

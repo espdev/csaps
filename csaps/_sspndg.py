@@ -40,15 +40,20 @@ class NdGridSplinePPForm(SplinePPFormBase[ty.Sequence[np.ndarray], ty.Tuple[int,
     breaks : np.ndarray
         Breaks values 1-D array
     coeffs : np.ndarray
-        Spline coefficients 2-D array
+        Spline coefficients N-D array
     """
 
     def __init__(self, breaks: ty.Sequence[np.ndarray], coeffs: np.ndarray) -> None:
         self._breaks = breaks
         self._coeffs = coeffs
         self._pieces = tuple(x.size - 1 for x in breaks)
-        self._order = tuple(s // p for s, p in zip(coeffs.shape[1:], self._pieces))
         self._ndim = len(breaks)
+
+        if self._ndim > 1:
+            self._order = tuple(s // p for s, p in zip(coeffs.shape, self._pieces))
+        else:
+            # the corner case for univariate spline that is represented as 1d-grid
+            self._order = (coeffs.shape[1] // self._pieces[0], )
 
     @property
     def breaks(self) -> ty.Sequence[np.ndarray]:
@@ -59,35 +64,57 @@ class NdGridSplinePPForm(SplinePPFormBase[ty.Sequence[np.ndarray], ty.Tuple[int,
         return self._coeffs
 
     @property
-    def pieces(self) -> ty.Tuple[int, ...]:
-        return self._pieces
-
-    @property
     def order(self) -> ty.Tuple[int, ...]:
         return self._order
+
+    @property
+    def pieces(self) -> ty.Tuple[int, ...]:
+        return self._pieces
 
     @property
     def ndim(self) -> int:
         return self._ndim
 
+    @property
+    def shape(self) -> ty.Tuple[int, ...]:
+        """Returns the original data shape
+        """
+        return tuple(x.size for x in self.breaks)
+
     def evaluate(self, xi: ty.Sequence[np.ndarray]) -> np.ndarray:
-        yi = self.coeffs.copy()
-        sizey = list(yi.shape)
-        nsize = tuple(x.size for x in xi)
+        shape = tuple(x.size for x in xi)
+
+        coeffs = self.coeffs
+        coeffs_shape = list(coeffs.shape)
+
+        d = self.ndim - 1
+        permuted_axes = (d, *range(d))
 
         for i in reversed(range(self.ndim)):
-            ndim = int(np.prod(sizey[:self.ndim]))
-            coeffs = yi.reshape((ndim * self.pieces[i], self.order[i]), order='F')
+            xii = xi[i]
+            ndim = int(np.prod(coeffs_shape[:d]))
 
-            spp = SplinePPForm(self.breaks[i], coeffs, ndim=ndim, shape=(ndim, xi[i].size))
-            yi = spp.evaluate(xi[i])
+            if self.ndim > 2:
+                coeffs = coeffs.reshape((ndim, self.pieces[i] * self.order[i]))
 
-            yi = yi.reshape((*sizey[:self.ndim], nsize[i]), order='F')
-            axes = (0, self.ndim, *range(1, self.ndim))
-            yi = yi.transpose(axes)
-            sizey = list(yi.shape)
+            spp = SplinePPForm(
+                breaks=self.breaks[i],
+                coeffs=coeffs,
+                pieces=self.pieces[i],
+                order=self.order[i],
+                shape=(ndim, xii.size)
+            )
 
-        return yi.reshape(nsize, order='F')
+            coeffs = spp.evaluate(xii)
+
+            if self.ndim > 2:
+                coeffs = coeffs.reshape((*coeffs_shape[:d], shape[i]))
+
+            if self.ndim > 1:
+                coeffs = coeffs.transpose(permuted_axes)
+                coeffs_shape = list(coeffs.shape)
+
+        return coeffs.reshape(shape)
 
 
 class NdGridCubicSmoothingSpline(ISmoothingSpline[NdGridSplinePPForm, ty.Tuple[float, ...], NdGridDataType]):
@@ -183,7 +210,7 @@ class NdGridCubicSmoothingSpline(ISmoothingSpline[NdGridSplinePPForm, ty.Tuple[f
                 if w.size != x.size:
                     raise ValueError(f'weights ({w}) and xdata ({x}) dimension size mismatch')
 
-        if not smooth:
+        if smooth is None:
             smooth = [None] * data_ndim
 
         if not isinstance(smooth, c_abc.Sequence):
@@ -209,25 +236,29 @@ class NdGridCubicSmoothingSpline(ISmoothingSpline[NdGridSplinePPForm, ty.Tuple[f
         return self._spline.evaluate(xi)
 
     def _make_spline(self, smooth: ty.List[ty.Optional[float]]) -> ty.Tuple[NdGridSplinePPForm, ty.Tuple[float, ...]]:
-        sizey = [1] + list(self._ydata.shape)
-        ydata = self._ydata.reshape(sizey, order='F').copy()
-        _smooth = []
+        coeffs = self._ydata
+        coeffs_shape = list(coeffs.shape)
 
-        # Perform coordinatewise smoothing spline computing
+        smooths = []
+        permute_axes = (self._ndim - 1, *range(self._ndim - 1))
+
+        # computing coordinatewise smoothing spline
         for i in reversed(range(self._ndim)):
-            shape_i = (np.prod(sizey[:-1]), sizey[-1])
-            ydata_i = ydata.reshape(shape_i, order='F')
+            if self._ndim > 2:
+                coeffs = coeffs.reshape(np.prod(coeffs.shape[:-1]), coeffs.shape[-1])
 
             s = CubicSmoothingSpline(
-                self._xdata[i], ydata_i, weights=self._weights[i], smooth=smooth[i])
+                self._xdata[i], coeffs, weights=self._weights[i], smooth=smooth[i])
 
-            _smooth.append(s.smooth)
-            sizey[-1] = s.spline.pieces * s.spline.order
-            ydata = s.spline.coeffs.reshape(sizey, order='F')
+            smooths.append(s.smooth)
+            coeffs = s.spline.coeffs
+
+            if self._ndim > 2:
+                coeffs_shape[-1] = s.spline.pieces * s.spline.order
+                coeffs = coeffs.reshape(coeffs_shape)
 
             if self._ndim > 1:
-                axes = (0, self._ndim, *range(1, self._ndim))
-                ydata = ydata.transpose(axes)
-                sizey = list(ydata.shape)
+                coeffs = coeffs.transpose(permute_axes)
+                coeffs_shape = list(coeffs.shape)
 
-        return NdGridSplinePPForm(self._xdata, ydata), tuple(_smooth)
+        return NdGridSplinePPForm(breaks=self._xdata, coeffs=coeffs), tuple(reversed(smooths))

@@ -41,3 +41,107 @@ def test_surface():
     assert len(sp.smooth) == 2
     assert isinstance(sp.spline, csaps.NdGridSplinePPForm)
     assert noisy_s.shape == noisy.shape
+
+
+@pytest.mark.parametrize('shape, smooth', [
+    ((4,), 0.0),
+    ((4,), 0.5),
+    ((4,), 1.0),
+
+    ((4,), (0.0,)),
+    ((4,), (0.5,)),
+    ((4,), (1.0,)),
+
+    ((4, 5), 0.0),
+    ((4, 5), 0.5),
+    ((4, 5), 1.0),
+    ((4, 5), (0.0, 0.0)),
+    ((4, 5), (0.0, 0.5)),
+    ((4, 5), (0.5, 0.0)),
+    ((4, 5), (0.5, 0.7)),
+    ((4, 5), (1.0, 0.0)),
+    ((4, 5), (0.0, 1.0)),
+    ((4, 5), (1.0, 1.0)),
+
+    ((4, 5, 6), 0.0),
+    ((4, 5, 6), 0.5),
+    ((4, 5, 6), 1.0),
+    ((4, 5, 6), (0.0, 0.0, 0.0)),
+    ((4, 5, 6), (0.5, 0.0, 0.0)),
+    ((4, 5, 6), (0.5, 0.6, 0.0)),
+    ((4, 5, 6), (0.0, 0.5, 0.6)),
+    ((4, 5, 6), (0.4, 0.5, 0.6)),
+
+    ((4, 5, 6, 7), 0.0),
+    ((4, 5, 6, 7), 0.5),
+    ((4, 5, 6, 7), 1.0),
+    ((4, 5, 6, 7), (0.0, 0.0, 0.0, 0.0)),
+    ((4, 5, 6, 7), (0.5, 0.0, 0.0, 0.0)),
+    ((4, 5, 6, 7), (0.0, 0.5, 0.0, 0.0)),
+    ((4, 5, 6, 7), (0.5, 0.6, 0.0, 0.0)),
+    ((4, 5, 6, 7), (0.0, 0.5, 0.6, 0.0)),
+    ((4, 5, 6, 7), (0.0, 0.5, 0.6, 0.7)),
+    ((4, 5, 6, 7), (0.4, 0.5, 0.6, 0.7)),
+])
+def test_smooth_factor(shape, smooth):
+    x = [np.arange(s) for s in shape]
+    y = np.arange(0, np.prod(shape)).reshape(shape)
+
+    sp = csaps.NdGridCubicSmoothingSpline(x, y, smooth=smooth)
+
+    if isinstance(smooth, tuple):
+        expected_smooth = smooth
+    else:
+        expected_smooth = tuple([smooth] * len(shape))
+
+    assert sp.smooth == pytest.approx(expected_smooth)
+
+
+@pytest.mark.parametrize('shape', [
+    (2,),
+
+    (2, 3),
+    (2, 2),
+
+    (2, 3, 4),
+    (2, 2, 3),
+    (2, 2, 2),
+
+    (2, 3, 4, 5),
+    (2, 2, 3, 4),
+    (2, 2, 2, 3),
+    (2, 2, 2, 2),
+
+    (2, 3, 4, 5, 6),
+    (2, 2, 3, 4, 5),
+    (2, 2, 2, 3, 4),
+    (2, 2, 2, 2, 3),
+    (2, 2, 2, 2, 2),
+])
+def test_nd_2pt_array(shape: tuple):
+    xdata = [np.arange(s) for s in shape]
+    ydata = np.arange(0, np.prod(shape)).reshape(shape)
+
+    sp = csaps.NdGridCubicSmoothingSpline(xdata, ydata, smooth=1.0)
+    ydata_s = sp(xdata)
+
+    assert ydata_s.shape == ydata.shape
+    assert ydata_s == pytest.approx(ydata)
+
+
+@pytest.mark.parametrize('shape', [
+    (3,),
+    (3, 4),
+    (3, 4, 5),
+    (3, 4, 5, 6),
+    (3, 4, 5, 6, 7),
+], ids=['1d', '2d', '3d', '4d', '5d'])
+def test_nd_array(shape: tuple):
+    xdata = [np.arange(s) for s in shape]
+    ydata = np.arange(0, np.prod(shape)).reshape(shape)
+
+    sp = csaps.NdGridCubicSmoothingSpline(xdata, ydata, smooth=1.0)
+    ydata_s = sp(xdata)
+
+    assert sp.spline.shape == ydata.shape
+    assert ydata_s == pytest.approx(ydata)

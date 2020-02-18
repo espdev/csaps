@@ -197,8 +197,8 @@ where
     - ``y`` -- the data values. For univariate case it is vector with the same size as ``x``,
       for multivariate case it is a sequence of vectors or nd-array, and for nd-gridded data
       it is nd-array
-    - ``xi`` -- the data sites for smoothed data. It is shape-like ``x`` data and in the same
-      range as ``x``, but usually has more interpolated points
+    - ``xi`` -- the data sites for smoothed data (output mesh). It is shape-like ``x`` and in the same
+      range as ``x``, but usually it has more interpolated points
     - ``smooth`` -- the smoothing parameter in the range ``[0, 1]``
 
 
@@ -384,7 +384,7 @@ The example for univariate data:
     Spline smoothing parameter: 0.8999999999999999
     Spline description: SplinePPForm
       breaks: [-5. -4. -3. -2. -1.  0.  1.  2.  3.  4.  5.]
-      coeffs: (10, 4) shape
+      coeffs: shape (1, 40)
       pieces: 10
       order: 4
       ndim: 1

@@ -28,7 +28,7 @@ def test_invalid_data(x, y, w):
 
 @pytest.mark.parametrize('y', [
     # 1D (2, )
-    np.array([2, 4]),
+    [2, 4],
 
     # 2D (2, 2)
     [(2, 4), (3, 5)],
@@ -37,14 +37,14 @@ def test_invalid_data(x, y, w):
     [(2, 4), (3, 5), (4, 6)],
 
     # 3D (2, 2, 2)
-    [[(2, 4), (3, 5)],
-     [(2, 4), (3, 5)]],
+    [[(1, 2), (3, 4)],
+     [(5, 6), (7, 8)]],
 
     # 1D (3, )
     [2, 4, 6],
 
-    # 2D (2, 3)
-    [(2, 4, 6), (3, 5, 7)],
+    # 2D (2, 5)
+    [(1, 2, 3, 4, 5), (3, 4, 5, 6, 7)],
 
     # 2D (3, 3)
     [(2, 4, 6), (3, 5, 7), (4, 6, 8)],
@@ -95,11 +95,16 @@ def test_invalid_data(x, y, w):
      [[(2, 4, 6, 8), (3, 5, 7, 9), (4, 6, 8, 10)], [(2, 4, 6, 8), (3, 5, 7, 9), (4, 6, 8, 10)]]],
 
     # 4D (3, 3, 3, 4)
-    [[[(2, 4, 6, 8), (3, 5, 7, 9), (4, 6, 8, 10)], [(2, 4, 6, 8), (3, 5, 7, 9), (4, 6, 8, 10)],
+    [[[(2, 4, 6, 8), (3, 5, 7, 9), (4, 6, 8, 10)],
+      [(2, 4, 6, 8), (3, 5, 7, 9), (4, 6, 8, 10)],
       [(2, 4, 6, 8), (3, 5, 7, 9), (4, 6, 8, 10)]],
-     [[(2, 4, 6, 8), (3, 5, 7, 9), (4, 6, 8, 10)], [(2, 4, 6, 8), (3, 5, 7, 9), (4, 6, 8, 10)],
+
+     [[(2, 4, 6, 8), (3, 5, 7, 9), (4, 6, 8, 10)],
+      [(2, 4, 6, 8), (3, 5, 7, 9), (4, 6, 8, 10)],
       [(2, 4, 6, 8), (3, 5, 7, 9), (4, 6, 8, 10)]],
-     [[(2, 4, 6, 8), (3, 5, 7, 9), (4, 6, 8, 10)], [(2, 4, 6, 8), (3, 5, 7, 9), (4, 6, 8, 10)],
+
+     [[(2, 4, 6, 8), (3, 5, 7, 9), (4, 6, 8, 10)],
+      [(2, 4, 6, 8), (3, 5, 7, 9), (4, 6, 8, 10)],
       [(2, 4, 6, 8), (3, 5, 7, 9), (4, 6, 8, 10)]]],
 
 ])
@@ -108,6 +113,26 @@ def test_vectorize(y):
 
     ys = csaps.UnivariateCubicSmoothingSpline(x, y)(x)
     np.testing.assert_allclose(ys, y)
+
+
+@pytest.mark.parametrize('y, order, pieces, ndim', [
+    ([1, 2], 2, 1, 1),
+    ([[1, 2], [1, 2]], 2, 1, 2),
+    ([1, 2, 3], 4, 2, 1),
+    ([[1, 2, 3], [1, 2, 3]], 4, 2, 2),
+    ([1, 2, 3, 4, 5, 6, 7], 4, 6, 1),
+    ([[1, 2, 3, 4, 5, 6, 7], [1, 2, 3, 4, 5, 6, 7]], 4, 6, 2),
+])
+def test_splineppform(y, order, pieces, ndim):
+    x = np.arange(np.array(y).shape[-1])
+    y = np.array(y)
+
+    s = csaps.UnivariateCubicSmoothingSpline(x, y).spline
+
+    assert s.order == order
+    assert s.pieces == pieces
+    assert s.ndim == ndim
+    assert s.shape == y.shape
 
 
 @pytest.mark.parametrize('shape, axis', chain(
@@ -129,7 +154,12 @@ def test_axis(shape, axis):
     y = np.arange(int(np.prod(shape))).reshape(shape)
     x = np.arange(np.array(y).shape[axis])
 
-    ys = csaps.UnivariateCubicSmoothingSpline(x, y, axis=axis)(x)
+    s = csaps.UnivariateCubicSmoothingSpline(x, y, axis=axis)
+    ys = s(x)
+
+    assert s.spline.shape == y.shape
+    assert s.spline.axis == axis
+
     np.testing.assert_allclose(ys, y)
 
 

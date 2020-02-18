@@ -41,17 +41,6 @@ class SplinePPFormBase(abc.ABC, ty.Generic[TData, TProps]):
 
     @property
     @abc.abstractmethod
-    def pieces(self) -> TProps:
-        """Returns a spline pieces data
-
-        Returns
-        -------
-        pieces : ty.Union[int, ty.Tuple[int, ...]]
-            Returns a spline pieces data
-        """
-
-    @property
-    @abc.abstractmethod
     def order(self) -> TProps:
         """Returns a spline order
 
@@ -59,6 +48,17 @@ class SplinePPFormBase(abc.ABC, ty.Generic[TData, TProps]):
         -------
         order : ty.Union[int, ty.Tuple[int, ...]]
             Returns a spline order
+        """
+
+    @property
+    @abc.abstractmethod
+    def pieces(self) -> TProps:
+        """Returns a spline pieces data
+
+        Returns
+        -------
+        pieces : ty.Union[int, ty.Tuple[int, ...]]
+            Returns a spline pieces data
         """
 
     @property
@@ -91,7 +91,7 @@ class SplinePPFormBase(abc.ABC, ty.Generic[TData, TProps]):
         return (
             f'{type(self).__name__}\n'
             f'  breaks: {self.breaks}\n'
-            f'  coeffs: {self.coeffs.shape} shape\n'
+            f'  coeffs: shape {self.coeffs.shape}\n'
             f'  pieces: {self.pieces}\n'
             f'  order: {self.order}\n'
             f'  ndim: {self.ndim}\n'
