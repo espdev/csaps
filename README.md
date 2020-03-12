@@ -1,5 +1,5 @@
 <h1 align="center">
-  <a href="https://github.com/espdev/csaps"><img src="https://user-images.githubusercontent.com/1299189/76571441-8d97e400-64c8-11ea-8c05-58850f8311a1.png" alt="csaps" width="400"/></a><br>
+  <a href="https://github.com/espdev/csaps"><img src="https://user-images.githubusercontent.com/1299189/76571441-8d97e400-64c8-11ea-8c05-58850f8311a1.png" alt="csaps" width="300"/></a><br>
 </h1>
 
 <p align="center"><em></em></p>
