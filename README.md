@@ -1,23 +1,28 @@
-# CSAPS: Cubic spline approximation (smoothing)
+<p align="center">
+  <a href="https://github.com/espdev/csaps"><img src="https://user-images.githubusercontent.com/1299189/76571441-8d97e400-64c8-11ea-8c05-58850f8311a1.png" alt="csaps" width="400" /></a><br>
+</p>
 
-[![PyPI version](https://img.shields.io/pypi/v/csaps.svg)](https://pypi.python.org/pypi/csaps)
-[![Documentation Status](https://readthedocs.org/projects/csaps/badge/?version=latest)](https://csaps.readthedocs.io/en/latest/?badge=latest)
-[![Build status](https://travis-ci.org/espdev/csaps.svg?branch=master)](https://travis-ci.org/espdev/csaps)
-[![Coverage Status](https://coveralls.io/repos/github/espdev/csaps/badge.svg?branch=master)](https://coveralls.io/github/espdev/csaps?branch=master)
-![Supported Python versions](https://img.shields.io/pypi/pyversions/csaps.svg)
-[![License](https://img.shields.io/pypi/l/csaps.svg)](LICENSE)
+<p align="center">
+  <a href="https://pypi.python.org/pypi/csaps"><img src="https://img.shields.io/pypi/v/csaps.svg" alt="PyPI version" /></a>
+  <a href="https://csaps.readthedocs.io/en/latest/?badge=latest"><img src="https://readthedocs.org/projects/csaps/badge/?version=latest" alt="Documentation Status" /></a>
+  <a href="https://travis-ci.org/espdev/csaps"><img src="https://travis-ci.org/espdev/csaps.svg?branch=master" alt="Build status" /></a>
+  <a href="https://coveralls.io/github/espdev/csaps?branch=master"><img src="https://coveralls.io/repos/github/espdev/csaps/badge.svg?branch=master" alt="Coverage Status" /></a>
+  <a href="https://pypi.python.org/pypi/csaps"><img src="https://img.shields.io/pypi/pyversions/csaps.svg" alt="Supported Python versions" /></a>
+  <a href="https://choosealicense.com/licenses/mit/"><img src="https://img.shields.io/pypi/l/csaps.svg" alt="License" /></a>
+</p>
 
-**csaps** is a package for univariate, multivariate and nd-gridded data approximation using cubic smoothing splines.
+**csaps** is a Python package for univariate, multivariate and n-dimensional grid data approximation using cubic smoothing splines.
+The package can be useful in practical engineering tasks for data approximation and smoothing.
 
 ## Installation
 
-Python 3.6 or above is supported.
+Use pip for installing:
 
 ```
 pip install -U csaps
 ```
 
-The module depends only on NumPy and SciPy.
+The module depends only on NumPy and SciPy. Python 3.6 or above is supported.
 
 ## Simple Examples
 
@@ -43,7 +48,9 @@ plt.plot(x, y, 'o', xs, ys, '-')
 plt.show()
 ```
 
-![univariate](https://user-images.githubusercontent.com/1299189/72231304-cd774380-35cb-11ea-821d-d5662cc1eedf.png)
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/1299189/72231304-cd774380-35cb-11ea-821d-d5662cc1eedf.png" alt="univariate" />
+<p/>
 
 A surface data smoothing:
 
@@ -76,7 +83,9 @@ ax.view_init(elev=9., azim=290)
 plt.show()
 ```
 
-![surface](https://user-images.githubusercontent.com/1299189/72231252-7a9d8c00-35cb-11ea-8890-487b8a7dbd1d.png)
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/1299189/72231252-7a9d8c00-35cb-11ea-8890-487b8a7dbd1d.png" alt="surface" />
+<p/>
 
 ## Documentation
 
