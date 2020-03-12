@@ -1,10 +1,8 @@
 <h1 align="center">
-  <a href="https://github.com/espdev/csaps"><img src="https://user-images.githubusercontent.com/1299189/76571441-8d97e400-64c8-11ea-8c05-58850f8311a1.png" alt="csaps"/></a><br>
+  <a href="https://github.com/espdev/csaps"><img src="https://user-images.githubusercontent.com/1299189/76571441-8d97e400-64c8-11ea-8c05-58850f8311a1.png" alt="csaps" width="600"/></a><br>
 </h1>
 
 <p align="center"><em></em></p>
-
-<p align="center">
 
 [![PyPI version](https://img.shields.io/pypi/v/csaps.svg)](https://pypi.python.org/pypi/csaps)
 [![Documentation Status](https://readthedocs.org/projects/csaps/badge/?version=latest)](https://csaps.readthedocs.io/en/latest/?badge=latest)
@@ -12,8 +10,6 @@
 [![Coverage Status](https://coveralls.io/repos/github/espdev/csaps/badge.svg?branch=master)](https://coveralls.io/github/espdev/csaps?branch=master)
 ![Supported Python versions](https://img.shields.io/pypi/pyversions/csaps.svg)
 [![License](https://img.shields.io/pypi/l/csaps.svg)](LICENSE)
-
-</p>
 
 # Cubic spline approximation (smoothing)
 
