@@ -1,19 +1,20 @@
-<h1 align="center">
-  <a href="https://github.com/espdev/csaps"><img src="https://user-images.githubusercontent.com/1299189/76571441-8d97e400-64c8-11ea-8c05-58850f8311a1.png" alt="csaps" width="400"/></a><br>
-</h1>
-
-<p align="center"><em></em></p>
+<p align="center">
+  <a href="https://github.com/espdev/csaps"><img src="https://user-images.githubusercontent.com/1299189/76571441-8d97e400-64c8-11ea-8c05-58850f8311a1.png" alt="csaps" width="400" /></a><br>
+</p>
 
 <p align="center">
-
-  <a href="https://pypi.python.org/pypi/csaps"><img src="https://img.shields.io/pypi/v/csaps.svg" alt="PyPI version"/></a>
-  <a href="https://csaps.readthedocs.io/en/latest/?badge=latest"><img src="https://readthedocs.org/projects/csaps/badge/?version=latest" alt="Documentation Status"/></a>
-  <a href="https://travis-ci.org/espdev/csaps"><img src="https://travis-ci.org/espdev/csaps.svg?branch=master" alt="Build status"/></a>
-  <a href="https://coveralls.io/github/espdev/csaps?branch=master"><img src="https://coveralls.io/repos/github/espdev/csaps/badge.svg?branch=master" alt="Coverage Status"/></a>
-  <a href="https://pypi.python.org/pypi/csaps"><img src="https://img.shields.io/pypi/pyversions/csaps.svg" alt="Supported Python versions"/></a>
-  <a href="https://choosealicense.com/licenses/mit/"><img src="https://img.shields.io/pypi/l/csaps.svg" alt="License"/></a>
-  <br>
+  <a href="https://pypi.python.org/pypi/csaps"><img src="https://img.shields.io/pypi/v/csaps.svg" alt="PyPI version" /></a>
+  <a href="https://csaps.readthedocs.io/en/latest/?badge=latest"><img src="https://readthedocs.org/projects/csaps/badge/?version=latest" alt="Documentation Status" /></a>
+  <a href="https://travis-ci.org/espdev/csaps"><img src="https://travis-ci.org/espdev/csaps.svg?branch=master" alt="Build status" /></a>
+  <a href="https://coveralls.io/github/espdev/csaps?branch=master"><img src="https://coveralls.io/repos/github/espdev/csaps/badge.svg?branch=master" alt="Coverage Status" /></a>
+  <a href="https://pypi.python.org/pypi/csaps"><img src="https://img.shields.io/pypi/pyversions/csaps.svg" alt="Supported Python versions" /></a>
+  <a href="https://choosealicense.com/licenses/mit/"><img src="https://img.shields.io/pypi/l/csaps.svg" alt="License" /></a>
 </p>
+
+<p align="center">
+  <em></em>
+</p>
+
 
 # Cubic spline approximation (smoothing)
 
