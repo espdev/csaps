@@ -12,16 +12,17 @@
 </p>
 
 **csaps** is a Python package for univariate, multivariate and n-dimensional grid data approximation using cubic smoothing splines.
+The package can be useful in practical engineering tasks for data approximation and smoothing.
 
 ## Installation
 
-Python 3.6 or above is supported.
+Use pip for installing:
 
 ```
 pip install -U csaps
 ```
 
-The module depends only on NumPy and SciPy.
+The module depends only on NumPy and SciPy. Python 3.6 or above is supported.
 
 ## Simple Examples
 
@@ -47,7 +48,9 @@ plt.plot(x, y, 'o', xs, ys, '-')
 plt.show()
 ```
 
-![univariate](https://user-images.githubusercontent.com/1299189/72231304-cd774380-35cb-11ea-821d-d5662cc1eedf.png)
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/1299189/72231304-cd774380-35cb-11ea-821d-d5662cc1eedf.png" alt="univariate" />
+<p/>
 
 A surface data smoothing:
 
@@ -80,7 +83,9 @@ ax.view_init(elev=9., azim=290)
 plt.show()
 ```
 
-![surface](https://user-images.githubusercontent.com/1299189/72231252-7a9d8c00-35cb-11ea-8890-487b8a7dbd1d.png)
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/1299189/72231252-7a9d8c00-35cb-11ea-8890-487b8a7dbd1d.png" alt="surface" />
+<p/>
 
 ## Documentation
 
