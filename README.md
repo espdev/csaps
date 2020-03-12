@@ -4,12 +4,16 @@
 
 <p align="center"><em></em></p>
 
-[![PyPI version](https://img.shields.io/pypi/v/csaps.svg)](https://pypi.python.org/pypi/csaps)
-[![Documentation Status](https://readthedocs.org/projects/csaps/badge/?version=latest)](https://csaps.readthedocs.io/en/latest/?badge=latest)
-[![Build status](https://travis-ci.org/espdev/csaps.svg?branch=master)](https://travis-ci.org/espdev/csaps)
-[![Coverage Status](https://coveralls.io/repos/github/espdev/csaps/badge.svg?branch=master)](https://coveralls.io/github/espdev/csaps?branch=master)
-![Supported Python versions](https://img.shields.io/pypi/pyversions/csaps.svg)
-[![License](https://img.shields.io/pypi/l/csaps.svg)](LICENSE)
+<p align="center">
+
+  <a href="https://pypi.python.org/pypi/csaps"><img src="https://img.shields.io/pypi/v/csaps.svg" alt="PyPI version"/></a>
+  <a href="https://csaps.readthedocs.io/en/latest/?badge=latest"><img src="https://readthedocs.org/projects/csaps/badge/?version=latest" alt="Documentation Status"/></a>
+  <a href="https://travis-ci.org/espdev/csaps"><img src="https://travis-ci.org/espdev/csaps.svg?branch=master" alt="Build status"/></a>
+  <a href="https://coveralls.io/github/espdev/csaps?branch=master"><img src="https://coveralls.io/repos/github/espdev/csaps/badge.svg?branch=master" alt="Coverage Status"/></a>
+  <a href="https://pypi.python.org/pypi/csaps"><img src="https://img.shields.io/pypi/pyversions/csaps.svg" alt="Supported Python versions"/></a>
+  <a href="https://choosealicense.com/licenses/mit/"><img src="https://img.shields.io/pypi/l/csaps.svg" alt="License"/></a>
+  <br>
+</p>
 
 # Cubic spline approximation (smoothing)
 
