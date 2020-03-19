@@ -6,6 +6,7 @@ Univariate/multivariate cubic smoothing spline implementation
 """
 
 import typing as ty
+import functools
 import warnings
 
 import numpy as np
@@ -278,12 +279,13 @@ class CubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, UnivariateDataT
 
             dx = dx[:, np.newaxis]
 
-            pad_width = [(1, 1), (0, 0)]
-            d1 = np.diff(np.pad(u, pad_width), axis=0) / dx
-            d2 = np.diff(np.pad(d1, pad_width), axis=0)
+            pad = functools.partial(np.pad, pad_width=[(1, 1), (0, 0)], mode='constant')
+
+            d1 = np.diff(pad(u), axis=0) / dx
+            d2 = np.diff(pad(d1), axis=0)
 
             yi = self._ydata.T - ((6. * (1. - p)) * w) @ d2
-            c3 = np.pad(p * u, pad_width)
+            c3 = pad(p * u)
             c2 = np.diff(yi, axis=0) / dx - dx * (2. * c3[:-1, :] + c3[1:, :])
 
             coeffs = np.vstack((
