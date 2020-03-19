@@ -2,7 +2,7 @@
 
 ## v0.10.1
 
-* Fix call of `numpy.pad` function for numpy <=1.16 [#15](https://github.com/espdev/csaps/issues/15)
+* Fix call of `numpy.pad` function for numpy <1.17 [#15](https://github.com/espdev/csaps/issues/15)
 
 ## v0.10.0
 
