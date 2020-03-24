@@ -143,5 +143,5 @@ def test_nd_array(shape: tuple):
     sp = csaps.NdGridCubicSmoothingSpline(xdata, ydata, smooth=1.0)
     ydata_s = sp(xdata)
 
-    assert sp.spline.shape == ydata.shape
+    assert len(sp.spline.coeffs.shape) == len(ydata.shape)
     assert ydata_s == pytest.approx(ydata)

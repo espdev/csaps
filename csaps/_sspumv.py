@@ -32,36 +32,40 @@ class SplinePPForm(SplinePPFormBase[np.ndarray, int]):
     """
 
     def __init__(self, breaks: np.ndarray, coeffs: np.ndarray) -> None:
-        pieces = breaks.size - 1
-        order = coeffs.shape[1] // pieces
-
         self._breaks = breaks
         self._coeffs = coeffs
-        self._order = order
-        self._pieces = pieces
+        self._pieces = breaks.size - 1
+        self._order = coeffs.shape[1] // self._pieces
         self._ndim = coeffs.shape[0]
 
     @property
     def breaks(self) -> np.ndarray:
+        """Returns the breaks array"""
         return self._breaks
 
     @property
     def coeffs(self) -> np.ndarray:
+        """Returns the spline coefficients 2-D array"""
         return self._coeffs
 
     @property
     def order(self) -> int:
+        """Returns the spline order"""
         return self._order
 
     @property
     def pieces(self) -> int:
+        """Returns the number of the spline pieces"""
         return self._pieces
 
     @property
     def ndim(self) -> int:
+        """Returns dimensionality (>1 for multivariate data)"""
         return self._ndim
 
     def evaluate(self, xi: np.ndarray) -> np.ndarray:
+        """Evaluates the spline for the given data point(s)"""
+
         # For each data site, compute its break interval
         mesh = self.breaks[1:-1]
         edges = np.hstack((-np.inf, mesh, np.inf))
