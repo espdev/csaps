@@ -232,61 +232,65 @@ class CubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, UnivariateDataT
         dy = np.diff(self._ydata, axis=1)
         dy_dx = dy / dx
 
-        if pcount > 2:
-            # Create diagonal sparse matrices
-            diags_r = np.vstack((dx[1:], 2 * (dx[1:] + dx[:-1]), dx[:-1]))
-            r = sp.spdiags(diags_r, [-1, 0, 1], pcount - 2, pcount - 2)
-
-            odx = 1. / dx
-            diags_qt = np.vstack((odx[:-1], -(odx[1:] + odx[:-1]), odx[1:]))
-            qt = sp.diags(diags_qt, [0, 1, 2], (pcount - 2, pcount))
-
-            ow = 1. / self._weights
-            osqw = 1. / np.sqrt(self._weights)  # type: np.ndarray
-            w = sp.diags(ow, 0, (pcount, pcount))
-            qtw = qt @ sp.diags(osqw, 0, (pcount, pcount))
-
-            # Solve linear system for the 2nd derivatives
-            qtwq = qtw @ qtw.T
-
-            if smooth is None:
-                p = self._compute_smooth(r, qtwq)
-            else:
-                p = smooth
-
-            a = (6. * (1. - p)) * qtwq + p * r
-            b = np.diff(dy_dx, axis=1).T
-
-            u = la.spsolve(a, b)
-            if u.ndim < 2:
-                u = u[np.newaxis]
-            if self._ydim == 1:
-                u = u.T
-
-            dx = dx[:, np.newaxis]
-
-            pad = functools.partial(np.pad, pad_width=[(1, 1), (0, 0)], mode='constant')
-
-            d1 = np.diff(pad(u), axis=0) / dx
-            d2 = np.diff(pad(d1), axis=0)
-
-            yi = self._ydata.T - ((6. * (1. - p)) * w) @ d2
-            c3 = pad(p * u)
-            c2 = np.diff(yi, axis=0) / dx - dx * (2. * c3[:-1, :] + c3[1:, :])
-
-            coeffs = np.vstack((
-                np.diff(c3, axis=0) / dx,
-                3. * c3[:-1, :],
-                c2,
-                yi[:-1, :],
-            )).T
-        else:
-            # The corner case for the data with 2 points.
+        if pcount == 2:
+            # The corner case for the data with 2 points (1 breaks interval)
+            # In this case we have 2-ordered spline and linear interpolation in fact
             yi = self._ydata[:, 0][:, np.newaxis]
             coeffs = np.hstack((dy_dx, yi))
 
+            spline = SplinePPForm(breaks=self._xdata, coeffs=coeffs)
             p = 1.
 
+            return spline, p
+
+        # Create diagonal sparse matrices
+        diags_r = np.vstack((dx[1:], 2 * (dx[1:] + dx[:-1]), dx[:-1]))
+        r = sp.spdiags(diags_r, [-1, 0, 1], pcount - 2, pcount - 2)
+
+        dx_recip = 1. / dx
+        diags_qtw = np.vstack((dx_recip[:-1], -(dx_recip[1:] + dx_recip[:-1]), dx_recip[1:]))
+        diags_sqrw_recip = 1. / np.sqrt(self._weights)
+
+        qtw = (sp.diags(diags_qtw, [0, 1, 2], (pcount - 2, pcount)) @
+               sp.diags(diags_sqrw_recip, 0, (pcount, pcount)))
+        qtw = qtw @ qtw.T
+
+        if smooth is None:
+            p = self._compute_smooth(r, qtw)
+        else:
+            p = smooth
+
+        pp = (6. * (1. - p))
+
+        # Solve linear system for the 2nd derivatives
+        a = pp * qtw + p * r
+        b = np.diff(dy_dx, axis=1).T
+
+        u = la.spsolve(a, b)
+        if u.ndim < 2:
+            u = u[np.newaxis]
+        if self._ydim == 1:
+            u = u.T
+
+        dx = dx[:, np.newaxis]
+
+        vpad = functools.partial(np.pad, pad_width=[(1, 1), (0, 0)], mode='constant')
+
+        d1 = np.diff(vpad(u), axis=0) / dx
+        d2 = np.diff(vpad(d1), axis=0)
+
+        diags_w_recip = 1. / self._weights
+        w = sp.diags(diags_w_recip, 0, (pcount, pcount))
+
+        yi = self._ydata.T - (pp * w) @ d2
+        pu = vpad(p * u)
+
+        p1 = np.diff(pu, axis=0) / dx
+        p2 = 3. * pu[:-1, :]
+        p3 = np.diff(yi, axis=0) / dx - dx * (2. * pu[:-1, :] + pu[1:, :])
+        p4 = yi[:-1, :]
+
+        coeffs = np.vstack((p1, p2, p3, p4)).T
         spline = SplinePPForm(breaks=self._xdata, coeffs=coeffs)
 
         return spline, p
