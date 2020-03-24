@@ -85,26 +85,24 @@ class NdGridSplinePPForm(SplinePPFormBase[ty.Sequence[np.ndarray], ty.Tuple[int,
         shape = tuple(x.size for x in xi)
 
         coeffs = self.coeffs
-        coeffs_shape = list(coeffs.shape)
+        coeffs_shape = coeffs.shape
 
-        d = self.ndim - 1
-        permuted_axes = (d, *range(d))
+        ndim_m1 = self.ndim - 1
+        permuted_axes = (ndim_m1, *range(ndim_m1))
 
         for i in reversed(range(self.ndim)):
-            xii = xi[i]
-            ndim = int(np.prod(coeffs_shape[:d]))
+            if self.ndim > 2:
+                umv_ndim = int(np.prod(coeffs_shape[:ndim_m1]))
+                coeffs = coeffs.reshape((umv_ndim, self.pieces[i] * self.order[i]))
+
+            coeffs = SplinePPForm(breaks=self.breaks[i], coeffs=coeffs).evaluate(xi[i])
 
             if self.ndim > 2:
-                coeffs = coeffs.reshape((ndim, self.pieces[i] * self.order[i]))
-
-            coeffs = SplinePPForm(breaks=self.breaks[i], coeffs=coeffs).evaluate(xii)
-
-            if self.ndim > 2:
-                coeffs = coeffs.reshape((*coeffs_shape[:d], shape[i]))
+                coeffs = coeffs.reshape((*coeffs_shape[:ndim_m1], shape[i]))
 
             if self.ndim > 1:
                 coeffs = coeffs.transpose(permuted_axes)
-                coeffs_shape = list(coeffs.shape)
+                coeffs_shape = coeffs.shape
 
         return coeffs.reshape(shape)
 
