@@ -97,15 +97,7 @@ class NdGridSplinePPForm(SplinePPFormBase[ty.Sequence[np.ndarray], ty.Tuple[int,
             if self.ndim > 2:
                 coeffs = coeffs.reshape((ndim, self.pieces[i] * self.order[i]))
 
-            spp = SplinePPForm(
-                breaks=self.breaks[i],
-                coeffs=coeffs,
-                pieces=self.pieces[i],
-                order=self.order[i],
-                shape=(ndim, xii.size)
-            )
-
-            coeffs = spp.evaluate(xii)
+            coeffs = SplinePPForm(breaks=self.breaks[i], coeffs=coeffs).evaluate(xii)
 
             if self.ndim > 2:
                 coeffs = coeffs.reshape((*coeffs_shape[:d], shape[i]))
