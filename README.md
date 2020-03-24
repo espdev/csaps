@@ -14,7 +14,7 @@
 **csaps** is a Python package for univariate, multivariate and n-dimensional grid data approximation using cubic smoothing splines.
 The package can be useful in practical engineering tasks for data approximation and smoothing.
 
-## Installation
+## Installing
 
 Use pip for installing:
 
@@ -89,20 +89,22 @@ plt.show()
 
 ## Documentation
 
-More examples of usage and the full documentation can be found at ReadTheDocs.
-
-https://csaps.readthedocs.io
+More examples of usage and the full documentation can be found at https://csaps.readthedocs.io.
 
 ## Testing
 
 pytest, tox and Travis CI are used for testing. Please see [tests](tests).
 
-## Algorithms and implementations
+## Algorithm and Implementation
 
-**csaps** package is a Python modified port of MATLAB [CSAPS](https://www.mathworks.com/help/curvefit/csaps.html) function that is an implementation of 
+**csaps** Python package is inspired by MATLAB [CSAPS](https://www.mathworks.com/help/curvefit/csaps.html) function that is an implementation of 
 Fortran routine SMOOTH from [PGS](http://pages.cs.wisc.edu/~deboor/pgs/) (originally written by Carl de Boor).
 
-[csaps-cpp](https://github.com/espdev/csaps-cpp) C++11 Eigen based implementation of the algorithm.
+Also the algothithm implementation in other languages:
+
+* [csaps-rs](https://github.com/espdev/csaps-rs) Rust ndarray/sprs based implementation
+* [csaps-cpp](https://github.com/espdev/csaps-cpp) C++11 Eigen based implementation (incomplete)
+
 
 ## References
 
