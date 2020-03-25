@@ -14,7 +14,7 @@ import scipy.sparse as sp
 import scipy.sparse.linalg as la
 
 from ._base import SplinePPFormBase, ISmoothingSpline
-from ._types import UnivariateDataType, UnivariateVectorizedDataType, MultivariateDataType
+from ._types import UnivariateDataType, MultivariateDataType
 from ._reshape import from_2d, to_2d
 
 
@@ -120,7 +120,7 @@ class CubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, UnivariateDataT
 
     def __init__(self,
                  xdata: UnivariateDataType,
-                 ydata: UnivariateVectorizedDataType,
+                 ydata: MultivariateDataType,
                  weights: ty.Optional[UnivariateDataType] = None,
                  smooth: ty.Optional[float] = None,
                  axis: int = -1):
@@ -301,7 +301,7 @@ class UnivariateCubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, Univa
 
     def __init__(self,
                  xdata: UnivariateDataType,
-                 ydata: UnivariateVectorizedDataType,
+                 ydata: MultivariateDataType,
                  weights: ty.Optional[UnivariateDataType] = None,
                  smooth: ty.Optional[float] = None,
                  axis: int = -1) -> None:

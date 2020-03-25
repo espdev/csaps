@@ -23,7 +23,6 @@ from csaps._sspndg import (
 )
 from csaps._types import (
     UnivariateDataType,
-    UnivariateVectorizedDataType,
     MultivariateDataType,
     NdGridDataType,
 )
@@ -46,7 +45,6 @@ __all__ = [
 
     # Type-hints
     'UnivariateDataType',
-    'UnivariateVectorizedDataType',
     'MultivariateDataType',
     'NdGridDataType',
 ]
