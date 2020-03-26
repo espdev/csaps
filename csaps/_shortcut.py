@@ -8,8 +8,6 @@ The module provised `csaps` shortcut function for smoothing data
 from collections import abc as c_abc
 from typing import Optional, Union, Sequence, NamedTuple, overload
 
-import numpy as np
-
 from ._base import ISmoothingSpline
 from ._sspumv import CubicSmoothingSpline
 from ._sspndg import ndgrid_prepare_data_sites, NdGridCubicSmoothingSpline
