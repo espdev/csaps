@@ -132,7 +132,6 @@ def test_splineppform(y, order, pieces, ndim):
     assert s.order == order
     assert s.pieces == pieces
     assert s.ndim == ndim
-    assert s.shape == y.shape
 
 
 @pytest.mark.parametrize('shape, axis', chain(
@@ -154,11 +153,7 @@ def test_axis(shape, axis):
     y = np.arange(int(np.prod(shape))).reshape(shape)
     x = np.arange(np.array(y).shape[axis])
 
-    s = csaps.UnivariateCubicSmoothingSpline(x, y, axis=axis)
-    ys = s(x)
-
-    assert s.spline.shape == y.shape
-    assert s.spline.axis == axis
+    ys = csaps.UnivariateCubicSmoothingSpline(x, y, axis=axis)(x)
 
     np.testing.assert_allclose(ys, y)
 

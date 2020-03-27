@@ -6,50 +6,93 @@ The module provised `csaps` shortcut function for smoothing data
 """
 
 from collections import abc as c_abc
-from typing import Optional, Union, Sequence, NamedTuple
-
-import numpy as np
+from typing import Optional, Union, Sequence, NamedTuple, overload
 
 from ._base import ISmoothingSpline
 from ._sspumv import CubicSmoothingSpline
 from ._sspndg import ndgrid_prepare_data_sites, NdGridCubicSmoothingSpline
-from ._types import (
-    UnivariateDataType,
-    UnivariateVectorizedDataType,
-    NdGridDataType,
-)
-
-_XDataType = Union[UnivariateDataType, NdGridDataType]
-_YDataType = Union[UnivariateVectorizedDataType, np.ndarray]
-_XiDataType = Optional[Union[UnivariateDataType, NdGridDataType]]
-_WeightsDataType = Optional[Union[UnivariateDataType, NdGridDataType]]
-_SmoothDataType = Optional[Union[float, Sequence[Optional[float]]]]
+from ._types import UnivariateDataType, MultivariateDataType, NdGridDataType
 
 
 class AutoSmoothingResult(NamedTuple):
     """The result for auto smoothing for `csaps` function"""
 
-    values: _YDataType
+    values: MultivariateDataType
     """Smoothed data values"""
 
-    smooth: _SmoothDataType
+    smooth: Union[float, Sequence[Optional[float]]]
     """The calculated smoothing parameter"""
 
 
-_ReturnType = Union[
-    _YDataType,
-    AutoSmoothingResult,
-    ISmoothingSpline,
-]
-
-
-def csaps(xdata: _XDataType,
-          ydata: _YDataType,
-          xidata: _XiDataType = None,
+# **************************************
+# csaps signatures
+#
+@overload
+def csaps(xdata: UnivariateDataType,
+          ydata: MultivariateDataType,
           *,
-          weights: _WeightsDataType = None,
-          smooth: _SmoothDataType = None,
-          axis: Optional[int] = None) -> _ReturnType:
+          weights: Optional[UnivariateDataType] = None,
+          smooth: Optional[float] = None,
+          axis: Optional[int] = None) -> ISmoothingSpline: ...
+
+
+@overload
+def csaps(xdata: UnivariateDataType,
+          ydata: MultivariateDataType,
+          xidata: UnivariateDataType,
+          *,
+          weights: Optional[UnivariateDataType] = None,
+          axis: Optional[int] = None) -> AutoSmoothingResult: ...
+
+
+@overload
+def csaps(xdata: UnivariateDataType,
+          ydata: MultivariateDataType,
+          xidata: UnivariateDataType,
+          *,
+          smooth: float,
+          weights: Optional[UnivariateDataType] = None,
+          axis: Optional[int] = None) -> MultivariateDataType: ...
+
+
+@overload
+def csaps(xdata: NdGridDataType,
+          ydata: MultivariateDataType,
+          *,
+          weights: Optional[NdGridDataType] = None,
+          smooth: Optional[Sequence[float]] = None,
+          axis: Optional[int] = None) -> ISmoothingSpline: ...
+
+
+@overload
+def csaps(xdata: NdGridDataType,
+          ydata: MultivariateDataType,
+          xidata: NdGridDataType,
+          *,
+          weights: Optional[NdGridDataType] = None,
+          axis: Optional[int] = None) -> AutoSmoothingResult: ...
+
+
+@overload
+def csaps(xdata: NdGridDataType,
+          ydata: MultivariateDataType,
+          xidata: NdGridDataType,
+          *,
+          smooth: Sequence[float],
+          weights: Optional[NdGridDataType] = None,
+          axis: Optional[int] = None) -> MultivariateDataType: ...
+#
+# csaps signatures
+# **************************************
+
+
+def csaps(xdata: Union[UnivariateDataType, NdGridDataType],
+          ydata: MultivariateDataType,
+          xidata: Optional[Union[UnivariateDataType, NdGridDataType]] = None,
+          *,
+          weights: Optional[Union[UnivariateDataType, NdGridDataType]] = None,
+          smooth: Optional[Union[float, Sequence[float]]] = None,
+          axis: Optional[int] = None) -> Union[MultivariateDataType, ISmoothingSpline, AutoSmoothingResult]:
     """Smooths the univariate/multivariate/gridded data or computes the corresponding splines
 
     This function might be used as the main API for smoothing any data.
