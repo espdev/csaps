@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.11.0
+
+* Internal re-design `SplinePPForm` and `NdGridSplinePPForm` classes [#17](https://github.com/espdev/csaps/issues/17):
+    - Remove `shape` and `axis` properties and reshaping data in these classes
+    - `NdGridSplinePPForm` coefficients array for 1D grid now is 1-d instead of 2-d
+* Refactoring the code and decrease memory consumption
+* Add `overload` type-hints for `csaps` function signatures
+
 ## v0.10.1
 
 * Fix call of `numpy.pad` function for numpy <1.17 [#15](https://github.com/espdev/csaps/issues/15)
