@@ -380,7 +380,7 @@ The example for univariate data:
     >>> print('Spline class name:', type(spline).__name__)
     ... print('Spline smoothing parameter:', spline.smooth)
     ... print('Spline description:', spline.spline)
-    Spline class name: UnivariateCubicSmoothingSpline
+    Spline class name: CubicSmoothingSpline
     Spline smoothing parameter: 0.8999999999999999
     Spline description: SplinePPForm
       breaks: [-5. -4. -3. -2. -1.  0.  1.  2.  3.  4.  5.]

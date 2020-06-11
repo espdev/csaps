@@ -23,7 +23,7 @@ import csaps
 ])
 def test_invalid_data(x, y, w):
     with pytest.raises(ValueError):
-        csaps.UnivariateCubicSmoothingSpline(x, y, weights=w)
+        csaps.CubicSmoothingSpline(x, y, weights=w)
 
 
 @pytest.mark.parametrize('y', [
@@ -111,7 +111,7 @@ def test_invalid_data(x, y, w):
 def test_vectorize(y):
     x = np.arange(np.array(y).shape[-1])
 
-    ys = csaps.UnivariateCubicSmoothingSpline(x, y)(x)
+    ys = csaps.CubicSmoothingSpline(x, y)(x)
     np.testing.assert_allclose(ys, y)
 
 
@@ -127,7 +127,7 @@ def test_splineppform(y, order, pieces, ndim):
     x = np.arange(np.array(y).shape[-1])
     y = np.array(y)
 
-    s = csaps.UnivariateCubicSmoothingSpline(x, y).spline
+    s = csaps.CubicSmoothingSpline(x, y).spline
 
     assert s.order == order
     assert s.pieces == pieces
@@ -153,7 +153,7 @@ def test_axis(shape, axis):
     y = np.arange(int(np.prod(shape))).reshape(shape)
     x = np.arange(np.array(y).shape[axis])
 
-    ys = csaps.UnivariateCubicSmoothingSpline(x, y, axis=axis)(x)
+    ys = csaps.CubicSmoothingSpline(x, y, axis=axis)(x)
 
     np.testing.assert_allclose(ys, y)
 
@@ -162,7 +162,7 @@ def test_zero_smooth():
     x = [1., 2., 4., 6.]
     y = [2., 4., 5., 7.]
 
-    sp = csaps.UnivariateCubicSmoothingSpline(x, y, smooth=0.)
+    sp = csaps.CubicSmoothingSpline(x, y, smooth=0.)
 
     assert sp.smooth == pytest.approx(0.)
 
@@ -180,7 +180,7 @@ def test_auto_smooth():
     x = np.linspace(0, 2 * np.pi, 21)
     y = np.sin(x) + (np.random.rand(21) - .5) * .1
 
-    sp = csaps.UnivariateCubicSmoothingSpline(x, y)
+    sp = csaps.CubicSmoothingSpline(x, y)
 
     xi = np.linspace(x[0], x[-1], 120)
     yi = sp(xi)
@@ -245,7 +245,7 @@ def test_auto_smooth():
     ]),
 ])
 def test_npoints(x, y, xi, yid):
-    sp = csaps.UnivariateCubicSmoothingSpline(x, y)
+    sp = csaps.CubicSmoothingSpline(x, y)
     yi = sp(xi)
 
     np.testing.assert_allclose(yi, yid)
@@ -264,7 +264,7 @@ def test_weighted(w, yid):
     y = [2., 4., 5., 7.]
     xi = np.linspace(1., 6., 10)
 
-    sp = csaps.UnivariateCubicSmoothingSpline(x, y, weights=w)
+    sp = csaps.CubicSmoothingSpline(x, y, weights=w)
     yi = sp(xi)
 
     np.testing.assert_allclose(yi, yid)
@@ -276,4 +276,4 @@ def test_big_vectorized():
     y = np.random.rand(1000, 10000)
     xi = np.linspace(0, 10000, 20000)
 
-    csaps.UnivariateCubicSmoothingSpline(x, y)(xi)
+    csaps.CubicSmoothingSpline(x, y)(xi)
