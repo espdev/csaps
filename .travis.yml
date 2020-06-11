@@ -9,7 +9,8 @@ matrix:
       env: TOXENV=py37-pytest-coverage
     - python: "3.8"
       env: TOXENV=py38-pytest
-
+    - python: "3.7"
+      env: TOXENV=docs
     - python: "3.7"
       env: TOXENV=flake8
 
