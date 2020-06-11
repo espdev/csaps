@@ -33,16 +33,8 @@ setup(
         'scipy >=1.0.0, <1.6.0',
     ],
     extras_require={
-        'docs': [
-            'sphinx >=2.3',
-            'matplotlib >=3.1',
-            'numpydoc',
-            'm2r',
-        ],
-        'tests': [
-            'pytest',
-            'coverage',
-        ],
+        'docs': ['sphinx >=2.3, <3', 'matplotlib >=3.1', 'numpydoc', 'm2r'],
+        'tests': ['pytest', 'coverage <6', 'pytest-cov', 'coveralls'],
     },
     package_data={"csaps": ["py.typed"]},
     url='https://github.com/espdev/csaps',
