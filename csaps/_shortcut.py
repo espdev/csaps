@@ -200,7 +200,7 @@ def csaps(xdata: Union[UnivariateDataType, NdGridDataType],
 
     if umv:
         axis = -1 if axis is None else axis
-        sp = CubicSmoothingSpline(xdata, ydata, weights, smooth, axis)
+        sp = CubicSmoothingSpline(xdata, ydata, weights=weights, smooth=smooth, axis=axis)
     else:
         sp = NdGridCubicSmoothingSpline(xdata, ydata, weights, smooth)
 
