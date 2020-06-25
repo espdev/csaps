@@ -160,9 +160,8 @@ class CubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, UnivariateDataT
             # In this case we have 2-ordered spline and linear interpolation in fact
             yi = y[:, 0][:, np.newaxis]
 
-            # FIXME: fix 'coeffs' array shape
-            c = np.hstack((dy_dx, yi))
-            p = 1.
+            c = np.vstack((dy_dx, yi)).reshape((2, pcount - 1) + shape[1:])
+            p = 1.0
 
             return c, p
 
