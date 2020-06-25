@@ -5,16 +5,15 @@ Univariate/multivariate cubic smoothing spline implementation
 
 """
 
-import typing as ty
 import functools
+from typing import Optional, Union
 
 import numpy as np
 
 import scipy.sparse as sp
 import scipy.sparse.linalg as la
-from scipy.interpolate import PPoly
 
-from ._base import SplinePPFormBase
+from ._base import SplineBase, SplinePPFormBase
 from ._types import UnivariateDataType, MultivariateDataType
 from ._reshape import to_2d
 
@@ -91,7 +90,7 @@ class SplinePPForm(SplinePPFormBase[np.ndarray, int]):
         return values
 
 
-class CubicSmoothingSpline(PPoly):
+class CubicSmoothingSpline(SplineBase):
     """Cubic smoothing spline
 
     The cubic spline implementation for univariate/multivariate data.
@@ -127,9 +126,9 @@ class CubicSmoothingSpline(PPoly):
     def __init__(self,
                  xdata: UnivariateDataType,
                  ydata: MultivariateDataType,
-                 weights: ty.Optional[UnivariateDataType] = None,
-                 smooth: ty.Optional[float] = None,
-                 extrapolate: ty.Optional[ty.Union[bool, str]] = None,
+                 weights: Optional[UnivariateDataType] = None,
+                 smooth: Optional[float] = None,
+                 extrapolate: Optional[Union[bool, str]] = None,
                  axis: int = 0):
 
         x, y, w, shape = self._prepare_data(xdata, ydata, weights, axis)
@@ -140,12 +139,12 @@ class CubicSmoothingSpline(PPoly):
 
     @property
     def smooth(self) -> float:
-        """Returns the smoothing parameter
+        """Returns the smoothing factor
 
         Returns
         -------
         smooth : float
-            Smooth factor in the range [0, 1]
+            Smoothing factor in the range [0, 1]
         """
         return self._smooth
 
