@@ -115,25 +115,6 @@ def test_vectorize(y):
     np.testing.assert_allclose(ys, y)
 
 
-@pytest.mark.parametrize('y, order, pieces, ndim', [
-    ([1, 2], 2, 1, 1),
-    ([[1, 2], [1, 2]], 2, 1, 2),
-    ([1, 2, 3], 4, 2, 1),
-    ([[1, 2, 3], [1, 2, 3]], 4, 2, 2),
-    ([1, 2, 3, 4, 5, 6, 7], 4, 6, 1),
-    ([[1, 2, 3, 4, 5, 6, 7], [1, 2, 3, 4, 5, 6, 7]], 4, 6, 2),
-])
-def test_splineppform(y, order, pieces, ndim):
-    x = np.arange(np.array(y).shape[-1])
-    y = np.array(y)
-
-    s = csaps.CubicSmoothingSpline(x, y).spline
-
-    assert s.order == order
-    assert s.pieces == pieces
-    assert s.ndim == ndim
-
-
 @pytest.mark.parametrize('shape, axis', chain(
     *map(product, [
         # shape
@@ -185,7 +166,6 @@ def test_auto_smooth():
     xi = np.linspace(x[0], x[-1], 120)
     yi = sp(xi)
 
-    assert isinstance(sp.spline, csaps.SplinePPForm)
     np.testing.assert_almost_equal(sp.smooth, 0.996566686)
 
     desired_yi = [
