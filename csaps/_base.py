@@ -9,14 +9,8 @@ import abc
 import typing as ty
 
 import numpy as np
-from scipy.interpolate import PPoly
 
 from ._types import TData, TProps, TSmooth, TXi, TSpline
-
-
-class SplineBase(PPoly):
-    """The base class for univariate/multivariate splines
-    """
 
 
 class SplinePPFormBase(abc.ABC, ty.Generic[TData, TProps]):

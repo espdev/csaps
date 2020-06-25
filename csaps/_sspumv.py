@@ -12,85 +12,19 @@ import numpy as np
 
 import scipy.sparse as sp
 import scipy.sparse.linalg as la
+from scipy.interpolate import PPoly
 
-from ._base import SplineBase, SplinePPFormBase
+from ._base import ISmoothingSpline
 from ._types import UnivariateDataType, MultivariateDataType
 from ._reshape import to_2d
 
 
-class SplinePPForm(SplinePPFormBase[np.ndarray, int]):
-    """Univariate/multivariate spline representation in PP-form
-
-    Parameters
-    ----------
-    breaks : np.ndarray
-        Breaks values 1-D array
-
-    coeffs : np.ndarray
-        Spline coefficients 2-D array
-
+class SplinePPForm(PPoly):
+    """The base class for univariate/multivariate spline in piecewise polynomial form
     """
 
-    def __init__(self, breaks: np.ndarray, coeffs: np.ndarray) -> None:
-        self._breaks = breaks
-        self._coeffs = coeffs
-        self._pieces = breaks.size - 1
-        self._order = coeffs.shape[1] // self._pieces
-        self._ndim = coeffs.shape[0]
 
-    @property
-    def breaks(self) -> np.ndarray:
-        """Returns the breaks array"""
-        return self._breaks
-
-    @property
-    def coeffs(self) -> np.ndarray:
-        """Returns the spline coefficients 2-D array"""
-        return self._coeffs
-
-    @property
-    def order(self) -> int:
-        """Returns the spline order"""
-        return self._order
-
-    @property
-    def pieces(self) -> int:
-        """Returns the number of the spline pieces"""
-        return self._pieces
-
-    @property
-    def ndim(self) -> int:
-        """Returns dimensionality (>1 for multivariate data)"""
-        return self._ndim
-
-    def evaluate(self, xi: np.ndarray) -> np.ndarray:
-        """Evaluates the spline for the given data point(s)"""
-
-        # For each data site, compute its break interval
-        mesh = self.breaks[1:-1]
-        edges = np.hstack((-np.inf, mesh, np.inf))
-
-        index = np.digitize(xi, edges)
-
-        nanx = np.flatnonzero(index == 0)
-        index = np.fmin(index, mesh.size + 1)
-        index[nanx] = 1
-        index -= 1
-
-        # Go to local coordinates
-        xi = xi - self.breaks[index]
-
-        # Apply nested multiplication
-        values = self.coeffs[:, index]
-
-        for i in range(1, self.order):
-            index += self.pieces
-            values = xi * values + self.coeffs[:, index]
-
-        return values
-
-
-class CubicSmoothingSpline(SplineBase):
+class CubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, UnivariateDataType]):
     """Cubic smoothing spline
 
     The cubic spline implementation for univariate/multivariate data.
@@ -133,9 +67,12 @@ class CubicSmoothingSpline(SplineBase):
 
         x, y, w, shape = self._prepare_data(xdata, ydata, weights, axis)
         coeffs, self._smooth = self._make_spline(x, y, w, smooth, shape)
+        self._spline = SplinePPForm.construct_fast(coeffs, x, extrapolate=extrapolate, axis=axis)
 
-        super().__init__(coeffs, x, extrapolate=extrapolate)
-        self.axis = axis
+    def __call__(self, xi: UnivariateDataType) -> np.ndarray:
+        """Evaluate the spline for given data
+        """
+        return self._spline(xi)
 
     @property
     def smooth(self) -> float:
@@ -147,6 +84,17 @@ class CubicSmoothingSpline(SplineBase):
             Smoothing factor in the range [0, 1]
         """
         return self._smooth
+
+    @property
+    def spline(self) -> SplinePPForm:
+        """Returns the spline description in `SplinePPForm` instance
+
+        Returns
+        -------
+        spline : SplinePPForm
+            The spline description in :class:`SplinePPForm` instance
+        """
+        return self._spline
 
     @staticmethod
     def _prepare_data(xdata, ydata, weights, axis):
@@ -209,12 +157,12 @@ class CubicSmoothingSpline(SplineBase):
             # The corner case for the data with 2 points (1 breaks interval)
             # In this case we have 2-ordered spline and linear interpolation in fact
             yi = y[:, 0][:, np.newaxis]
-            coeffs = np.hstack((dy_dx, yi))
 
-            spline = SplinePPForm(breaks=x, coeffs=coeffs)
+            # FIXME: fix 'coeffs' array shape
+            c = np.hstack((dy_dx, yi))
             p = 1.
 
-            return spline, p
+            return c, p
 
         # Create diagonal sparse matrices
         diags_r = np.vstack((dx[1:], 2 * (dx[1:] + dx[:-1]), dx[:-1]))
