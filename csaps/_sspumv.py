@@ -54,7 +54,7 @@ class CubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, UnivariateDataT
     axis : [*Optional*] int
         Axis along which ``ydata`` is assumed to be varying.
         Meaning that for x[i] the corresponding values are np.take(ydata, i, axis=axis).
-        By default is 0 (the first axis).
+        By default is -1 (the last axis).
     """
 
     def __init__(self,
@@ -63,9 +63,9 @@ class CubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, UnivariateDataT
                  weights: Optional[UnivariateDataType] = None,
                  smooth: Optional[float] = None,
                  extrapolate: Optional[Union[bool, str]] = None,
-                 axis: int = 0):
+                 axis: int = -1):
 
-        x, y, w, shape = self._prepare_data(xdata, ydata, weights, axis)
+        x, y, w, shape, axis = self._prepare_data(xdata, ydata, weights, axis)
         coeffs, self._smooth = self._make_spline(x, y, w, smooth, shape)
         self._spline = SplinePPForm.construct_fast(coeffs, x, extrapolate=extrapolate, axis=axis)
 
@@ -106,6 +106,8 @@ class CubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, UnivariateDataT
         if xdata.size < 2:
             raise ValueError("'xdata' must contain at least 2 data points.")
 
+        axis = ydata.ndim + axis if axis < 0 else axis
+
         if ydata.shape[axis] != xdata.size:
             raise ValueError(
                 f"'ydata' data must be a 1-D or N-D array with shape[{axis}] "
@@ -125,7 +127,7 @@ class CubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, UnivariateDataT
             if weights.size != xdata.size:
                 raise ValueError('Weights vector size must be equal of xdata size')
 
-        return xdata, ydata, weights, shape
+        return xdata, ydata, weights, shape, axis
 
     @staticmethod
     def _compute_smooth(a, b):
