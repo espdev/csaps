@@ -3,6 +3,7 @@
 from itertools import chain, product, permutations
 
 import numpy as np
+from scipy.interpolate import CubicSpline
 import pytest
 
 import csaps
@@ -257,3 +258,19 @@ def test_big_vectorized():
     xi = np.linspace(0, 10000, 20000)
 
     csaps.CubicSmoothingSpline(x, y)(xi)
+
+
+def test_cubic_bc_natural():
+    np.random.seed(1234)
+    x = np.linspace(0, 5, 20)
+    xi = np.linspace(0, 5, 100)
+    y = np.sin(x) + np.random.randn(x.size) * 0.3
+
+    cs = CubicSpline(x, y, bc_type='natural')
+    ss = csaps.CubicSmoothingSpline(x, y, smooth=1.0)
+
+    y_cs = cs(xi)
+    y_ss = ss(xi)
+
+    assert cs.c == pytest.approx(ss.spline.c)
+    assert y_cs == pytest.approx(y_ss)
