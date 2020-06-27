@@ -21,6 +21,8 @@ from ._reshape import to_2d
 
 class SplinePPForm(PPoly):
     """The base class for univariate/multivariate spline in piecewise polynomial form
+
+    Piecewise polynomial in terms of coefficients and breakpoints.
     """
 
 
@@ -46,11 +48,6 @@ class CubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, UnivariateDataT
             - 0: The smoothing spline is the least-squares straight line fit
             - 1: The cubic spline interpolant with natural condition
 
-    extrapolate : [*Optional*] bool or 'periodic'
-        If bool, determines whether to extrapolate to out-of-bounds points
-        based on first and last intervals, or to return NaNs. If 'periodic',
-        periodic extrapolation is used. Default is True.
-
     axis : [*Optional*] int
         Axis along which ``ydata`` is assumed to be varying.
         Meaning that for x[i] the corresponding values are np.take(ydata, i, axis=axis).
@@ -62,17 +59,46 @@ class CubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, UnivariateDataT
                  ydata: MultivariateDataType,
                  weights: Optional[UnivariateDataType] = None,
                  smooth: Optional[float] = None,
-                 extrapolate: Optional[Union[bool, str]] = None,
                  axis: int = -1):
 
         x, y, w, shape, axis = self._prepare_data(xdata, ydata, weights, axis)
-        coeffs, self._smooth = self._make_spline(x, y, w, smooth, shape)
-        self._spline = SplinePPForm.construct_fast(coeffs, x, extrapolate=extrapolate, axis=axis)
+        coeffs, smooth = self._make_spline(x, y, w, smooth, shape)
+        spline = SplinePPForm.construct_fast(coeffs, x, axis=axis)
 
-    def __call__(self, xi: UnivariateDataType) -> np.ndarray:
+        self._smooth = smooth
+        self._spline = spline
+
+    def __call__(self,
+                 x: UnivariateDataType,
+                 nu: int = 0,
+                 extrapolate: Optional[Union[bool, str]] = None) -> np.ndarray:
         """Evaluate the spline for given data
+
+        Parameters
+        ----------
+
+        x : 1-d array-like
+            Points to evaluate the spline at.
+
+        nu : [*Optional*] int
+            Order of derivative to evaluate. Must be non-negative.
+
+        extrapolate : [*Optional*] bool or 'periodic'
+            If bool, determines whether to extrapolate to out-of-bounds points
+            based on first and last intervals, or to return NaNs. If 'periodic',
+            periodic extrapolation is used. Default is True.
+
+        Notes
+        -----
+
+        Derivatives are evaluated piecewise for each polynomial
+        segment, even if the polynomial is not differentiable at the
+        breakpoints. The polynomial intervals are considered half-open,
+        ``[a, b)``, except for the last interval which is closed
+        ``[a, b]``.
+
         """
-        return self._spline(xi)
+        return self._spline(x, nu=nu, extrapolate=extrapolate)
 
     @property
     def smooth(self) -> float:
@@ -92,7 +118,7 @@ class CubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, UnivariateDataT
         Returns
         -------
         spline : SplinePPForm
-            The spline description in :class:`SplinePPForm` instance
+            The spline representation in :class:`SplinePPForm` instance
         """
         return self._spline
 
