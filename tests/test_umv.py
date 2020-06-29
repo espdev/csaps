@@ -135,9 +135,18 @@ def test_axis(shape, axis):
     y = np.arange(int(np.prod(shape))).reshape(shape)
     x = np.arange(np.array(y).shape[axis])
 
-    ys = csaps.CubicSmoothingSpline(x, y, axis=axis)(x)
+    s = csaps.CubicSmoothingSpline(x, y, axis=axis)
 
+    ys = s(x)
     np.testing.assert_allclose(ys, y)
+
+    ss = s.spline
+    axis = len(shape) + axis if axis < 0 else axis
+
+    assert ss.axis == axis
+    assert ss.order == 2 if len(x) < 3 else 4
+    assert ss.pieces == len(x) - 1
+    assert ss.shape == shape
 
 
 def test_zero_smooth():

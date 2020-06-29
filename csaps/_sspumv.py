@@ -6,7 +6,7 @@ Univariate/multivariate cubic smoothing spline implementation
 """
 
 import functools
-from typing import Optional, Union
+from typing import Optional, Union, Tuple, List
 
 import numpy as np
 
@@ -24,6 +24,27 @@ class SplinePPForm(PPoly):
 
     Piecewise polynomial in terms of coefficients and breakpoints.
     """
+
+    @property
+    def order(self) -> int:
+        """Returns the order of the spline
+        """
+        return self.c.shape[0]
+
+    @property
+    def pieces(self) -> int:
+        """Returns the number of the spline pieces (intervals)
+        """
+        return self.c.shape[1]
+
+    @property
+    def shape(self) -> Tuple[int]:
+        """Returns the data shape
+        """
+        shape: List[int] = list(self.c.shape[2:])
+        shape.insert(self.axis, self.c.shape[1] + 1)
+
+        return tuple(shape)
 
 
 class CubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, UnivariateDataType]):
