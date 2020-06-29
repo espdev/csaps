@@ -207,7 +207,8 @@ class CubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, UnivariateDataT
             # In this case we have 2-ordered spline and linear interpolation in fact
             yi = y[:, 0][:, np.newaxis]
 
-            c = np.vstack((dy_dx, yi)).reshape((2, pcount - 1) + shape[1:])
+            c_shape = (2, pcount - 1) + shape[1:]
+            c = np.vstack((dy_dx, yi)).reshape(c_shape)
             p = 1.0
 
             return c, p
@@ -259,6 +260,7 @@ class CubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, UnivariateDataT
         c3 = np.diff(yi, axis=0) / dx - dx * (2. * pu[:-1, :] + pu[1:, :])
         c4 = yi[:-1, :]
 
-        c = np.vstack((c1, c2, c3, c4)).reshape((4, pcount - 1) + shape[1:])
+        c_shape = (4, pcount - 1) + shape[1:]
+        c = np.vstack((c1, c2, c3, c4)).reshape(c_shape)
 
         return c, p
