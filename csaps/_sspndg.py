@@ -14,6 +14,7 @@ from scipy.interpolate import NdPPoly
 from ._base import ISplinePPForm, ISmoothingSpline
 from ._types import UnivariateDataType, NdGridDataType
 from ._sspumv import SplinePPForm, CubicSmoothingSpline
+from ._reshape import block_view
 
 
 def ndgrid_prepare_data_sites(data, name) -> Tuple[np.ndarray, ...]:
@@ -132,6 +133,16 @@ class NdGridCubicSmoothingSpline(ISmoothingSpline[
         self._spline = NdGridSplinePPForm.construct_fast(coeffs, x)
         self._smooth = smooth
 
+    def __call__(self,
+                 x: Union[NdGridDataType, UnivariateDataType],
+                 nu: Optional[Tuple[int]] = None,
+                 extrapolate: Optional[bool] = None) -> np.ndarray:
+        """Evaluate the spline for given data
+        """
+
+        # FIXME: we need to prepare x data and reshape output data to original data shape
+        return self._spline(x, nu=nu, extrapolate=extrapolate)
+
     @property
     def smooth(self) -> Tuple[float, ...]:
         """Returns a tuple of smoothing parameters for each axis
@@ -199,20 +210,18 @@ class NdGridCubicSmoothingSpline(ISmoothingSpline[
 
         return xdata, ydata, weights, smooth
 
-    def __call__(self,
-                 x: NdGridDataType,
-                 nu: Optional[Tuple[int]] = None,
-                 extrapolate: Optional[bool] = None) -> np.ndarray:
-        """Evaluate the spline for given data
-        """
-
-        return self._spline(x, nu=nu, extrapolate=extrapolate)
-
     @staticmethod
     def _make_spline(xdata, ydata, weights, smooth):
         ndim = len(xdata)
+
+        if ndim == 1:
+            s = CubicSmoothingSpline(
+                xdata[0], ydata, weights=weights[0], smooth=smooth[0])
+            return s.spline.coeffs, (s.smooth,)
+
+        shape = ydata.shape
         coeffs = ydata
-        coeffs_shape = list(coeffs.shape)
+        coeffs_shape = list(shape)
 
         smooths = []
         permute_axes = (ndim - 1, *range(ndim - 1))
@@ -232,10 +241,10 @@ class NdGridCubicSmoothingSpline(ISmoothingSpline[
                 coeffs_shape[-1] = s.spline.pieces * s.spline.order
                 coeffs = coeffs.reshape(coeffs_shape)
 
-            if ndim > 1:
-                coeffs = coeffs.transpose(permute_axes)
-                coeffs_shape = list(coeffs.shape)
+            coeffs = coeffs.transpose(permute_axes)
+            coeffs_shape = list(coeffs.shape)
 
-        coeffs = coeffs.squeeze()
+        block = tuple(int(size - 1) for size in shape)
+        coeffs = block_view(coeffs.squeeze(), block)
 
         return coeffs, tuple(reversed(smooths))

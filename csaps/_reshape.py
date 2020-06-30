@@ -146,3 +146,28 @@ def from_2d(arr: np.ndarray, shape: ty.Sequence[int], axis: int) -> np.ndarray:
     tr_axes.insert(axis, tr_axes.pop(-1))
 
     return arr.reshape(new_shape).transpose(tr_axes)
+
+
+def block_view(arr: np.ndarray, block: ty.Tuple[int]) -> np.ndarray:
+    """Returns array block view for given n-d array
+
+    Creates n-d array block view with shape (k0, ..., kn, b0, ..., bn) for given
+    array with shape (m0, ..., mn) and block (b0, ..., bn).
+
+    Parameters
+    ----------
+    arr : array-like
+        The input array with shape (m0, ..., mn)
+    block : tuple
+        The block tuple (b0, ..., bn)
+
+    Returns
+    -------
+    a_view : array-like
+        The block view for given array (k0, ..., kn, b0, ..., bn)
+
+    """
+    shape = tuple(size // blk for size, blk in zip(arr.shape, block)) + block
+    strides = tuple(stride * blk for stride, blk in zip(arr.strides, block)) + arr.strides
+
+    return np.lib.stride_tricks.as_strided(arr, shape=shape, strides=strides)
