@@ -6,6 +6,7 @@ Univariate/multivariate cubic smoothing spline implementation
 """
 
 import functools
+import operator
 from typing import Optional, Union, Tuple, List
 
 import numpy as np
@@ -14,37 +15,64 @@ import scipy.sparse as sp
 import scipy.sparse.linalg as la
 from scipy.interpolate import PPoly
 
-from ._base import ISmoothingSpline
+from ._base import ISplinePPForm, ISmoothingSpline
 from ._types import UnivariateDataType, MultivariateDataType
 from ._reshape import to_2d
 
 
-class SplinePPForm(PPoly):
+class SplinePPForm(ISplinePPForm[np.ndarray, int], PPoly):
     """The base class for univariate/multivariate spline in piecewise polynomial form
 
     Piecewise polynomial in terms of coefficients and breakpoints.
     """
 
     @property
+    def breaks(self) -> np.ndarray:
+        return self.x
+
+    @property
+    def coeffs(self) -> np.ndarray:
+        return self.c
+
+    @property
     def order(self) -> int:
-        """Returns the order of the spline
-        """
         return self.c.shape[0]
 
     @property
     def pieces(self) -> int:
-        """Returns the number of the spline pieces (intervals)
-        """
         return self.c.shape[1]
 
     @property
-    def shape(self) -> Tuple[int]:
-        """Returns the data shape
+    def ndim(self) -> int:
+        """Returns the number of spline dimensions
+
+        The number of dimensions is product of shape without ``shape[self.axis]``.
         """
+        shape = list(self.shape)
+        shape.pop(self.axis)
+
+        if len(shape) == 0:
+            return 1
+        return functools.reduce(operator.mul, shape)
+
+    @property
+    def shape(self) -> Tuple[int]:
         shape: List[int] = list(self.c.shape[2:])
         shape.insert(self.axis, self.c.shape[1] + 1)
 
         return tuple(shape)
+
+    def __repr__(self):  # pragma: no cover
+        return (
+            f'{type(self).__name__}\n'
+            f'  breaks: {self.breaks}\n'
+            f'  coeffs shape: {self.coeffs.shape}\n'
+            f'  data shape: {self.shape}\n'
+            f'  axis: {self.axis}\n'
+            f'  pieces: {self.pieces}\n'
+            f'  order: {self.order}\n'
+            f'  ndim: {self.ndim}\n'
+        )
 
 
 class CubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, UnivariateDataType]):

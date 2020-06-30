@@ -11,7 +11,7 @@ from typing import Tuple, Sequence, Optional, Union
 import numpy as np
 from scipy.interpolate import NdPPoly
 
-from ._base import ISmoothingSpline
+from ._base import ISplinePPForm, ISmoothingSpline
 from ._types import UnivariateDataType, NdGridDataType
 from ._sspumv import SplinePPForm, CubicSmoothingSpline
 
@@ -41,11 +41,47 @@ def _flatten_coeffs(spline: SplinePPForm):
     return spline.c.reshape(c_shape).T
 
 
-class NdGridSplinePPForm(NdPPoly):
+class NdGridSplinePPForm(ISplinePPForm[Tuple[np.ndarray, ...], Tuple[int, ...]],
+                         NdPPoly):
     """N-D grid spline representation in PP-form
 
     N-D grid spline is represented in piecewise tensor product polynomial form.
     """
+
+    @property
+    def breaks(self) -> Tuple[np.ndarray, ...]:
+        return self.c
+
+    @property
+    def coeffs(self) -> np.ndarray:
+        return self.c
+
+    @property
+    def order(self) -> Tuple[int, ...]:
+        return self.c.shape[:self.c.ndim // 2]
+
+    @property
+    def pieces(self) -> Tuple[int, ...]:
+        return self.c.shape[self.c.ndim // 2:]
+
+    @property
+    def ndim(self) -> int:
+        return len(self.x)
+
+    @property
+    def shape(self) -> Tuple[int, ...]:
+        return tuple(len(xi) for xi in self.x)
+
+    def __repr__(self):  # pragma: no cover
+        return (
+            f'{type(self).__name__}\n'
+            f'  breaks: {self.breaks}\n'
+            f'  coeffs shape: {self.coeffs.shape}\n'
+            f'  data shape: {self.shape}\n'
+            f'  pieces: {self.pieces}\n'
+            f'  order: {self.order}\n'
+            f'  ndim: {self.ndim}\n'
+        )
 
 
 class NdGridCubicSmoothingSpline(ISmoothingSpline[
