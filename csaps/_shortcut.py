@@ -10,7 +10,7 @@ from typing import Optional, Union, Sequence, NamedTuple, overload
 
 from ._base import ISmoothingSpline
 from ._sspumv import CubicSmoothingSpline
-from ._sspndg import ndgrid_prepare_data_sites, NdGridCubicSmoothingSpline
+from ._sspndg import ndgrid_prepare_data_vectors, NdGridCubicSmoothingSpline
 from ._types import UnivariateDataType, MultivariateDataType, NdGridDataType
 
 
@@ -190,7 +190,7 @@ def csaps(xdata: Union[UnivariateDataType, NdGridDataType],
 
     if isinstance(xdata, c_abc.Sequence):
         try:
-            ndgrid_prepare_data_sites(xdata, 'xdata')
+            ndgrid_prepare_data_vectors(xdata, 'xdata')
         except ValueError:
             umv = True
         else:

@@ -18,19 +18,19 @@ from ._sspumv import SplinePPForm, CubicSmoothingSpline
 from ._reshape import block_view
 
 
-def ndgrid_prepare_data_sites(data, name) -> Tuple[np.ndarray, ...]:
+def ndgrid_prepare_data_vectors(data, name, min_size: int = 2) -> Tuple[np.ndarray, ...]:
     if not isinstance(data, c_abc.Sequence):
-        raise TypeError(f"'{name}' must be a sequence of the vectors.")
+        raise TypeError(f"'{name}' must be a sequence of 1-d array-like (vectors) or scalars.")
 
     data = list(data)
 
-    for axis, di in enumerate(data):
-        di = np.array(di, dtype=np.float64)
-        if di.ndim > 1:
+    for axis, d in enumerate(data):
+        d = np.asarray(d, dtype=np.float64)
+        if d.ndim > 1:
             raise ValueError(f"All '{name}' elements must be a vector for axis {axis}.")
-        if di.size < 2:
-            raise ValueError(f"'{name}' must contain at least 2 data points for axis {axis}.")
-        data[axis] = di
+        if d.size < min_size:
+            raise ValueError(f"'{name}' must contain at least {min_size} data points for axis {axis}.")
+        data[axis] = d
 
     return tuple(data)
 
@@ -140,12 +140,9 @@ class NdGridCubicSmoothingSpline(ISmoothingSpline[
                  extrapolate: Optional[bool] = None) -> np.ndarray:
         """Evaluate the spline for given data
         """
-        if not isinstance(x, c_abc.Sequence):
-            ndim = self._spline.ndim
-            raise ValueError(
-                f"'x' must be a sequence of 1-d array-like of scalars with length {ndim}")
-
+        x = ndgrid_prepare_data_vectors(x, 'x', min_size=1)
         x = tuple(np.meshgrid(*x, indexing='ij'))
+
         return self._spline(x, nu=nu, extrapolate=extrapolate)
 
     @property
@@ -172,7 +169,7 @@ class NdGridCubicSmoothingSpline(ISmoothingSpline[
 
     @classmethod
     def _prepare_data(cls, xdata, ydata, weights, smooth):
-        xdata = ndgrid_prepare_data_sites(xdata, 'xdata')
+        xdata = ndgrid_prepare_data_vectors(xdata, 'xdata')
         ydata = np.asarray(ydata)
         data_ndim = len(xdata)
 
@@ -188,7 +185,7 @@ class NdGridCubicSmoothingSpline(ISmoothingSpline[
         if not weights:
             weights = [None] * data_ndim
         else:
-            weights = ndgrid_prepare_data_sites(weights, 'weights')
+            weights = ndgrid_prepare_data_vectors(weights, 'weights')
 
         if len(weights) != data_ndim:
             raise ValueError(
