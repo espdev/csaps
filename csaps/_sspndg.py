@@ -175,10 +175,10 @@ class NdGridCubicSmoothingSpline(ISmoothingSpline[
             raise ValueError(
                 f"'ydata' must have dimension {data_ndim} according to 'xdata'")
 
-        for yd, xs in zip(ydata.shape, map(len, xdata)):
+        for axis, (yd, xs) in enumerate(zip(ydata.shape, map(len, xdata))):
             if yd != xs:
                 raise ValueError(
-                    f"'ydata' ({yd}) and xdata ({xs}) dimension size mismatch")
+                    f"'ydata' ({yd}) and xdata ({xs}) sizes mismatch for axis {axis}")
 
         if not weights:
             weights = [None] * data_ndim
@@ -189,11 +189,11 @@ class NdGridCubicSmoothingSpline(ISmoothingSpline[
             raise ValueError(
                 f"'weights' ({len(weights)}) and 'xdata' ({data_ndim}) dimensions mismatch")
 
-        for w, x in zip(weights, xdata):
+        for axis, (w, x) in enumerate(zip(weights, xdata)):
             if w is not None:
                 if w.size != x.size:
                     raise ValueError(
-                        f"'weights' ({w}) and 'xdata' ({x}) dimension size mismatch")
+                        f"'weights' ({w.size}) and 'xdata' ({x.size}) sizes mismatch for axis {axis}")
 
         if smooth is None:
             smooth = [None] * data_ndim
