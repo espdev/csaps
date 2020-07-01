@@ -52,7 +52,7 @@ class NdGridSplinePPForm(ISplinePPForm[Tuple[np.ndarray, ...], Tuple[int, ...]],
 
     @property
     def breaks(self) -> Tuple[np.ndarray, ...]:
-        return self.c
+        return self.x
 
     @property
     def coeffs(self) -> np.ndarray:
@@ -76,6 +76,11 @@ class NdGridSplinePPForm(ISplinePPForm[Tuple[np.ndarray, ...], Tuple[int, ...]],
 
     def __call__(self, x, nu=None, extrapolate=None):
         x = ndgrid_prepare_data_vectors(x, 'x', min_size=1)
+
+        if len(x) != self.ndim:
+            raise ValueError(
+                f"'x' sequence must have length {self.ndim} according to 'breaks'")
+
         x = tuple(np.meshgrid(*x, indexing='ij'))
 
         return super().__call__(x, nu, extrapolate)

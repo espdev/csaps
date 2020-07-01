@@ -147,6 +147,7 @@ def test_axis(shape, axis):
     pieces = len(x) - 1
     coeffs_shape = (order, pieces) + shape[:axis] + shape[axis+1:]
 
+    assert ss.breaks == pytest.approx(x)
     assert ss.coeffs.shape == coeffs_shape
     assert ss.axis == axis
     assert ss.order == order
