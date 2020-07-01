@@ -155,12 +155,17 @@ def test_nd_2pt_array(shape: tuple):
 
 
 @pytest.mark.parametrize('shape', [
+    (2,),
     (3,),
+    (2, 3),
     (3, 4),
+    (3, 2, 4),
     (3, 4, 5),
+    (2, 4, 2, 6),
     (3, 4, 5, 6),
+    (3, 2, 2, 6, 2),
     (3, 4, 5, 6, 7),
-], ids=['1d', '2d', '3d', '4d', '5d'])
+], ids=['1d_o2', '1d_o4', '2d_o2', '2d_o4', '3d_o2', '3d_o4', '4d_o2', '4d_o4', '5d_o2', '5d_o4'])
 def test_nd_array(shape: tuple):
     xdata = [np.arange(s) for s in shape]
     ydata = np.arange(0, np.prod(shape)).reshape(shape)
@@ -168,5 +173,4 @@ def test_nd_array(shape: tuple):
     sp = csaps.NdGridCubicSmoothingSpline(xdata, ydata, smooth=1.0)
     ydata_s = sp(xdata)
 
-    assert len(sp.spline.coeffs.shape) == len(ydata.shape)
     assert ydata_s == pytest.approx(ydata)
