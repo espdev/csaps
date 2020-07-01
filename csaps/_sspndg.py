@@ -74,6 +74,12 @@ class NdGridSplinePPForm(ISplinePPForm[Tuple[np.ndarray, ...], Tuple[int, ...]],
     def shape(self) -> Tuple[int, ...]:
         return tuple(len(xi) for xi in self.x)
 
+    def __call__(self, x, nu=None, extrapolate=None):
+        x = ndgrid_prepare_data_vectors(x, 'x', min_size=1)
+        x = tuple(np.meshgrid(*x, indexing='ij'))
+
+        return super().__call__(x, nu, extrapolate)
+
     def __repr__(self):  # pragma: no cover
         return (
             f'{type(self).__name__}\n'
@@ -140,9 +146,6 @@ class NdGridCubicSmoothingSpline(ISmoothingSpline[
                  extrapolate: Optional[bool] = None) -> np.ndarray:
         """Evaluate the spline for given data
         """
-        x = ndgrid_prepare_data_vectors(x, 'x', min_size=1)
-        x = tuple(np.meshgrid(*x, indexing='ij'))
-
         return self._spline(x, nu=nu, extrapolate=extrapolate)
 
     @property
