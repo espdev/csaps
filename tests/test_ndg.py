@@ -23,6 +23,31 @@ def test_invalid_data(x, y, w, p):
         csaps.NdGridCubicSmoothingSpline(x, y, w, p)
 
 
+@pytest.mark.parametrize('shape, coeffs_shape, order, pieces, ndim', [
+    ((2,), (2, 1), (2,), (1,), 1),
+    ((3,), (4, 2), (4,), (2,), 1),
+    ((4,), (4, 3), (4,), (3,), 1),
+    ((2, 4), (2, 4, 1, 3), (2, 4), (1, 3), 2),
+    ((3, 4), (4, 4, 2, 3), (4, 4), (2, 3), 2),
+    ((4, 4), (4, 4, 3, 3), (4, 4), (3, 3), 2),
+    ((2, 3, 4), (2, 4, 4, 1, 2, 3), (2, 4, 4), (1, 2, 3), 3),
+    ((3, 4, 5), (4, 4, 4, 2, 3, 4), (4, 4, 4), (2, 3, 4), 3),
+    ((2, 3, 2, 6), (2, 4, 2, 4, 1, 2, 1, 5), (2, 4, 2, 4), (1, 2, 1, 5), 4),
+    ((3, 4, 5, 6), (4, 4, 4, 4, 2, 3, 4, 5), (4, 4, 4, 4), (2, 3, 4, 5), 4),
+])
+def test_ndsplineppform(shape, coeffs_shape, order, pieces, ndim):
+    x = tuple(np.arange(s) for s in shape)
+    y = np.arange(float(np.prod(shape))).reshape(shape)
+
+    ss = csaps.NdGridCubicSmoothingSpline(x, y).spline
+
+    assert ss.c.shape == coeffs_shape
+    assert ss.order == order
+    assert ss.pieces == pieces
+    assert ss.ndim == ndim
+    assert ss.shape == shape
+
+
 def test_surface():
     xdata = [np.linspace(-3, 3, 61), np.linspace(-3.5, 3.5, 51)]
     i, j = np.meshgrid(*xdata, indexing='ij')
