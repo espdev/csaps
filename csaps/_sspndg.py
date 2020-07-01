@@ -6,6 +6,7 @@ ND-Gridded cubic smoothing spline implementation
 """
 
 import collections.abc as c_abc
+from numbers import Number
 from typing import Tuple, Sequence, Optional, Union
 
 import numpy as np
@@ -134,13 +135,17 @@ class NdGridCubicSmoothingSpline(ISmoothingSpline[
         self._smooth = smooth
 
     def __call__(self,
-                 x: Union[NdGridDataType, UnivariateDataType],
+                 x: Union[NdGridDataType, Sequence[Number]],
                  nu: Optional[Tuple[int]] = None,
                  extrapolate: Optional[bool] = None) -> np.ndarray:
         """Evaluate the spline for given data
         """
+        if not isinstance(x, c_abc.Sequence):
+            ndim = self._spline.ndim
+            raise ValueError(
+                f"'x' must be a sequence of 1-d array-like of scalars with length {ndim}")
 
-        # FIXME: we need to prepare x data and reshape output data to original data shape
+        x = tuple(np.meshgrid(*x, indexing='ij'))
         return self._spline(x, nu=nu, extrapolate=extrapolate)
 
     @property
