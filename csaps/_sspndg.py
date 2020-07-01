@@ -74,7 +74,33 @@ class NdGridSplinePPForm(ISplinePPForm[Tuple[np.ndarray, ...], Tuple[int, ...]],
     def shape(self) -> Tuple[int, ...]:
         return tuple(len(xi) for xi in self.x)
 
-    def __call__(self, x, nu=None, extrapolate=None):
+    def __call__(self,
+                 x: Sequence[UnivariateDataType],
+                 nu: Optional[Tuple[int, ...]] = None,
+                 extrapolate: Optional[bool] = None) -> np.ndarray:
+        """Evaluate the spline for given data
+
+        Parameters
+        ----------
+
+        x : tuple of 1-d array-like
+            The tuple of point values for each dimension to evaluate the spline at.
+
+        nu : [*Optional*] tuple of int
+            Orders of derivatives to evaluate. Each must be non-negative.
+
+        extrapolate : [*Optional*] bool
+            Whether to extrapolate to out-of-bounds points based on first and last
+            intervals, or to return NaNs.
+
+        Returns
+        -------
+
+        y : array-like
+            Interpolated values. Shape is determined by replacing the
+            interpolation axis in the original array with the shape of x.
+
+        """
         x = ndgrid_prepare_data_vectors(x, 'x', min_size=1)
 
         if len(x) != self.ndim:
@@ -100,7 +126,9 @@ class NdGridSplinePPForm(ISplinePPForm[Tuple[np.ndarray, ...], Tuple[int, ...]],
 class NdGridCubicSmoothingSpline(ISmoothingSpline[
                                      NdGridSplinePPForm,
                                      Tuple[float, ...],
-                                     NdGridDataType
+                                     NdGridDataType,
+                                     Tuple[int, ...],
+                                     bool,
                                  ]):
     """N-D grid cubic smoothing spline
 
@@ -147,9 +175,30 @@ class NdGridCubicSmoothingSpline(ISmoothingSpline[
 
     def __call__(self,
                  x: Union[NdGridDataType, Sequence[Number]],
-                 nu: Optional[Tuple[int]] = None,
+                 nu: Optional[Tuple[int, ...]] = None,
                  extrapolate: Optional[bool] = None) -> np.ndarray:
         """Evaluate the spline for given data
+
+        Parameters
+        ----------
+
+        x : tuple of 1-d array-like
+            The tuple of point values for each dimension to evaluate the spline at.
+
+        nu : [*Optional*] tuple of int
+            Orders of derivatives to evaluate. Each must be non-negative.
+
+        extrapolate : [*Optional*] bool
+            Whether to extrapolate to out-of-bounds points based on first and last
+            intervals, or to return NaNs.
+
+        Returns
+        -------
+
+        y : array-like
+            Interpolated values. Shape is determined by replacing the
+            interpolation axis in the original array with the shape of x.
+
         """
         return self._spline(x, nu=nu, extrapolate=extrapolate)
 

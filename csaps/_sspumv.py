@@ -57,6 +57,8 @@ class SplinePPForm(ISplinePPForm[np.ndarray, int], PPoly):
 
     @property
     def shape(self) -> Tuple[int]:
+        """Returns the source data shape
+        """
         shape: List[int] = list(self.c.shape[2:])
         shape.insert(self.axis, self.c.shape[1] + 1)
 
@@ -75,7 +77,13 @@ class SplinePPForm(ISplinePPForm[np.ndarray, int], PPoly):
         )
 
 
-class CubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, UnivariateDataType]):
+class CubicSmoothingSpline(ISmoothingSpline[
+                               SplinePPForm,
+                               float,
+                               UnivariateDataType,
+                               int,
+                               Union[bool, str]
+                           ]):
     """Cubic smoothing spline
 
     The cubic spline implementation for univariate/multivariate data.
@@ -119,7 +127,7 @@ class CubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, UnivariateDataT
 
     def __call__(self,
                  x: UnivariateDataType,
-                 nu: int = 0,
+                 nu: Optional[int] = None,
                  extrapolate: Optional[Union[bool, str]] = None) -> np.ndarray:
         """Evaluate the spline for given data
 
@@ -147,6 +155,8 @@ class CubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, UnivariateDataT
         ``[a, b]``.
 
         """
+        if nu is None:
+            nu = 0
         return self._spline(x, nu=nu, extrapolate=extrapolate)
 
     @property

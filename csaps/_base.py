@@ -6,14 +6,14 @@ The base classes and interfaces
 """
 
 import abc
-import typing as ty
+from typing import Generic, Tuple, Optional
 
 import numpy as np
 
-from ._types import TData, TProps, TSmooth, TXi, TSpline
+from ._types import TData, TProps, TSmooth, TXi, TNu, TExtrapolate, TSpline
 
 
-class ISplinePPForm(abc.ABC, ty.Generic[TData, TProps]):
+class ISplinePPForm(abc.ABC, Generic[TData, TProps]):
     """The interface class for spline representation in PP-form
     """
 
@@ -74,24 +74,24 @@ class ISplinePPForm(abc.ABC, ty.Generic[TData, TProps]):
 
     @property
     @abc.abstractmethod
-    def shape(self) -> ty.Tuple[int]:
-        """Returns the data shape
+    def shape(self) -> Tuple[int]:
+        """Returns the source data shape
 
         Returns
         -------
-        ndim : int
-            The data shape
+        shape : tuple of int
+            The source data shape
         """
 
 
-class ISmoothingSpline(abc.ABC, ty.Generic[TSpline, TSmooth, TXi]):
+class ISmoothingSpline(abc.ABC, Generic[TSpline, TSmooth, TXi, TNu, TExtrapolate]):
     """The interface class for smooting splines
     """
 
     @property
     @abc.abstractmethod
     def smooth(self) -> TSmooth:
-        """Returns smoothing parameter(s)
+        """Returns smoothing factor(s)
         """
 
     @property
@@ -101,6 +101,9 @@ class ISmoothingSpline(abc.ABC, ty.Generic[TSpline, TSmooth, TXi]):
         """
 
     @abc.abstractmethod
-    def __call__(self, xi: TXi) -> np.ndarray:
+    def __call__(self,
+                 xi: TXi,
+                 nu: Optional[TNu] = None,
+                 extrapolate: Optional[TExtrapolate] = None) -> np.ndarray:
         """Evaluates spline on the data sites
         """
