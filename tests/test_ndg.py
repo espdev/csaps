@@ -41,7 +41,7 @@ def test_ndsplineppform(shape, coeffs_shape, order, pieces, ndim):
 
     ss = csaps.NdGridCubicSmoothingSpline(x, y).spline
 
-    assert ss.c.shape == coeffs_shape
+    assert ss.coeffs.shape == coeffs_shape
     assert ss.order == order
     assert ss.pieces == pieces
     assert ss.ndim == ndim
