@@ -143,10 +143,14 @@ def test_axis(shape, axis):
     ss = s.spline
     axis = len(shape) + axis if axis < 0 else axis
     ndim = int(np.prod(shape)) // shape[axis]
+    order = 2 if len(x) < 3 else 4
+    pieces = len(x) - 1
+    coeffs_shape = (order, pieces) + shape[:axis] + shape[axis+1:]
 
+    assert ss.coeffs.shape == coeffs_shape
     assert ss.axis == axis
-    assert ss.order == 2 if len(x) < 3 else 4
-    assert ss.pieces == len(x) - 1
+    assert ss.order == order
+    assert ss.pieces == pieces
     assert ss.ndim == ndim
     assert ss.shape == shape
 
