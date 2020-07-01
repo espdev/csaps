@@ -23,6 +23,22 @@ def test_invalid_data(x, y, w, p):
         csaps.NdGridCubicSmoothingSpline(x, y, w, p)
 
 
+@pytest.mark.parametrize('x, xi', [
+    (([1, 2, 3],), ([],)),
+    (([1, 2, 3], [1, 2, 3]), ([1, 2], [])),
+    (([1, 2, 3], [1, 2, 3], [1, 2, 3]), ([1, 2, 3], [1, 2, 3])),
+    (([1, 2, 3], [1, 2, 3]), ([1, 2, 3], [1, 2, 3], [1, 2, 3])),
+])
+def test_invalid_evaluate_data(x, xi):
+    np.random.seed(1234)
+
+    y = np.random.randn(*tuple(len(xx) for xx in x))
+    s = csaps.NdGridCubicSmoothingSpline(x, y)
+
+    with pytest.raises((ValueError, TypeError)):
+        s(xi)
+
+
 @pytest.mark.parametrize('shape, coeffs_shape, order, pieces, ndim', [
     ((2,), (2, 1), (2,), (1,), 1),
     ((3,), (4, 2), (4,), (2,), 1),
