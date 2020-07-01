@@ -173,7 +173,7 @@ def test_zero_smooth():
 
 
 def test_auto_smooth(univariate_data):
-    x, y, xi, yi_expected, smooth_expected = univariate_data
+    x, y, xi, yi_expected, *_, smooth_expected = univariate_data
 
     s = csaps.CubicSmoothingSpline(x, y, smooth=None)
     yi = s(xi)
