@@ -3,6 +3,7 @@
 from itertools import chain, product, permutations
 
 import numpy as np
+from scipy.interpolate import CubicSpline
 import pytest
 
 import csaps
@@ -115,25 +116,6 @@ def test_vectorize(y):
     np.testing.assert_allclose(ys, y)
 
 
-@pytest.mark.parametrize('y, order, pieces, ndim', [
-    ([1, 2], 2, 1, 1),
-    ([[1, 2], [1, 2]], 2, 1, 2),
-    ([1, 2, 3], 4, 2, 1),
-    ([[1, 2, 3], [1, 2, 3]], 4, 2, 2),
-    ([1, 2, 3, 4, 5, 6, 7], 4, 6, 1),
-    ([[1, 2, 3, 4, 5, 6, 7], [1, 2, 3, 4, 5, 6, 7]], 4, 6, 2),
-])
-def test_splineppform(y, order, pieces, ndim):
-    x = np.arange(np.array(y).shape[-1])
-    y = np.array(y)
-
-    s = csaps.CubicSmoothingSpline(x, y).spline
-
-    assert s.order == order
-    assert s.pieces == pieces
-    assert s.ndim == ndim
-
-
 @pytest.mark.parametrize('shape, axis', chain(
     *map(product, [
         # shape
@@ -153,9 +135,25 @@ def test_axis(shape, axis):
     y = np.arange(int(np.prod(shape))).reshape(shape)
     x = np.arange(np.array(y).shape[axis])
 
-    ys = csaps.CubicSmoothingSpline(x, y, axis=axis)(x)
+    s = csaps.CubicSmoothingSpline(x, y, axis=axis)
 
+    ys = s(x)
     np.testing.assert_allclose(ys, y)
+
+    ss = s.spline
+    axis = len(shape) + axis if axis < 0 else axis
+    ndim = int(np.prod(shape)) // shape[axis]
+    order = 2 if len(x) < 3 else 4
+    pieces = len(x) - 1
+    coeffs_shape = (order, pieces) + shape[:axis] + shape[axis+1:]
+
+    assert ss.breaks == pytest.approx(x)
+    assert ss.coeffs.shape == coeffs_shape
+    assert ss.axis == axis
+    assert ss.order == order
+    assert ss.pieces == pieces
+    assert ss.ndim == ndim
+    assert ss.shape == shape
 
 
 def test_zero_smooth():
@@ -185,7 +183,6 @@ def test_auto_smooth():
     xi = np.linspace(x[0], x[-1], 120)
     yi = sp(xi)
 
-    assert isinstance(sp.spline, csaps.SplinePPForm)
     np.testing.assert_almost_equal(sp.smooth, 0.996566686)
 
     desired_yi = [
@@ -277,3 +274,19 @@ def test_big_vectorized():
     xi = np.linspace(0, 10000, 20000)
 
     csaps.CubicSmoothingSpline(x, y)(xi)
+
+
+def test_cubic_bc_natural():
+    np.random.seed(1234)
+    x = np.linspace(0, 5, 20)
+    xi = np.linspace(0, 5, 100)
+    y = np.sin(x) + np.random.randn(x.size) * 0.3
+
+    cs = CubicSpline(x, y, bc_type='natural')
+    ss = csaps.CubicSmoothingSpline(x, y, smooth=1.0)
+
+    y_cs = cs(xi)
+    y_ss = ss(xi)
+
+    assert cs.c == pytest.approx(ss.spline.c)
+    assert y_cs == pytest.approx(y_ss)

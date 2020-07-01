@@ -6,103 +6,133 @@ ND-Gridded cubic smoothing spline implementation
 """
 
 import collections.abc as c_abc
-import typing as ty
+from numbers import Number
+from typing import Tuple, Sequence, Optional, Union
 
 import numpy as np
+from scipy.interpolate import NdPPoly
 
-from ._base import SplinePPFormBase, ISmoothingSpline
+from ._base import ISplinePPForm, ISmoothingSpline
 from ._types import UnivariateDataType, NdGridDataType
 from ._sspumv import SplinePPForm, CubicSmoothingSpline
+from ._reshape import block_view
 
 
-def ndgrid_prepare_data_sites(data, name) -> ty.Tuple[np.ndarray, ...]:
+def ndgrid_prepare_data_vectors(data, name, min_size: int = 2) -> Tuple[np.ndarray, ...]:
     if not isinstance(data, c_abc.Sequence):
-        raise TypeError(f"'{name}' must be a sequence of the vectors.")
+        raise TypeError(f"'{name}' must be a sequence of 1-d array-like (vectors) or scalars.")
 
     data = list(data)
 
-    for i, di in enumerate(data):
-        di = np.array(di, dtype=np.float64)
-        if di.ndim > 1:
-            raise ValueError(f"All '{name}' elements must be a vector.")
-        if di.size < 2:
-            raise ValueError(f"'{name}' must contain at least 2 data points.")
-        data[i] = di
+    for axis, d in enumerate(data):
+        d = np.asarray(d, dtype=np.float64)
+        if d.ndim > 1:
+            raise ValueError(f"All '{name}' elements must be a vector for axis {axis}.")
+        if d.size < min_size:
+            raise ValueError(f"'{name}' must contain at least {min_size} data points for axis {axis}.")
+        data[axis] = d
 
     return tuple(data)
 
 
-class NdGridSplinePPForm(SplinePPFormBase[ty.Sequence[np.ndarray], ty.Tuple[int, ...]]):
+def _flatten_coeffs(spline: SplinePPForm):
+    shape = list(spline.shape)
+    shape.pop(spline.axis)
+    c_shape = (spline.order * spline.pieces, int(np.prod(shape)))
+
+    return spline.c.reshape(c_shape).T
+
+
+class NdGridSplinePPForm(ISplinePPForm[Tuple[np.ndarray, ...], Tuple[int, ...]],
+                         NdPPoly):
     """N-D grid spline representation in PP-form
 
-    Parameters
-    ----------
-    breaks : Sequence[np.ndarray]
-        The sequence of the breaks 1-D arrays for each dimension
-
-    coeffs : np.ndarray
-        Tensor-product spline coefficients N-D array
-
+    N-D grid spline is represented in piecewise tensor product polynomial form.
     """
 
-    def __init__(self, breaks: ty.Sequence[np.ndarray], coeffs: np.ndarray) -> None:
-        self._breaks = breaks
-        self._coeffs = coeffs
-        self._pieces = tuple(x.size - 1 for x in breaks)
-        self._order = tuple(s // p for s, p in zip(coeffs.shape, self._pieces))
-        self._ndim = len(breaks)
-
     @property
-    def breaks(self) -> ty.Sequence[np.ndarray]:
-        """Returns the sequence of the data breaks for each dimension"""
-        return self._breaks
+    def breaks(self) -> Tuple[np.ndarray, ...]:
+        return self.x
 
     @property
     def coeffs(self) -> np.ndarray:
-        """Returns n-d array of tensor-product n-d grid spline coefficients"""
-        return self._coeffs
+        return self.c
 
     @property
-    def order(self) -> ty.Tuple[int, ...]:
-        """Returns the tuple of the spline orders for each dimension"""
-        return self._order
+    def order(self) -> Tuple[int, ...]:
+        return self.c.shape[:self.c.ndim // 2]
 
     @property
-    def pieces(self) -> ty.Tuple[int, ...]:
-        """Returns the tuple of the spline pieces for each dimension"""
-        return self._pieces
+    def pieces(self) -> Tuple[int, ...]:
+        return self.c.shape[self.c.ndim // 2:]
 
     @property
     def ndim(self) -> int:
-        """Returns the dimensionality of n-d grid data"""
-        return self._ndim
+        return len(self.x)
 
-    def evaluate(self, xi: ty.Sequence[np.ndarray]) -> np.ndarray:
-        """Evaluates the spline for given data point(s) on the n-d grid"""
-        shape = tuple(x.size for x in xi)
+    @property
+    def shape(self) -> Tuple[int, ...]:
+        return tuple(len(xi) for xi in self.x)
 
-        coeffs = self.coeffs
-        coeffs_shape = coeffs.shape
+    def __call__(self,
+                 x: Sequence[UnivariateDataType],
+                 nu: Optional[Tuple[int, ...]] = None,
+                 extrapolate: Optional[bool] = None) -> np.ndarray:
+        """Evaluate the spline for given data
 
-        ndim_m1 = self.ndim - 1
-        permuted_axes = (ndim_m1, *range(ndim_m1))
+        Parameters
+        ----------
 
-        for i in reversed(range(self.ndim)):
-            umv_ndim = int(np.prod(coeffs_shape[:ndim_m1]))
-            coeffs = coeffs.reshape((umv_ndim, self.pieces[i] * self.order[i]))
+        x : tuple of 1-d array-like
+            The tuple of point values for each dimension to evaluate the spline at.
 
-            coeffs = SplinePPForm(breaks=self.breaks[i], coeffs=coeffs).evaluate(xi[i])
+        nu : [*Optional*] tuple of int
+            Orders of derivatives to evaluate. Each must be non-negative.
 
-            coeffs = coeffs.reshape((*coeffs_shape[:ndim_m1], shape[i])).transpose(permuted_axes)
-            coeffs_shape = coeffs.shape
+        extrapolate : [*Optional*] bool
+            Whether to extrapolate to out-of-bounds points based on first and last
+            intervals, or to return NaNs.
 
-        return coeffs.reshape(shape)
+        Returns
+        -------
+
+        y : array-like
+            Interpolated values. Shape is determined by replacing the
+            interpolation axis in the original array with the shape of x.
+
+        """
+        x = ndgrid_prepare_data_vectors(x, 'x', min_size=1)
+
+        if len(x) != self.ndim:
+            raise ValueError(
+                f"'x' sequence must have length {self.ndim} according to 'breaks'")
+
+        x = tuple(np.meshgrid(*x, indexing='ij'))
+
+        return super().__call__(x, nu, extrapolate)
+
+    def __repr__(self):  # pragma: no cover
+        return (
+            f'{type(self).__name__}\n'
+            f'  breaks: {self.breaks}\n'
+            f'  coeffs shape: {self.coeffs.shape}\n'
+            f'  data shape: {self.shape}\n'
+            f'  pieces: {self.pieces}\n'
+            f'  order: {self.order}\n'
+            f'  ndim: {self.ndim}\n'
+        )
 
 
-class NdGridCubicSmoothingSpline(ISmoothingSpline[NdGridSplinePPForm, ty.Tuple[float, ...], NdGridDataType]):
-    """ND-Gridded cubic smoothing spline
+class NdGridCubicSmoothingSpline(ISmoothingSpline[
+                                     NdGridSplinePPForm,
+                                     Tuple[float, ...],
+                                     NdGridDataType,
+                                     Tuple[int, ...],
+                                     bool,
+                                 ]):
+    """N-D grid cubic smoothing spline
 
-    Class implements ND-gridded data smoothing (piecewise tensor product polynomial).
+    Class implements N-D grid data smoothing (piecewise tensor product polynomial).
 
     Parameters
     ----------
@@ -134,19 +164,46 @@ class NdGridCubicSmoothingSpline(ISmoothingSpline[NdGridSplinePPForm, ty.Tuple[f
     def __init__(self,
                  xdata: NdGridDataType,
                  ydata: np.ndarray,
-                 weights: ty.Optional[ty.Union[UnivariateDataType, NdGridDataType]] = None,
-                 smooth: ty.Optional[ty.Union[float, ty.Sequence[ty.Optional[float]]]] = None) -> None:
+                 weights: Optional[Union[UnivariateDataType, NdGridDataType]] = None,
+                 smooth: Optional[Union[float, Sequence[Optional[float]]]] = None) -> None:
 
-        (self._xdata,
-         self._ydata,
-         self._weights,
-         _smooth) = self._prepare_data(xdata, ydata, weights, smooth)
+        x, y, w, s = self._prepare_data(xdata, ydata, weights, smooth)
+        coeffs, smooth = self._make_spline(x, y, w, s)
 
-        self._ndim = len(self._xdata)
-        self._spline, self._smooth = self._make_spline(_smooth)
+        self._spline = NdGridSplinePPForm.construct_fast(coeffs, x)
+        self._smooth = smooth
+
+    def __call__(self,
+                 x: Union[NdGridDataType, Sequence[Number]],
+                 nu: Optional[Tuple[int, ...]] = None,
+                 extrapolate: Optional[bool] = None) -> np.ndarray:
+        """Evaluate the spline for given data
+
+        Parameters
+        ----------
+
+        x : tuple of 1-d array-like
+            The tuple of point values for each dimension to evaluate the spline at.
+
+        nu : [*Optional*] tuple of int
+            Orders of derivatives to evaluate. Each must be non-negative.
+
+        extrapolate : [*Optional*] bool
+            Whether to extrapolate to out-of-bounds points based on first and last
+            intervals, or to return NaNs.
+
+        Returns
+        -------
+
+        y : array-like
+            Interpolated values. Shape is determined by replacing the
+            interpolation axis in the original array with the shape of x.
+
+        """
+        return self._spline(x, nu=nu, extrapolate=extrapolate)
 
     @property
-    def smooth(self) -> ty.Tuple[float, ...]:
+    def smooth(self) -> Tuple[float, ...]:
         """Returns a tuple of smoothing parameters for each axis
 
         Returns
@@ -169,28 +226,33 @@ class NdGridCubicSmoothingSpline(ISmoothingSpline[NdGridSplinePPForm, ty.Tuple[f
 
     @classmethod
     def _prepare_data(cls, xdata, ydata, weights, smooth):
-        xdata = ndgrid_prepare_data_sites(xdata, 'xdata')
+        xdata = ndgrid_prepare_data_vectors(xdata, 'xdata')
+        ydata = np.asarray(ydata)
         data_ndim = len(xdata)
 
         if ydata.ndim != data_ndim:
-            raise ValueError(f'ydata must have dimension {data_ndim} according to xdata')
+            raise ValueError(
+                f"'ydata' must have dimension {data_ndim} according to 'xdata'")
 
-        for yd, xs in zip(ydata.shape, map(len, xdata)):
+        for axis, (yd, xs) in enumerate(zip(ydata.shape, map(len, xdata))):
             if yd != xs:
-                raise ValueError(f'ydata ({yd}) and xdata ({xs}) dimension size mismatch')
+                raise ValueError(
+                    f"'ydata' ({yd}) and xdata ({xs}) sizes mismatch for axis {axis}")
 
         if not weights:
             weights = [None] * data_ndim
         else:
-            weights = ndgrid_prepare_data_sites(weights, 'weights')
+            weights = ndgrid_prepare_data_vectors(weights, 'weights')
 
         if len(weights) != data_ndim:
-            raise ValueError(f'weights ({len(weights)}) and xdata ({data_ndim}) dimensions mismatch')
+            raise ValueError(
+                f"'weights' ({len(weights)}) and 'xdata' ({data_ndim}) dimensions mismatch")
 
-        for w, x in zip(weights, xdata):
+        for axis, (w, x) in enumerate(zip(weights, xdata)):
             if w is not None:
                 if w.size != x.size:
-                    raise ValueError(f'weights ({w}) and xdata ({x}) dimension size mismatch')
+                    raise ValueError(
+                        f"'weights' ({w.size}) and 'xdata' ({x.size}) sizes mismatch for axis {axis}")
 
         if smooth is None:
             smooth = [None] * data_ndim
@@ -202,47 +264,46 @@ class NdGridCubicSmoothingSpline(ISmoothingSpline[NdGridSplinePPForm, ty.Tuple[f
 
         if len(smooth) != data_ndim:
             raise ValueError(
-                f'Number of smoothing parameter values must '
+                'Number of smoothing parameter values must '
                 f'be equal number of dimensions ({data_ndim})')
 
         return xdata, ydata, weights, smooth
 
-    def __call__(self, xi: NdGridDataType) -> np.ndarray:
-        """Evaluate the spline for given data
-        """
-        xi = ndgrid_prepare_data_sites(xi, 'xi')
+    @staticmethod
+    def _make_spline(xdata, ydata, weights, smooth):
+        ndim = len(xdata)
 
-        if len(xi) != self._ndim:  # pragma: no cover
-            raise ValueError(f'xi ({len(xi)}) and xdata ({self._ndim}) dimensions mismatch')
+        if ndim == 1:
+            s = CubicSmoothingSpline(
+                xdata[0], ydata, weights=weights[0], smooth=smooth[0])
+            return s.spline.coeffs, (s.smooth,)
 
-        return self._spline.evaluate(xi)
-
-    def _make_spline(self, smooth: ty.List[ty.Optional[float]]) -> ty.Tuple[NdGridSplinePPForm, ty.Tuple[float, ...]]:
-        coeffs = self._ydata
-        coeffs_shape = list(coeffs.shape)
+        shape = ydata.shape
+        coeffs = ydata
+        coeffs_shape = list(shape)
 
         smooths = []
-        permute_axes = (self._ndim - 1, *range(self._ndim - 1))
+        permute_axes = (ndim - 1, *range(ndim - 1))
 
         # computing coordinatewise smoothing spline
-        for i in reversed(range(self._ndim)):
-            if self._ndim > 2:
+        for i in reversed(range(ndim)):
+            if ndim > 2:
                 coeffs = coeffs.reshape(np.prod(coeffs.shape[:-1]), coeffs.shape[-1])
 
             s = CubicSmoothingSpline(
-                self._xdata[i], coeffs, weights=self._weights[i], smooth=smooth[i])
+                xdata[i], coeffs, weights=weights[i], smooth=smooth[i])
 
             smooths.append(s.smooth)
-            coeffs = s.spline.coeffs
+            coeffs = _flatten_coeffs(s.spline)
 
-            if self._ndim > 2:
+            if ndim > 2:
                 coeffs_shape[-1] = s.spline.pieces * s.spline.order
                 coeffs = coeffs.reshape(coeffs_shape)
 
-            if self._ndim > 1:
-                coeffs = coeffs.transpose(permute_axes)
-                coeffs_shape = list(coeffs.shape)
+            coeffs = coeffs.transpose(permute_axes)
+            coeffs_shape = list(coeffs.shape)
 
-        coeffs = coeffs.squeeze()
+        block = tuple(int(size - 1) for size in shape)
+        coeffs = block_view(coeffs.squeeze(), block)
 
-        return NdGridSplinePPForm(breaks=self._xdata, coeffs=coeffs), tuple(reversed(smooths))
+        return coeffs, tuple(reversed(smooths))

@@ -8,7 +8,7 @@ Cubic spline approximation (smoothing)
 from csaps._version import __version__  # noqa
 
 from csaps._base import (
-    SplinePPFormBase,
+    ISplinePPForm,
     ISmoothingSpline,
 )
 from csaps._sspumv import (
@@ -32,7 +32,7 @@ __all__ = [
     'AutoSmoothingResult',
 
     # Classes
-    'SplinePPFormBase',
+    'ISplinePPForm',
     'ISmoothingSpline',
     'SplinePPForm',
     'NdGridSplinePPForm',

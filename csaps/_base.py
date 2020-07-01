@@ -6,21 +6,21 @@ The base classes and interfaces
 """
 
 import abc
-import typing as ty
+from typing import Generic, Tuple, Optional
 
 import numpy as np
 
-from ._types import TData, TProps, TSmooth, TXi, TSpline
+from ._types import TData, TProps, TSmooth, TXi, TNu, TExtrapolate, TSpline
 
 
-class SplinePPFormBase(abc.ABC, ty.Generic[TData, TProps]):
-    """The base class for spline representation in PP-form
+class ISplinePPForm(abc.ABC, Generic[TData, TProps]):
+    """The interface class for spline representation in PP-form
     """
 
     @property
     @abc.abstractmethod
     def breaks(self) -> TData:
-        """Returns breaks data
+        """Returns the breaks for the spline
 
         Returns
         -------
@@ -31,81 +31,67 @@ class SplinePPFormBase(abc.ABC, ty.Generic[TData, TProps]):
     @property
     @abc.abstractmethod
     def coeffs(self) -> np.ndarray:
-        """Returns a spline coefficients 2-D array
+        """Returns the spline coefficients
 
         Returns
         -------
         coeffs : np.ndarray
-            Coefficients 2-D array
+            Coefficients n-d array
         """
 
     @property
     @abc.abstractmethod
     def order(self) -> TProps:
-        """Returns a spline order
+        """Returns the spline order
 
         Returns
         -------
         order : ty.Union[int, ty.Tuple[int, ...]]
-            Returns a spline order
+            The spline order
         """
 
     @property
     @abc.abstractmethod
     def pieces(self) -> TProps:
-        """Returns a spline pieces data
+        """Returns the spline pieces data
 
         Returns
         -------
         pieces : ty.Union[int, ty.Tuple[int, ...]]
-            Returns a spline pieces data
+            The spline pieces data
         """
 
     @property
     @abc.abstractmethod
     def ndim(self) -> int:
-        """Returns a spline dimension count
+        """Returns the spline dimension count
 
         Returns
         -------
         ndim : int
-            A spline dimension count
+            The spline dimension count
         """
 
+    @property
     @abc.abstractmethod
-    def evaluate(self, xi: TData) -> np.ndarray:
-        """Evaluates the spline for given data sites
-
-        Parameters
-        ----------
-        xi : UnivariateDataType, NdGridDataType
-            X data vector or list of vectors for multivariate spline
+    def shape(self) -> Tuple[int]:
+        """Returns the source data shape
 
         Returns
         -------
-        data : np.ndarray
-            Interpolated/smoothed data
+        shape : tuple of int
+            The source data shape
         """
 
-    def __repr__(self):  # pragma: no cover
-        return (
-            f'{type(self).__name__}\n'
-            f'  breaks: {self.breaks}\n'
-            f'  coeffs: shape {self.coeffs.shape}\n'
-            f'  pieces: {self.pieces}\n'
-            f'  order: {self.order}\n'
-            f'  ndim: {self.ndim}\n'
-        )
 
-
-class ISmoothingSpline(abc.ABC, ty.Generic[TSpline, TSmooth, TXi]):
+class ISmoothingSpline(abc.ABC, Generic[TSpline, TSmooth, TXi, TNu, TExtrapolate]):
     """The interface class for smooting splines
     """
 
     @property
     @abc.abstractmethod
     def smooth(self) -> TSmooth:
-        """Returns smoothing parameter(s)
+        """Returns smoothing factor(s)
         """
 
     @property
@@ -115,6 +101,9 @@ class ISmoothingSpline(abc.ABC, ty.Generic[TSpline, TSmooth, TXi]):
         """
 
     @abc.abstractmethod
-    def __call__(self, xi: TXi) -> np.ndarray:
+    def __call__(self,
+                 xi: TXi,
+                 nu: Optional[TNu] = None,
+                 extrapolate: Optional[TExtrapolate] = None) -> np.ndarray:
         """Evaluates spline on the data sites
         """

@@ -5,91 +5,85 @@ Univariate/multivariate cubic smoothing spline implementation
 
 """
 
-import typing as ty
 import functools
+import operator
+from typing import Optional, Union, Tuple, List
 
 import numpy as np
+
 import scipy.sparse as sp
 import scipy.sparse.linalg as la
+from scipy.interpolate import PPoly
 
-from ._base import SplinePPFormBase, ISmoothingSpline
+from ._base import ISplinePPForm, ISmoothingSpline
 from ._types import UnivariateDataType, MultivariateDataType
-from ._reshape import from_2d, to_2d
+from ._reshape import to_2d
 
 
-class SplinePPForm(SplinePPFormBase[np.ndarray, int]):
-    """Univariate/multivariate spline representation in PP-form
+class SplinePPForm(ISplinePPForm[np.ndarray, int], PPoly):
+    """The base class for univariate/multivariate spline in piecewise polynomial form
 
-    Parameters
-    ----------
-    breaks : np.ndarray
-        Breaks values 1-D array
-
-    coeffs : np.ndarray
-        Spline coefficients 2-D array
-
+    Piecewise polynomial in terms of coefficients and breakpoints.
     """
-
-    def __init__(self, breaks: np.ndarray, coeffs: np.ndarray) -> None:
-        self._breaks = breaks
-        self._coeffs = coeffs
-        self._pieces = breaks.size - 1
-        self._order = coeffs.shape[1] // self._pieces
-        self._ndim = coeffs.shape[0]
 
     @property
     def breaks(self) -> np.ndarray:
-        """Returns the breaks array"""
-        return self._breaks
+        return self.x
 
     @property
     def coeffs(self) -> np.ndarray:
-        """Returns the spline coefficients 2-D array"""
-        return self._coeffs
+        return self.c
 
     @property
     def order(self) -> int:
-        """Returns the spline order"""
-        return self._order
+        return self.c.shape[0]
 
     @property
     def pieces(self) -> int:
-        """Returns the number of the spline pieces"""
-        return self._pieces
+        return self.c.shape[1]
 
     @property
     def ndim(self) -> int:
-        """Returns dimensionality (>1 for multivariate data)"""
-        return self._ndim
+        """Returns the number of spline dimensions
 
-    def evaluate(self, xi: np.ndarray) -> np.ndarray:
-        """Evaluates the spline for the given data point(s)"""
+        The number of dimensions is product of shape without ``shape[self.axis]``.
+        """
+        shape = list(self.shape)
+        shape.pop(self.axis)
 
-        # For each data site, compute its break interval
-        mesh = self.breaks[1:-1]
-        edges = np.hstack((-np.inf, mesh, np.inf))
+        if len(shape) == 0:
+            return 1
+        return functools.reduce(operator.mul, shape)
 
-        index = np.digitize(xi, edges)
+    @property
+    def shape(self) -> Tuple[int]:
+        """Returns the source data shape
+        """
+        shape: List[int] = list(self.c.shape[2:])
+        shape.insert(self.axis, self.c.shape[1] + 1)
 
-        nanx = np.flatnonzero(index == 0)
-        index = np.fmin(index, mesh.size + 1)
-        index[nanx] = 1
-        index -= 1
+        return tuple(shape)
 
-        # Go to local coordinates
-        xi = xi - self.breaks[index]
-
-        # Apply nested multiplication
-        values = self.coeffs[:, index]
-
-        for i in range(1, self.order):
-            index += self.pieces
-            values = xi * values + self.coeffs[:, index]
-
-        return values
+    def __repr__(self):  # pragma: no cover
+        return (
+            f'{type(self).__name__}\n'
+            f'  breaks: {self.breaks}\n'
+            f'  coeffs shape: {self.coeffs.shape}\n'
+            f'  data shape: {self.shape}\n'
+            f'  axis: {self.axis}\n'
+            f'  pieces: {self.pieces}\n'
+            f'  order: {self.order}\n'
+            f'  ndim: {self.ndim}\n'
+        )
 
 
-class CubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, UnivariateDataType]):
+class CubicSmoothingSpline(ISmoothingSpline[
+                               SplinePPForm,
+                               float,
+                               UnivariateDataType,
+                               int,
+                               Union[bool, str]
+                           ]):
     """Cubic smoothing spline
 
     The cubic spline implementation for univariate/multivariate data.
@@ -111,7 +105,7 @@ class CubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, UnivariateDataT
             - 0: The smoothing spline is the least-squares straight line fit
             - 1: The cubic spline interpolant with natural condition
 
-    axis : int
+    axis : [*Optional*] int
         Axis along which ``ydata`` is assumed to be varying.
         Meaning that for x[i] the corresponding values are np.take(ydata, i, axis=axis).
         By default is -1 (the last axis).
@@ -120,48 +114,59 @@ class CubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, UnivariateDataT
     def __init__(self,
                  xdata: UnivariateDataType,
                  ydata: MultivariateDataType,
-                 weights: ty.Optional[UnivariateDataType] = None,
-                 smooth: ty.Optional[float] = None,
+                 weights: Optional[UnivariateDataType] = None,
+                 smooth: Optional[float] = None,
                  axis: int = -1):
 
-        (self._xdata,
-         self._ydata,
-         self._weights,
-         self._shape) = self._prepare_data(xdata, ydata, weights, axis)
+        x, y, w, shape, axis = self._prepare_data(xdata, ydata, weights, axis)
+        coeffs, smooth = self._make_spline(x, y, w, smooth, shape)
+        spline = SplinePPForm.construct_fast(coeffs, x, axis=axis)
 
-        self._ydim = self._ydata.shape[0]
-        self._axis = axis
+        self._smooth = smooth
+        self._spline = spline
 
-        self._spline, self._smooth = self._make_spline(smooth)
-
-    def __call__(self, xi: UnivariateDataType) -> np.ndarray:
+    def __call__(self,
+                 x: UnivariateDataType,
+                 nu: Optional[int] = None,
+                 extrapolate: Optional[Union[bool, str]] = None) -> np.ndarray:
         """Evaluate the spline for given data
+
+        Parameters
+        ----------
+
+        x : 1-d array-like
+            Points to evaluate the spline at.
+
+        nu : [*Optional*] int
+            Order of derivative to evaluate. Must be non-negative.
+
+        extrapolate : [*Optional*] bool or 'periodic'
+            If bool, determines whether to extrapolate to out-of-bounds points
+            based on first and last intervals, or to return NaNs. If 'periodic',
+            periodic extrapolation is used. Default is True.
+
+        Notes
+        -----
+
+        Derivatives are evaluated piecewise for each polynomial
+        segment, even if the polynomial is not differentiable at the
+        breakpoints. The polynomial intervals are considered half-open,
+        ``[a, b)``, except for the last interval which is closed
+        ``[a, b]``.
+
         """
-        xi = ty.cast(np.ndarray, np.asarray(xi, dtype=np.float64))
-
-        if xi.ndim > 1:  # pragma: no cover
-            raise ValueError("'xi' data must be a 1-d array.")
-
-        yi = self._spline.evaluate(xi)
-
-        shape = list(self._shape)
-        shape[self._axis] = xi.size
-        shape = tuple(shape)
-
-        if yi.shape != shape:
-            # Reshape values 2-D NxM array to N-D array with original shape
-            yi = from_2d(yi, shape, self._axis)
-
-        return yi
+        if nu is None:
+            nu = 0
+        return self._spline(x, nu=nu, extrapolate=extrapolate)
 
     @property
     def smooth(self) -> float:
-        """Returns the smoothing parameter
+        """Returns the smoothing factor
 
         Returns
         -------
         smooth : float
-            Smooth factor in the range [0, 1]
+            Smoothing factor in the range [0, 1]
         """
         return self._smooth
 
@@ -172,7 +177,7 @@ class CubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, UnivariateDataT
         Returns
         -------
         spline : SplinePPForm
-            The spline description in :class:`SplinePPForm` instance
+            The spline representation in :class:`SplinePPForm` instance
         """
         return self._spline
 
@@ -186,12 +191,15 @@ class CubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, UnivariateDataT
         if xdata.size < 2:
             raise ValueError("'xdata' must contain at least 2 data points.")
 
-        yshape = list(ydata.shape)
+        axis = ydata.ndim + axis if axis < 0 else axis
 
-        if yshape[axis] != xdata.size:
+        if ydata.shape[axis] != xdata.size:
             raise ValueError(
                 f"'ydata' data must be a 1-D or N-D array with shape[{axis}] "
                 f"that is equal to 'xdata' size ({xdata.size})")
+
+        # Rolling axis for using its shape while constructing coeffs array
+        shape = np.rollaxis(ydata, axis).shape
 
         # Reshape ydata N-D array to 2-D NxM array where N is the data
         # dimension and M is the number of data points.
@@ -204,7 +212,7 @@ class CubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, UnivariateDataT
             if weights.size != xdata.size:
                 raise ValueError('Weights vector size must be equal of xdata size')
 
-        return xdata, ydata, weights, yshape
+        return xdata, ydata, weights, shape, axis
 
     @staticmethod
     def _compute_smooth(a, b):
@@ -220,27 +228,28 @@ class CubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, UnivariateDataT
 
         return 1. / (1. + trace(a) / (6. * trace(b)))
 
-    def _make_spline(self, smooth: ty.Optional[float]) -> ty.Tuple[SplinePPForm, float]:
-        pcount = self._xdata.size
-        dx = np.diff(self._xdata)
+    @staticmethod
+    def _make_spline(x, y, w, smooth, shape):
+        pcount = x.size
+        dx = np.diff(x)
 
         if not all(dx > 0):  # pragma: no cover
             raise ValueError(
                 "Items of 'xdata' vector must satisfy the condition: x1 < x2 < ... < xN")
 
-        dy = np.diff(self._ydata, axis=1)
+        dy = np.diff(y, axis=1)
         dy_dx = dy / dx
 
         if pcount == 2:
             # The corner case for the data with 2 points (1 breaks interval)
             # In this case we have 2-ordered spline and linear interpolation in fact
-            yi = self._ydata[:, 0][:, np.newaxis]
-            coeffs = np.hstack((dy_dx, yi))
+            yi = y[:, 0][:, np.newaxis]
 
-            spline = SplinePPForm(breaks=self._xdata, coeffs=coeffs)
-            p = 1.
+            c_shape = (2, pcount - 1) + shape[1:]
+            c = np.vstack((dy_dx, yi)).reshape(c_shape)
+            p = 1.0
 
-            return spline, p
+            return c, p
 
         # Create diagonal sparse matrices
         diags_r = np.vstack((dx[1:], 2 * (dx[1:] + dx[:-1]), dx[:-1]))
@@ -248,14 +257,14 @@ class CubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, UnivariateDataT
 
         dx_recip = 1. / dx
         diags_qtw = np.vstack((dx_recip[:-1], -(dx_recip[1:] + dx_recip[:-1]), dx_recip[1:]))
-        diags_sqrw_recip = 1. / np.sqrt(self._weights)
+        diags_sqrw_recip = 1. / np.sqrt(w)
 
         qtw = (sp.diags(diags_qtw, [0, 1, 2], (pcount - 2, pcount)) @
                sp.diags(diags_sqrw_recip, 0, (pcount, pcount)))
         qtw = qtw @ qtw.T
 
         if smooth is None:
-            p = self._compute_smooth(r, qtw)
+            p = CubicSmoothingSpline._compute_smooth(r, qtw)
         else:
             p = smooth
 
@@ -268,7 +277,7 @@ class CubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, UnivariateDataT
         u = la.spsolve(a, b)
         if u.ndim < 2:
             u = u[np.newaxis]
-        if self._ydim == 1:
+        if y.shape[0] == 1:
             u = u.T
 
         dx = dx[:, np.newaxis]
@@ -278,18 +287,18 @@ class CubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, UnivariateDataT
         d1 = np.diff(vpad(u), axis=0) / dx
         d2 = np.diff(vpad(d1), axis=0)
 
-        diags_w_recip = 1. / self._weights
+        diags_w_recip = 1. / w
         w = sp.diags(diags_w_recip, 0, (pcount, pcount))
 
-        yi = self._ydata.T - (pp * w) @ d2
+        yi = y.T - (pp * w) @ d2
         pu = vpad(p * u)
 
-        p1 = np.diff(pu, axis=0) / dx
-        p2 = 3. * pu[:-1, :]
-        p3 = np.diff(yi, axis=0) / dx - dx * (2. * pu[:-1, :] + pu[1:, :])
-        p4 = yi[:-1, :]
+        c1 = np.diff(pu, axis=0) / dx
+        c2 = 3. * pu[:-1, :]
+        c3 = np.diff(yi, axis=0) / dx - dx * (2. * pu[:-1, :] + pu[1:, :])
+        c4 = yi[:-1, :]
 
-        coeffs = np.vstack((p1, p2, p3, p4)).T
-        spline = SplinePPForm(breaks=self._xdata, coeffs=coeffs)
+        c_shape = (4, pcount - 1) + shape[1:]
+        c = np.vstack((c1, c2, c3, c4)).reshape(c_shape)
 
-        return spline, p
+        return c, p
