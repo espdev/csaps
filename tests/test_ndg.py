@@ -65,24 +65,16 @@ def test_ndsplineppform(shape, coeffs_shape, order, pieces, ndim):
     assert ss.shape == shape
 
 
-def test_surface():
-    xdata = [np.linspace(-3, 3, 61), np.linspace(-3.5, 3.5, 51)]
-    i, j = np.meshgrid(*xdata, indexing='ij')
+def test_surface(surface_data):
+    xdata, ydata = surface_data
 
-    ydata = (3 * (1 - j)**2. * np.exp(-(j**2) - (i + 1)**2)
-             - 10 * (j / 5 - j**3 - i**5) * np.exp(-j**2 - i**2)
-             - 1 / 3 * np.exp(-(j + 1)**2 - i**2))
-
-    np.random.seed(12345)
-    noisy = ydata + (np.random.randn(*ydata.shape) * 0.75)
-
-    sp = csaps.NdGridCubicSmoothingSpline(xdata, noisy)
+    sp = csaps.NdGridCubicSmoothingSpline(xdata, ydata)
     noisy_s = sp(xdata)
 
     assert isinstance(sp.smooth, tuple)
     assert len(sp.smooth) == 2
     assert isinstance(sp.spline, csaps.NdGridSplinePPForm)
-    assert noisy_s.shape == noisy.shape
+    assert noisy_s.shape == ydata.shape
 
 
 @pytest.mark.parametrize('shape, smooth', [
@@ -191,3 +183,16 @@ def test_nd_array(shape: tuple):
     ydata_s = sp(xdata)
 
     assert ydata_s == pytest.approx(ydata)
+
+
+def test_auto_smooth_2d(ndgrid_2d_data):
+    xy = ndgrid_2d_data.xy
+    z = ndgrid_2d_data.z
+    zi_expected = ndgrid_2d_data.zi
+    smooth_expected = ndgrid_2d_data.smooth
+
+    s = csaps.NdGridCubicSmoothingSpline(xy, z, smooth=None)
+    zi = s(xy)
+
+    assert s.smooth == pytest.approx(smooth_expected)
+    assert zi == pytest.approx(zi_expected)
