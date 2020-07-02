@@ -183,3 +183,16 @@ def test_nd_array(shape: tuple):
     ydata_s = sp(xdata)
 
     assert ydata_s == pytest.approx(ydata)
+
+
+def test_auto_smooth_2d(ndgrid_2d_data):
+    xy = ndgrid_2d_data.xy
+    z = ndgrid_2d_data.z
+    zi_expected = ndgrid_2d_data.zi
+    smooth_expected = ndgrid_2d_data.smooth
+
+    s = csaps.NdGridCubicSmoothingSpline(xy, z, smooth=None)
+    zi = s(xy)
+
+    assert s.smooth == pytest.approx(smooth_expected)
+    assert zi == pytest.approx(zi_expected)
