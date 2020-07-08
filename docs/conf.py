@@ -44,10 +44,15 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
+    'sphinx.ext.intersphinx',
     'matplotlib.sphinxext.plot_directive',
     'numpydoc',
     'm2r',
 ]
+
+intersphinx_mapping = {
+    'scipy': ('https://docs.scipy.org/doc/scipy/reference/', None)
+}
 
 # Extension settings
 plot_apply_rcparams = True
