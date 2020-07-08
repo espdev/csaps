@@ -48,6 +48,12 @@ class NdGridSplinePPForm(ISplinePPForm[Tuple[np.ndarray, ...], Tuple[int, ...]],
     """N-D grid spline representation in PP-form
 
     N-D grid spline is represented in piecewise tensor product polynomial form.
+
+    Notes
+    -----
+
+    Inherited from :py:class:`scipy.interpolate.NdPPoly`
+
     """
 
     __module__ = 'csaps'

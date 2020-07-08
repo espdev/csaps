@@ -24,6 +24,12 @@ class SplinePPForm(ISplinePPForm[np.ndarray, int], PPoly):
     """The base class for univariate/multivariate spline in piecewise polynomial form
 
     Piecewise polynomial in terms of coefficients and breakpoints.
+
+    Notes
+    -----
+
+    Inherited from :py:class:`scipy.interpolate.PPoly`
+
     """
 
     __module__ = 'csaps'
