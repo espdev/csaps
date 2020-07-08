@@ -26,6 +26,8 @@ class SplinePPForm(ISplinePPForm[np.ndarray, int], PPoly):
     Piecewise polynomial in terms of coefficients and breakpoints.
     """
 
+    __module__ = 'csaps'
+
     @property
     def breaks(self) -> np.ndarray:
         return self.x
@@ -110,6 +112,8 @@ class CubicSmoothingSpline(ISmoothingSpline[
         Meaning that for x[i] the corresponding values are np.take(ydata, i, axis=axis).
         By default is -1 (the last axis).
     """
+
+    __module__ = 'csaps'
 
     def __init__(self,
                  xdata: UnivariateDataType,
