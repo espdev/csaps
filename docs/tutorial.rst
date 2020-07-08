@@ -1,12 +1,11 @@
-.. _manual:
+.. _tutorial:
 
 .. currentmodule:: csaps
 
-Manual
-======
+Tutorial
+========
 
-
-.. _manual-quickstart:
+.. _tutorial-quickstart:
 
 Quickstart
 ----------
@@ -77,7 +76,7 @@ The example of data:
     ]
 
 By default, the shape of Y array must be: ``(d0, d1, ..., dN)``
-where ``dN`` must equal to X vector size. Also you can use :ref:`axis parameter <manual-using-axis>` to
+where ``dN`` must equal to X vector size. Also you can use :ref:`axis parameter <tutorial-using-axis>` to
 set the data values axis for Y array.
 
 In this case the smoothing spline will be computed for all Y data vectors at a time.
@@ -202,7 +201,7 @@ where
     - ``smooth`` -- the smoothing parameter in the range ``[0, 1]``
 
 
-.. _manual-advanced:
+.. _tutorial-advanced:
 
 Advanced Usage
 --------------
@@ -310,7 +309,7 @@ In ND-gridded data case we can use the same weights for all dimensions or differ
 weights for each dimension.
 
 
-.. _manual-using-axis:
+.. _tutorial-using-axis:
 
 Axis Parameter
 ~~~~~~~~~~~~~~

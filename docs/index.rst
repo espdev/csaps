@@ -50,7 +50,7 @@ Content
     :maxdepth: 2
 
     formulation
-    manual
+    tutorial
     internals
     benchmarks
     api
