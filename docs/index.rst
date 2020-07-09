@@ -10,8 +10,7 @@ Overview
 
 **csaps** is a package for univariate, multivariate and nd-gridded data approximation using cubic smoothing splines.
 
-The package provides functionality for computing and evaluating splines.
-It does not contain any spline analysis functions. Therefore, the package can be useful
+The package provides functionality for computing and evaluating splines and can be useful
 in practical engineering tasks for data approximation and smoothing.
 
 Here is an example of the univariate data smoothing:
