@@ -26,7 +26,7 @@ The module depends only on NumPy and SciPy. Python 3.6 or above is supported.
 
 ## Simple Examples
 
-Here are a couple of examples of smoothing data.
+Here is a couple of examples of smoothing data.
 
 An univariate data smoothing:
 
