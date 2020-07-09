@@ -1,12 +1,11 @@
-.. _manual:
+.. _tutorial:
 
 .. currentmodule:: csaps
 
-Manual
-======
+Tutorial
+========
 
-
-.. _manual-quickstart:
+.. _tutorial-quickstart:
 
 Quickstart
 ----------
@@ -77,7 +76,7 @@ The example of data:
     ]
 
 By default, the shape of Y array must be: ``(d0, d1, ..., dN)``
-where ``dN`` must equal to X vector size. Also you can use :ref:`axis parameter <manual-using-axis>` to
+where ``dN`` must equal to X vector size. Also you can use :ref:`axis parameter <tutorial-using-axis>` to
 set the data values axis for Y array.
 
 In this case the smoothing spline will be computed for all Y data vectors at a time.
@@ -126,15 +125,15 @@ The same weights vector and the same smoothing parameter will be used for all Y 
     ax.plot(xi, yi, zi, '-')
 
 
-ND-grid Smoothing
-~~~~~~~~~~~~~~~~~
+N-D grid Smoothing
+~~~~~~~~~~~~~~~~~~
 
-Finally, using the same function we can smooth nd-gridded data.
+Finally, using the same function we can smooth n-d gridded data.
 
-The algorithm can make smoothing splines for ND-gridded data smoothing.
+The algorithm can make smoothing splines for n-d gridded data smoothing.
 In this case the algorithm makes coordinatewise smoothing (tensor-product of univariate splines coefficients).
 
-X-data must be a sequence of vectors for each dimension. Y-data must be ND-array.
+X-data must be a sequence of vectors for each dimension. Y-data must be n-d array.
 
 The example of data:
 
@@ -202,7 +201,7 @@ where
     - ``smooth`` -- the smoothing parameter in the range ``[0, 1]``
 
 
-.. _manual-advanced:
+.. _tutorial-advanced:
 
 Advanced Usage
 --------------
@@ -306,11 +305,11 @@ The example of weighted smoothing univariate data:
     plt.plot(xi, yi_w, '-', label='weighted')
     plt.legend()
 
-In ND-gridded data case we can use the same weights for all dimensions or different
+In n-d gridded data case we can use the same weights for all dimensions or different
 weights for each dimension.
 
 
-.. _manual-using-axis:
+.. _tutorial-using-axis:
 
 Axis Parameter
 ~~~~~~~~~~~~~~
@@ -375,16 +374,32 @@ The example for univariate data:
     ax1.plot(x, y, 'o', xi1, yi1, '.-')
     ax2.plot(x, y, 'o', xi2, yi2, '.-')
 
-.. code-block:: python
 
-    >>> print('Spline class name:', type(spline).__name__)
-    ... print('Spline smoothing parameter:', spline.smooth)
-    ... print('Spline description:', spline.spline)
-    Spline class name: CubicSmoothingSpline
-    Spline smoothing parameter: 0.8999999999999999
-    Spline description: SplinePPForm
-      breaks: [-5. -4. -3. -2. -1.  0.  1.  2.  3.  4.  5.]
-      coeffs: shape (1, 40)
-      pieces: 10
-      order: 4
-      ndim: 1
+.. _tutorial-analysis:
+
+Analysis
+--------
+
+We can use spline analysis functionality that is provided by :class:`scipy.interpolate.PPoly`/:class:`scipy.interpolate.NdPPoly` classes.
+
+For example, let's try to use :func:`scipy.interpolate.PPoly.derivative` method to compute spline 1nd and 2nd derivatives.
+
+.. plot::
+
+    from csaps import CubicSmoothingSpline
+
+    x, y = univariate_data()
+    xi = np.linspace(x[0], x[-1], 300)
+
+    s = CubicSmoothingSpline(x, y, smooth=0.85).spline
+    ds1 = s.derivative(nu=1)
+    ds2 = s.derivative(nu=2)
+
+    _, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(5, 6))
+    ax1.plot(x, y, '.', xi, s(xi), '-')
+    ax2.plot(xi, ds1(xi), '-')
+    ax3.plot(xi, ds2(xi), '-')
+
+    ax1.set_title('spline')
+    ax2.set_title('1nd derivative')
+    ax3.set_title('2nd derivative')

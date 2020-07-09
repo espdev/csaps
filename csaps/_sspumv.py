@@ -24,7 +24,15 @@ class SplinePPForm(ISplinePPForm[np.ndarray, int], PPoly):
     """The base class for univariate/multivariate spline in piecewise polynomial form
 
     Piecewise polynomial in terms of coefficients and breakpoints.
+
+    Notes
+    -----
+
+    Inherited from :py:class:`scipy.interpolate.PPoly`
+
     """
+
+    __module__ = 'csaps'
 
     @property
     def breaks(self) -> np.ndarray:
@@ -110,6 +118,8 @@ class CubicSmoothingSpline(ISmoothingSpline[
         Meaning that for x[i] the corresponding values are np.take(ydata, i, axis=axis).
         By default is -1 (the last axis).
     """
+
+    __module__ = 'csaps'
 
     def __init__(self,
                  xdata: UnivariateDataType,

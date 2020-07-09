@@ -48,7 +48,15 @@ class NdGridSplinePPForm(ISplinePPForm[Tuple[np.ndarray, ...], Tuple[int, ...]],
     """N-D grid spline representation in PP-form
 
     N-D grid spline is represented in piecewise tensor product polynomial form.
+
+    Notes
+    -----
+
+    Inherited from :py:class:`scipy.interpolate.NdPPoly`
+
     """
+
+    __module__ = 'csaps'
 
     @property
     def breaks(self) -> Tuple[np.ndarray, ...]:
@@ -160,6 +168,8 @@ class NdGridCubicSmoothingSpline(ISmoothingSpline[
             - 1: The cubic spline interpolant with natural condition
 
     """
+
+    __module__ = 'csaps'
 
     def __init__(self,
                  xdata: NdGridDataType,

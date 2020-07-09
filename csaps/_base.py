@@ -17,6 +17,8 @@ class ISplinePPForm(abc.ABC, Generic[TData, TProps]):
     """The interface class for spline representation in PP-form
     """
 
+    __module__ = 'csaps'
+
     @property
     @abc.abstractmethod
     def breaks(self) -> TData:
@@ -87,6 +89,8 @@ class ISplinePPForm(abc.ABC, Generic[TData, TProps]):
 class ISmoothingSpline(abc.ABC, Generic[TSpline, TSmooth, TXi, TNu, TExtrapolate]):
     """The interface class for smooting splines
     """
+
+    __module__ = 'csaps'
 
     @property
     @abc.abstractmethod

@@ -18,7 +18,7 @@ Summary
     CubicSmoothingSpline
     NdGridCubicSmoothingSpline
 
-    SplinePPFormBase
+    ISplinePPForm
     SplinePPForm
     NdGridSplinePPForm
 
@@ -39,33 +39,39 @@ Object-Oriented API
 -------------------
 
 .. autoclass:: CubicSmoothingSpline
+    :show-inheritance:
     :members:
     :special-members: __call__
 
 ----
 
 .. autoclass:: NdGridCubicSmoothingSpline
+    :show-inheritance:
     :members:
     :special-members: __call__
 
 ----
 
 .. autoclass:: SplinePPForm
+    :show-inheritance:
     :members:
 
 ----
 
 .. autoclass:: NdGridSplinePPForm
+    :show-inheritance:
     :members:
 
-Base Classes
-------------
+Interfaces
+----------
 
 .. autoclass:: ISmoothingSpline
+    :show-inheritance:
     :members:
     :special-members: __call__
 
 ----
 
-.. autoclass:: SplinePPFormBase
+.. autoclass:: ISplinePPForm
+    :show-inheritance:
     :members:
