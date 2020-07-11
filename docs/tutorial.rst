@@ -382,7 +382,7 @@ Analysis
 
 We can use spline analysis functionality that is provided by :class:`scipy.interpolate.PPoly`/:class:`scipy.interpolate.NdPPoly` classes.
 
-For example, let's try to use :func:`scipy.interpolate.PPoly.derivative` method to compute spline 1nd and 2nd derivatives.
+For example, let's try to use :func:`scipy.interpolate.PPoly.derivative` method to compute spline 1st and 2nd derivatives.
 
 .. plot::
 
@@ -401,5 +401,5 @@ For example, let's try to use :func:`scipy.interpolate.PPoly.derivative` method 
     ax3.plot(xi, ds2(xi), '-')
 
     ax1.set_title('spline')
-    ax2.set_title('1nd derivative')
+    ax2.set_title('1st derivative')
     ax3.set_title('2nd derivative')
