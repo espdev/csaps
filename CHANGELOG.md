@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.0.0dev
+## v1.0.0
 
 * Use `PPoly` and `NdPPoly` base classes from SciPy interpolate module for `SplinePPForm` and `NdGridSplinePPForm` respectively.
 * Remove deprecated classes `UnivariateCubicSmoothingSpline` and `MultivariateCubicSmoothingSpline`
