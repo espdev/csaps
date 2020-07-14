@@ -6,7 +6,6 @@ Univariate/multivariate cubic smoothing spline implementation
 """
 
 import functools
-import operator
 from typing import Optional, Union, Tuple, List
 
 import numpy as np
@@ -17,7 +16,7 @@ from scipy.interpolate import PPoly
 
 from ._base import ISplinePPForm, ISmoothingSpline
 from ._types import UnivariateDataType, MultivariateDataType
-from ._reshape import to_2d
+from ._reshape import to_2d, prod
 
 
 class SplinePPForm(ISplinePPForm[np.ndarray, int], PPoly):
@@ -59,9 +58,7 @@ class SplinePPForm(ISplinePPForm[np.ndarray, int], PPoly):
         shape = list(self.shape)
         shape.pop(self.axis)
 
-        if len(shape) == 0:
-            return 1
-        return functools.reduce(operator.mul, shape)
+        return prod(shape)
 
     @property
     def shape(self) -> Tuple[int]:
