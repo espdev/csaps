@@ -2,6 +2,7 @@
 
 import functools
 import operator
+from itertools import chain
 import typing as ty
 
 import numpy as np
@@ -87,7 +88,7 @@ def to_2d(arr: np.ndarray, axis: int) -> np.ndarray:
     return arr.transpose(tr_axes).reshape(new_shape)
 
 
-def umv_coeffs_canonical_view(arr: np.ndarray, pieces: int):
+def umv_coeffs_to_canonical(arr: np.ndarray, pieces: int):
     """
 
     Parameters
@@ -125,7 +126,7 @@ def umv_coeffs_canonical_view(arr: np.ndarray, pieces: int):
     return as_strided(arr, shape=shape, strides=strides)
 
 
-def umv_coeffs_flatten_view(arr: np.ndarray):
+def umv_coeffs_to_flatten(arr: np.ndarray):
     """
 
     Parameters
@@ -157,7 +158,7 @@ def umv_coeffs_flatten_view(arr: np.ndarray):
     return arr_view
 
 
-def ndg_coeffs_canonical_view(arr: np.ndarray, pieces: ty.Tuple[int]) -> np.ndarray:
+def ndg_coeffs_to_canonical(arr: np.ndarray, pieces: ty.Tuple[int]) -> np.ndarray:
     """Returns array canonical view for given n-d grid coeffs flatten array
 
     Creates n-d array canonical view with shape (k0, ..., kn, p0, ..., pn) for given
@@ -190,7 +191,7 @@ def ndg_coeffs_canonical_view(arr: np.ndarray, pieces: ty.Tuple[int]) -> np.ndar
     return as_strided(arr, shape=shape, strides=strides)
 
 
-def ndg_coeffs_flatten_view(arr: np.ndarray):
+def ndg_coeffs_to_flatten(arr: np.ndarray):
     """Creates flatten array view for n-d grid coeffs canonical array
 
     For example for input array (4, 4, 20, 30) will be created the flatten view (80, 120)
@@ -210,11 +211,11 @@ def ndg_coeffs_flatten_view(arr: np.ndarray):
 
     """
 
-    if len(arr.shape) == 2:
+    if arr.ndim == 2:
         return arr
 
-    ndim = len(arr.shape) // 2
+    ndim = arr.ndim // 2
+    axes = tuple(chain.from_iterable(zip(range(ndim), range(ndim, arr.ndim))))
     shape = tuple(prod(arr.shape[i::ndim]) for i in range(ndim))
-    strides = arr.strides[ndim:]
 
-    return as_strided(arr, shape=shape, strides=strides)
+    return arr.transpose(axes).reshape(shape)

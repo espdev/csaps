@@ -17,10 +17,10 @@ from ._types import UnivariateDataType, NdGridDataType
 from ._sspumv import CubicSmoothingSpline
 from ._reshape import (
     prod,
-    umv_coeffs_canonical_view,
-    umv_coeffs_flatten_view,
-    ndg_coeffs_canonical_view,
-    ndg_coeffs_flatten_view,
+    umv_coeffs_to_canonical,
+    umv_coeffs_to_flatten,
+    ndg_coeffs_to_canonical,
+    ndg_coeffs_to_flatten,
 )
 
 
@@ -115,7 +115,7 @@ class NdGridSplinePPForm(ISplinePPForm[Tuple[np.ndarray, ...], Tuple[int, ...]],
 
         shape = tuple(x.size for x in x)
 
-        coeffs = ndg_coeffs_flatten_view(self.coeffs)
+        coeffs = ndg_coeffs_to_flatten(self.coeffs)
         coeffs_shape = coeffs.shape
 
         ndim_m1 = self.ndim - 1
@@ -127,7 +127,7 @@ class NdGridSplinePPForm(ISplinePPForm[Tuple[np.ndarray, ...], Tuple[int, ...]],
             if c_shape != coeffs_shape:
                 coeffs = coeffs.reshape(c_shape)
 
-            coeffs_cnl = umv_coeffs_canonical_view(coeffs, self.pieces[i])
+            coeffs_cnl = umv_coeffs_to_canonical(coeffs, self.pieces[i])
             coeffs = PPoly.construct_fast(coeffs_cnl, self.breaks[i],
                                           extrapolate=extrapolate, axis=1)(x[i])
 
@@ -322,7 +322,7 @@ class NdGridCubicSmoothingSpline(ISmoothingSpline[
                 xdata[i], coeffs, weights=weights[i], smooth=smooth[i])
 
             smooths.append(s.smooth)
-            coeffs = umv_coeffs_flatten_view(s.spline.coeffs)
+            coeffs = umv_coeffs_to_flatten(s.spline.coeffs)
 
             if ndim > 2:
                 coeffs_shape[-1] = s.spline.pieces * s.spline.order
@@ -332,6 +332,6 @@ class NdGridCubicSmoothingSpline(ISmoothingSpline[
             coeffs_shape = list(coeffs.shape)
 
         pieces = tuple(int(size - 1) for size in shape)
-        coeffs = ndg_coeffs_canonical_view(coeffs.squeeze(), pieces)
+        coeffs = ndg_coeffs_to_canonical(coeffs.squeeze(), pieces)
 
         return coeffs, tuple(reversed(smooths))
