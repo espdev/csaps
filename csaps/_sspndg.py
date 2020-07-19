@@ -107,11 +107,18 @@ class NdGridSplinePPForm(ISplinePPForm[Tuple[np.ndarray, ...], Tuple[int, ...]],
             interpolation axis in the original array with the shape of x.
 
         """
+
         x = ndgrid_prepare_data_vectors(x, 'x', min_size=1)
 
         if len(x) != self.ndim:
             raise ValueError(
                 f"'x' sequence must have length {self.ndim} according to 'breaks'")
+
+        if nu is None:
+            nu = (0,) * len(x)
+
+        if extrapolate is None:
+            extrapolate = True
 
         shape = tuple(x.size for x in x)
 
@@ -128,8 +135,9 @@ class NdGridSplinePPForm(ISplinePPForm[Tuple[np.ndarray, ...], Tuple[int, ...]],
                 coeffs = coeffs.reshape(c_shape)
 
             coeffs_cnl = umv_coeffs_to_canonical(coeffs, self.pieces[i])
-            coeffs = PPoly.construct_fast(coeffs_cnl, self.breaks[i],
-                                          extrapolate=extrapolate, axis=1)(x[i])
+
+            spline = PPoly.construct_fast(coeffs_cnl, self.breaks[i], axis=1)
+            coeffs = spline(x[i], nu=nu[i], extrapolate=extrapolate)
 
             shape_r = (*coeffs_shape[:ndim_m1], shape[i])
             coeffs = coeffs.reshape(shape_r).transpose(permuted_axes)
