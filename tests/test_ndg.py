@@ -200,6 +200,7 @@ def test_auto_smooth_2d(ndgrid_2d_data):
 
 
 @pytest.mark.parametrize('nu', [
+    None,
     (0, 0),
     (1, 1),
     (2, 2),
