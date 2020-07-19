@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.0.1.dev (19.07.2020)
+## v1.0.1 (19.07.2020)
 
 * Fix n-d grid spline evaluating performance regression [#31](https://github.com/espdev/csaps/pull/31)
 
