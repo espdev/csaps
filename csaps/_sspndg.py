@@ -10,12 +10,18 @@ from numbers import Number
 from typing import Tuple, Sequence, Optional, Union
 
 import numpy as np
-from scipy.interpolate import NdPPoly
+from scipy.interpolate import PPoly, NdPPoly
 
 from ._base import ISplinePPForm, ISmoothingSpline
 from ._types import UnivariateDataType, NdGridDataType
-from ._sspumv import SplinePPForm, CubicSmoothingSpline
-from ._reshape import block_view
+from ._sspumv import CubicSmoothingSpline
+from ._reshape import (
+    prod,
+    umv_coeffs_to_canonical,
+    umv_coeffs_to_flatten,
+    ndg_coeffs_to_canonical,
+    ndg_coeffs_to_flatten,
+)
 
 
 def ndgrid_prepare_data_vectors(data, name, min_size: int = 2) -> Tuple[np.ndarray, ...]:
@@ -33,14 +39,6 @@ def ndgrid_prepare_data_vectors(data, name, min_size: int = 2) -> Tuple[np.ndarr
         data[axis] = d
 
     return tuple(data)
-
-
-def _flatten_coeffs(spline: SplinePPForm):
-    shape = list(spline.shape)
-    shape.pop(spline.axis)
-    c_shape = (spline.order * spline.pieces, int(np.prod(shape)))
-
-    return spline.c.reshape(c_shape).T
 
 
 class NdGridSplinePPForm(ISplinePPForm[Tuple[np.ndarray, ...], Tuple[int, ...]],
@@ -115,9 +113,29 @@ class NdGridSplinePPForm(ISplinePPForm[Tuple[np.ndarray, ...], Tuple[int, ...]],
             raise ValueError(
                 f"'x' sequence must have length {self.ndim} according to 'breaks'")
 
-        x = tuple(np.meshgrid(*x, indexing='ij'))
+        shape = tuple(x.size for x in x)
 
-        return super().__call__(x, nu, extrapolate)
+        coeffs = ndg_coeffs_to_flatten(self.coeffs)
+        coeffs_shape = coeffs.shape
+
+        ndim_m1 = self.ndim - 1
+        permuted_axes = (ndim_m1, *range(ndim_m1))
+
+        for i in reversed(range(self.ndim)):
+            umv_ndim = prod(coeffs_shape[:ndim_m1])
+            c_shape = (umv_ndim, self.pieces[i] * self.order[i])
+            if c_shape != coeffs_shape:
+                coeffs = coeffs.reshape(c_shape)
+
+            coeffs_cnl = umv_coeffs_to_canonical(coeffs, self.pieces[i])
+            coeffs = PPoly.construct_fast(coeffs_cnl, self.breaks[i],
+                                          extrapolate=extrapolate, axis=1)(x[i])
+
+            shape_r = (*coeffs_shape[:ndim_m1], shape[i])
+            coeffs = coeffs.reshape(shape_r).transpose(permuted_axes)
+            coeffs_shape = coeffs.shape
+
+        return coeffs.reshape(shape)
 
     def __repr__(self):  # pragma: no cover
         return (
@@ -298,13 +316,13 @@ class NdGridCubicSmoothingSpline(ISmoothingSpline[
         # computing coordinatewise smoothing spline
         for i in reversed(range(ndim)):
             if ndim > 2:
-                coeffs = coeffs.reshape(np.prod(coeffs.shape[:-1]), coeffs.shape[-1])
+                coeffs = coeffs.reshape(prod(coeffs.shape[:-1]), coeffs.shape[-1])
 
             s = CubicSmoothingSpline(
                 xdata[i], coeffs, weights=weights[i], smooth=smooth[i])
 
             smooths.append(s.smooth)
-            coeffs = _flatten_coeffs(s.spline)
+            coeffs = umv_coeffs_to_flatten(s.spline.coeffs)
 
             if ndim > 2:
                 coeffs_shape[-1] = s.spline.pieces * s.spline.order
@@ -313,7 +331,7 @@ class NdGridCubicSmoothingSpline(ISmoothingSpline[
             coeffs = coeffs.transpose(permute_axes)
             coeffs_shape = list(coeffs.shape)
 
-        block = tuple(int(size - 1) for size in shape)
-        coeffs = block_view(coeffs.squeeze(), block)
+        pieces = tuple(int(size - 1) for size in shape)
+        coeffs = ndg_coeffs_to_canonical(coeffs.squeeze(), pieces)
 
         return coeffs, tuple(reversed(smooths))
