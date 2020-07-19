@@ -222,4 +222,4 @@ def test_evaluate_nu_extrapolate(nu: tuple, extrapolate: bool):
     xx = tuple(np.meshgrid(*xi, indexing='ij'))
     y_pp = pp(xx, nu=nu, extrapolate=extrapolate)
 
-    np.testing.assert_allclose(y_ss, y_pp, equal_nan=True)
+    np.testing.assert_allclose(y_ss, y_pp, rtol=1e-05, atol=1e-08, equal_nan=True)

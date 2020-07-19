@@ -256,4 +256,4 @@ def test_evaluate_nu_extrapolate(nu, extrapolate):
     ss = csaps.CubicSmoothingSpline(x, y, smooth=1.0)
     y_ss = ss(xi, nu=nu, extrapolate=extrapolate)
 
-    np.testing.assert_allclose(y_ss, y_cs, equal_nan=True)
+    np.testing.assert_allclose(y_ss, y_cs, rtol=1e-05, atol=1e-08, equal_nan=True)
