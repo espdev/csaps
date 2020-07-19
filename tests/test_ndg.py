@@ -205,15 +205,21 @@ def test_auto_smooth_2d(ndgrid_2d_data):
     (1, 1),
     (2, 2),
 ])
-def test_evaluate_nu(nu: tuple):
+@pytest.mark.parametrize('extrapolate', [
+    None,
+    True,
+    False,
+])
+def test_evaluate_nu_extrapolate(nu: tuple, extrapolate: bool):
     x = ([1, 2, 3, 4], [1, 2, 3, 4])
+    xi = ([0, 1, 2, 3, 4, 5], [0, 1, 2, 3, 4, 5])
     y = np.arange(4 * 4).reshape((4, 4))
 
     ss = csaps.NdGridCubicSmoothingSpline(x, y, smooth=1.0)
-    y_ss = ss(x, nu=nu)
+    y_ss = ss(xi, nu=nu, extrapolate=extrapolate)
 
     pp = NdPPoly(ss.spline.c, x)
-    xx = tuple(np.meshgrid(*x, indexing='ij'))
-    y_pp = pp(xx, nu=nu)
+    xx = tuple(np.meshgrid(*xi, indexing='ij'))
+    y_pp = pp(xx, nu=nu, extrapolate=extrapolate)
 
-    assert y_ss == pytest.approx(y_pp)
+    np.testing.assert_allclose(y_ss, y_pp, equal_nan=True)

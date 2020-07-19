@@ -244,14 +244,16 @@ def test_cubic_bc_natural():
 
 
 @pytest.mark.parametrize('nu', [0, 1, 2])
-def test_evaluate_nu(nu):
+@pytest.mark.parametrize('extrapolate', [None, True, False, 'periodic'])
+def test_evaluate_nu_extrapolate(nu, extrapolate):
     x = [1, 2, 3, 4]
+    xi = [0, 1, 2, 3, 4, 5]
     y = [1, 2, 3, 4]
 
     cs = CubicSpline(x, y)
-    y_cs = cs(x, nu=nu)
+    y_cs = cs(xi, nu=nu, extrapolate=extrapolate)
 
     ss = csaps.CubicSmoothingSpline(x, y, smooth=1.0)
-    y_ss = ss(x, nu=nu)
+    y_ss = ss(xi, nu=nu, extrapolate=extrapolate)
 
-    assert y_ss == pytest.approx(y_cs)
+    np.testing.assert_allclose(y_ss, y_cs, equal_nan=True)
