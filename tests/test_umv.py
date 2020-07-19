@@ -241,3 +241,17 @@ def test_cubic_bc_natural():
 
     assert cs.c == pytest.approx(ss.spline.c)
     assert y_cs == pytest.approx(y_ss)
+
+
+@pytest.mark.parametrize('nu', [0, 1, 2])
+def test_evaluate_nu(nu):
+    x = [1, 2, 3, 4]
+    y = [1, 2, 3, 4]
+
+    cs = CubicSpline(x, y)
+    y_cs = cs(x, nu=nu)
+
+    ss = csaps.CubicSmoothingSpline(x, y, smooth=1.0)
+    y_ss = ss(x, nu=nu)
+
+    assert y_ss == pytest.approx(y_cs)

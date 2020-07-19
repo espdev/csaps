@@ -3,6 +3,7 @@
 import pytest
 
 import numpy as np
+from scipy.interpolate import NdPPoly
 import csaps
 
 
@@ -196,3 +197,22 @@ def test_auto_smooth_2d(ndgrid_2d_data):
 
     assert s.smooth == pytest.approx(smooth_expected)
     assert zi == pytest.approx(zi_expected)
+
+
+@pytest.mark.parametrize('nu', [
+    (0, 0),
+    (1, 1),
+    (2, 2),
+])
+def test_evaluate_nu(nu: tuple):
+    x = ([1, 2, 3, 4], [1, 2, 3, 4])
+    y = np.arange(4 * 4).reshape((4, 4))
+
+    ss = csaps.NdGridCubicSmoothingSpline(x, y, smooth=1.0)
+    y_ss = ss(x, nu=nu)
+
+    pp = NdPPoly(ss.spline.c, x)
+    xx = tuple(np.meshgrid(*x, indexing='ij'))
+    y_pp = pp(xx, nu=nu)
+
+    assert y_ss == pytest.approx(y_pp)
