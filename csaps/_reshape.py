@@ -151,7 +151,7 @@ def umv_coeffs_to_flatten(arr: np.ndarray):
         shape = (arr.shape[2], prod(arr.shape[:2]))
         strides = arr.strides[:-3:-1]
         arr_view = as_strided(arr, shape=shape, strides=strides)
-    else:
+    else:  # pragma: no cover
         raise ValueError(
             f"The array ndim must be 2 or 3, but given array has ndim={arr.ndim}.")
 
@@ -178,15 +178,11 @@ def ndg_coeffs_to_canonical(arr: np.ndarray, pieces: ty.Tuple[int]) -> np.ndarra
 
     """
 
+    if arr.ndim > len(pieces):
+        return arr
+
     shape = tuple(sz // p for sz, p in zip(arr.shape, pieces)) + pieces
-
-    if shape == arr.shape:
-        return arr
-
     strides = tuple(st * p for st, p in zip(arr.strides, pieces)) + arr.strides
-
-    if len(shape) != len(strides):
-        return arr
 
     return as_strided(arr, shape=shape, strides=strides)
 
