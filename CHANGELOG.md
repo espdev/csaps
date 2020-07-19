@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.0.2 (19.07.2020)
+
+* Fix using 'nu' argument when n-d grid spline evaluating [#32](https://github.com/espdev/csaps/pull/32)
+
 ## v1.0.1 (19.07.2020)
 
 * Fix n-d grid spline evaluating performance regression [#31](https://github.com/espdev/csaps/pull/31)
