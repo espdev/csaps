@@ -47,7 +47,7 @@ extensions = [
     'sphinx.ext.intersphinx',
     'matplotlib.sphinxext.plot_directive',
     'numpydoc',
-    'm2r',
+    'm2r2',
 ]
 
 intersphinx_mapping = {
