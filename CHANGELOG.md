@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.0.3 (01.01.2021)
+
+* Bump scipy dependency version
+* Bump sphinx dependency version and use m2r2 sphinx extension instead of m2r
+* Add Python 3.9 to classifiers list and to Travis CI
+* Set development status classifier to "5 - Production/Stable"
+* Happy New Year!
+
 ## v1.0.2 (19.07.2020)
 
 * Fix using 'nu' argument when n-d grid spline evaluating [#32](https://github.com/espdev/csaps/pull/32)
