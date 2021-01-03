@@ -46,16 +46,12 @@ jobs:
 
   docs:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: [ 3.9 ]
 
     steps:
       - uses: actions/checkout@v2
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+      - uses: actions/setup-python@v2
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: 3.9
 
       - name: Install dependencies
         run: |
