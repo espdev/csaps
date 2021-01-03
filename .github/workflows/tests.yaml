@@ -32,19 +32,20 @@ jobs:
           python -m pip install -e .[tests,docs]
 
       - name: Tests
-        run: pytest --color=yes --cov=csaps
+        run: pytest --color=yes --cov=csaps --cov-report=term
 
-      - name: Docs
+      - name: Upload coverage report to coveralls
         if: ${{ matrix.platform == 'ubuntu-latest' && matrix.python-version == '3.9' }}
-        run: make -C docs/ html
+        # https://github.com/marketplace/actions/coveralls-github-action
+        uses: coverallsapp/github-action@v1.1.2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path-to-lcov: ./.coverage
 
       - name: flake8
         if: ${{ matrix.platform == 'ubuntu-latest' && matrix.python-version == '3.9' }}
         run: flake8 csaps/ tests/ setup.py
 
-#      - name: Upload coverage report to coveralls
-#        if: ${{ matrix.platform == 'ubuntu-latest' && matrix.python-version == '3.9' }}
-#        # https://github.com/marketplace/actions/coveralls-github-action
-#        uses: coverallsapp/github-action@v1.1.2
-#        with:
-#          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Docs
+        if: ${{ matrix.platform == 'ubuntu-latest' && matrix.python-version == '3.9' }}
+        run: make -C docs/ html
