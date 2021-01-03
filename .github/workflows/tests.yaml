@@ -41,10 +41,12 @@ jobs:
           parallel: false
           flag-name: Unit Tests
 
-#      - name: flake8
-#        if: ${{ matrix.platform == 'ubuntu-latest' && matrix.python-version == '3.9' }}
-#        run: flake8 csaps/ tests/ setup.py
-#
-#      - name: Docs
-#        if: ${{ matrix.platform == 'ubuntu-latest' && matrix.python-version == '3.9' }}
-#        run: make -C docs/ html
+  coveralls_finish:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Coveralls Finished
+        if: ${{ matrix.python-version == '3.9' }}
+        uses: AndreMiras/coveralls-python-action@develop
+        with:
+          parallel-finished: false
