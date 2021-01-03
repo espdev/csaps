@@ -1,4 +1,4 @@
-name: Main
+name: main
 
 on:
   push:
@@ -29,7 +29,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip setuptools wheel
           python -m pip install flake8 flake8-colors
-          python -m pip install -e .[tests,docs]
+          python -m pip install -e .[tests]
 
       - name: Unit Tests
         run: pytest --color=yes --cov=csaps --cov-report=term
@@ -39,3 +39,28 @@ jobs:
         uses: AndreMiras/coveralls-python-action@develop
         with:
           parallel: false
+
+      - name: flake8 Static Analysis
+        if: ${{ matrix.platform == 'ubuntu-latest' && matrix.python-version == '3.9' }}
+        run: flake8 csaps/ tests/ setup.py
+
+  docs:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [ 3.9 ]
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+          python -m pip install -e .[docs]
+
+      - name: Build Docs
+        run: make -C docs/ html
