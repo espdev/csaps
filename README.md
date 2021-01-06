@@ -93,7 +93,13 @@ More examples of usage and the full documentation can be found at https://csaps.
 
 ## Testing
 
-pytest, tox and Travis CI are used for testing. Please see [tests](tests).
+We use pytest for testing.
+
+```
+cd /path/to/csaps/project/directory
+pip install -e .[tests]
+pytest
+```
 
 ## Algorithm and Implementation
 
