@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.0.4 (04.05.2021)
+
+* Bump numpy dependency version
+
 ## v1.0.3 (01.01.2021)
 
 * Bump scipy dependency version
