@@ -105,10 +105,13 @@ class CubicSmoothingSpline(ISmoothingSpline[
     weights : [*Optional*] np.ndarray, list
         Weights 1-D vector with size equal of ``xdata`` size
 
-    smooth : [*Optional*] float
-        Smoothing parameter in range [0, 1] where:
+    smooth : [*Optional*] float or str(float)
+        Smoothing parameter is a float in range [0, 1] where:
             - 0: The smoothing spline is the least-squares straight line fit
             - 1: The cubic spline interpolant with natural condition
+        If smoothing parameter is a string that converts to a float:
+            string is clipped to [0,1] with smoothing following similar semantics to the float case
+            however smoothing factor is in this case less dependent on scale of xdata
 
     axis : [*Optional*] int
         Axis along which ``ydata`` is assumed to be varying.
@@ -122,7 +125,7 @@ class CubicSmoothingSpline(ISmoothingSpline[
                  xdata: UnivariateDataType,
                  ydata: MultivariateDataType,
                  weights: Optional[UnivariateDataType] = None,
-                 smooth: Optional[float] = None,
+                 smooth: Optional[Union[float, str]] = None,
                  axis: int = -1):
 
         x, y, w, shape, axis = self._prepare_data(xdata, ydata, weights, axis)
@@ -222,18 +225,25 @@ class CubicSmoothingSpline(ISmoothingSpline[
         return xdata, ydata, weights, shape, axis
 
     @staticmethod
-    def _compute_smooth(a, b):
+    def _compute_smooth(a, b, scalefactor=None):
         """
         The calculation of the smoothing spline requires the solution of a
         linear system whose coefficient matrix has the form p*A + (1-p)*B, with
         the matrices A and B depending on the data sites x. The default value
         of p makes p*trace(A) equal (1 - p)*trace(B).
+        If scalefactor coerces to float, the default value of p is adjusted
+        by an additional smoothing factor in the range 0..1
         """
 
         def trace(m: sp.dia_matrix):
             return m.diagonal().sum()
 
-        return 1. / (1. + trace(a) / (6. * trace(b)))
+        try:
+            scale = np.exp(10*min(1,max(0,float(scalefactor)))+np.log(6)-5)
+        except Exception:
+            scale = 6.0
+
+        return 1. / (1. + trace(a) / (scale * trace(b)))
 
     @staticmethod
     def _make_spline(x, y, w, smooth, shape):
@@ -270,12 +280,12 @@ class CubicSmoothingSpline(ISmoothingSpline[
                sp.diags(diags_sqrw_recip, 0, (pcount, pcount)))
         qtw = qtw @ qtw.T
 
-        if smooth is None:
-            p = CubicSmoothingSpline._compute_smooth(r, qtw)
-        else:
+        try:
             p = smooth
-
-        pp = (6. * (1. - p))
+            pp = (6. * (1. - p))
+        except Exception:
+            p = CubicSmoothingSpline._compute_smooth(r, qtw, smooth)
+            pp = (6. * (1. - p))
 
         # Solve linear system for the 2nd derivatives
         a = pp * qtw + p * r
