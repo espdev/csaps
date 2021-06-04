@@ -105,18 +105,19 @@ class CubicSmoothingSpline(ISmoothingSpline[
     weights : [*Optional*] np.ndarray, list
         Weights 1-D vector with size equal of ``xdata`` size
 
-    smooth : [*Optional*] float or str(float)
-        Smoothing parameter is a float in range [0, 1] where:
+    smooth : [*Optional*] float
+        Smoothing parameter in range [0, 1] where:
             - 0: The smoothing spline is the least-squares straight line fit
             - 1: The cubic spline interpolant with natural condition
-        If smoothing parameter is a string that converts to a float:
-            string is clipped to [0,1] with smoothing following similar semantics to the float case
-            however smoothing factor is in this case less dependent on scale of xdata
 
     axis : [*Optional*] int
         Axis along which ``ydata`` is assumed to be varying.
         Meaning that for x[i] the corresponding values are np.take(ydata, i, axis=axis).
         By default is -1 (the last axis).
+
+    normalizedsmooth : [*Optional*] bool
+        If True, the smooth parameter is normalized such that results are invariant to xdata range
+        and less sensitive to nonuniformity of weights and xdata clumping
     """
 
     __module__ = 'csaps'
@@ -125,11 +126,12 @@ class CubicSmoothingSpline(ISmoothingSpline[
                  xdata: UnivariateDataType,
                  ydata: MultivariateDataType,
                  weights: Optional[UnivariateDataType] = None,
-                 smooth: Optional[Union[float, str]] = None,
-                 axis: int = -1):
+                 smooth: Optional[float] = None,
+                 axis: int = -1,
+                 normalizedsmooth: bool = False):
 
         x, y, w, shape, axis = self._prepare_data(xdata, ydata, weights, axis)
-        coeffs, smooth = self._make_spline(x, y, w, smooth, shape)
+        coeffs, smooth = self._make_spline(x, y, w, smooth, shape, normalizedsmooth)
         spline = SplinePPForm.construct_fast(coeffs, x, axis=axis)
 
         self._smooth = smooth
@@ -225,28 +227,21 @@ class CubicSmoothingSpline(ISmoothingSpline[
         return xdata, ydata, weights, shape, axis
 
     @staticmethod
-    def _compute_smooth(a, b, scalefactor=None):
+    def _compute_smooth(a, b):
         """
         The calculation of the smoothing spline requires the solution of a
         linear system whose coefficient matrix has the form p*A + (1-p)*B, with
         the matrices A and B depending on the data sites x. The default value
         of p makes p*trace(A) equal (1 - p)*trace(B).
-        If scalefactor coerces to float, the default value of p is adjusted
-        by an additional smoothing factor in the range 0..1
         """
 
         def trace(m: sp.dia_matrix):
             return m.diagonal().sum()
 
-        try:
-            scale = np.exp(10*min(1,max(0,float(scalefactor)))+np.log(6)-5)
-        except Exception:
-            scale = 6.0
-
-        return 1. / (1. + trace(a) / (scale * trace(b)))
+        return 1. / (1. + trace(a) / (6. * trace(b)))
 
     @staticmethod
-    def _make_spline(x, y, w, smooth, shape):
+    def _make_spline(x, y, w, smooth, shape, normalizedsmooth):
         pcount = x.size
         dx = np.diff(x)
 
@@ -280,12 +275,19 @@ class CubicSmoothingSpline(ISmoothingSpline[
                sp.diags(diags_sqrw_recip, 0, (pcount, pcount)))
         qtw = qtw @ qtw.T
 
-        try:
-            p = smooth
-            pp = (6. * (1. - p))
-        except Exception:
-            p = CubicSmoothingSpline._compute_smooth(r, qtw, smooth)
-            pp = (6. * (1. - p))
+        p = smooth
+        if normalizedsmooth:
+            span = np.ptp(x)
+            count = x.size
+            eff_x = 1+(np.ptp(x)**2)/np.sum(np.diff(x)**2)
+            eff_w = np.sum(w)**2 / np.sum(w**2)
+            K = (80)*(span**3)*(count**-2)*(eff_x**-0.5)*(eff_w**-0.5)
+            s = 0.5 if smooth is None else smooth
+            p = s/(s+(1-s)*K)
+        elif smooth is None:
+            p = CubicSmoothingSpline._compute_smooth(r, qtw)
+
+        pp = (6. * (1. - p))
 
         # Solve linear system for the 2nd derivatives
         a = pp * qtw + p * r
