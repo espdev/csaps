@@ -114,6 +114,10 @@ class CubicSmoothingSpline(ISmoothingSpline[
         Axis along which ``ydata`` is assumed to be varying.
         Meaning that for x[i] the corresponding values are np.take(ydata, i, axis=axis).
         By default is -1 (the last axis).
+
+    normalizedsmooth : [*Optional*] bool
+        If True, the smooth parameter is normalized such that results are invariant to xdata range
+        and less sensitive to nonuniformity of weights and xdata clumping
     """
 
     __module__ = 'csaps'
@@ -123,10 +127,11 @@ class CubicSmoothingSpline(ISmoothingSpline[
                  ydata: MultivariateDataType,
                  weights: Optional[UnivariateDataType] = None,
                  smooth: Optional[float] = None,
-                 axis: int = -1):
+                 axis: int = -1,
+                 normalizedsmooth: bool = False):
 
         x, y, w, shape, axis = self._prepare_data(xdata, ydata, weights, axis)
-        coeffs, smooth = self._make_spline(x, y, w, smooth, shape)
+        coeffs, smooth = self._make_spline(x, y, w, smooth, shape, normalizedsmooth)
         spline = SplinePPForm.construct_fast(coeffs, x, axis=axis)
 
         self._smooth = smooth
@@ -236,7 +241,7 @@ class CubicSmoothingSpline(ISmoothingSpline[
         return 1. / (1. + trace(a) / (6. * trace(b)))
 
     @staticmethod
-    def _make_spline(x, y, w, smooth, shape):
+    def _make_spline(x, y, w, smooth, shape, normalizedsmooth):
         pcount = x.size
         dx = np.diff(x)
 
@@ -270,10 +275,17 @@ class CubicSmoothingSpline(ISmoothingSpline[
                sp.diags(diags_sqrw_recip, 0, (pcount, pcount)))
         qtw = qtw @ qtw.T
 
-        if smooth is None:
+        p = smooth
+        if normalizedsmooth:
+            span = np.ptp(x)
+            count = x.size
+            eff_x = 1+(np.ptp(x)**2)/np.sum(np.diff(x)**2)
+            eff_w = np.sum(w)**2 / np.sum(w**2)
+            K = (80)*(span**3)*(count**-2)*(eff_x**-0.5)*(eff_w**-0.5)
+            s = 0.5 if smooth is None else smooth
+            p = s/(s+(1-s)*K)
+        elif smooth is None:
             p = CubicSmoothingSpline._compute_smooth(r, qtw)
-        else:
-            p = smooth
 
         pp = (6. * (1. - p))
 

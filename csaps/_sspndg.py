@@ -193,6 +193,10 @@ class NdGridCubicSmoothingSpline(ISmoothingSpline[
             - 0: The smoothing spline is the least-squares straight line fit
             - 1: The cubic spline interpolant with natural condition
 
+    normalizedsmooth : [*Optional*] bool
+        If True, the smooth parameter is normalized such that results are invariant to xdata range
+        and less sensitive to nonuniformity of weights and xdata clumping
+
     """
 
     __module__ = 'csaps'
@@ -201,10 +205,11 @@ class NdGridCubicSmoothingSpline(ISmoothingSpline[
                  xdata: NdGridDataType,
                  ydata: np.ndarray,
                  weights: Optional[Union[UnivariateDataType, NdGridDataType]] = None,
-                 smooth: Optional[Union[float, Sequence[Optional[float]]]] = None) -> None:
+                 smooth: Optional[Union[float, Sequence[Optional[float]]]] = None,
+                 normalizedsmooth: bool = False) -> None:
 
         x, y, w, s = self._prepare_data(xdata, ydata, weights, smooth)
-        coeffs, smooth = self._make_spline(x, y, w, s)
+        coeffs, smooth = self._make_spline(x, y, w, s, normalizedsmooth)
 
         self._spline = NdGridSplinePPForm.construct_fast(coeffs, x)
         self._smooth = smooth
@@ -306,12 +311,12 @@ class NdGridCubicSmoothingSpline(ISmoothingSpline[
         return xdata, ydata, weights, smooth
 
     @staticmethod
-    def _make_spline(xdata, ydata, weights, smooth):
+    def _make_spline(xdata, ydata, weights, smooth, normalizedsmooth):
         ndim = len(xdata)
 
         if ndim == 1:
             s = CubicSmoothingSpline(
-                xdata[0], ydata, weights=weights[0], smooth=smooth[0])
+                xdata[0], ydata, weights=weights[0], smooth=smooth[0], normalizedsmooth=normalizedsmooth)
             return s.spline.coeffs, (s.smooth,)
 
         shape = ydata.shape
@@ -327,7 +332,7 @@ class NdGridCubicSmoothingSpline(ISmoothingSpline[
                 coeffs = coeffs.reshape(prod(coeffs.shape[:-1]), coeffs.shape[-1])
 
             s = CubicSmoothingSpline(
-                xdata[i], coeffs, weights=weights[i], smooth=smooth[i])
+                xdata[i], coeffs, weights=weights[i], smooth=smooth[i], normalizedsmooth=normalizedsmooth)
 
             smooths.append(s.smooth)
             coeffs = umv_coeffs_to_flatten(s.spline.coeffs)

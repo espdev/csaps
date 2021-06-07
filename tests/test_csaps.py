@@ -64,6 +64,29 @@ def test_shortcut_output(data, tolist):
     sp = csaps(x, y)
     assert isinstance(sp, sp_cls)
 
+    yi = csaps(x, y, xi, smooth=smooth, normalizedsmooth=True)
+    assert isinstance(yi, np.ndarray)
+
+    smoothed_data = csaps(x, y, xi, normalizedsmooth=True)
+    assert isinstance(smoothed_data, AutoSmoothingResult)
+
+    sp = csaps(x, y, normalizedsmooth=True)
+    assert isinstance(sp, sp_cls)
+
+    if tolist:
+        x2 = (2*np.array(x)).tolist()
+        xi2 = (2*np.array(xi)).tolist()
+    else:
+        x2 = ([2*np.array(xx, dtype=np.float64) for xx in x]
+              if isinstance(x, list)
+              else 2*np.array(x, dtype=np.float64))
+        xi2 = ([2*np.array(xx, dtype=np.float64) for xx in xi]
+               if isinstance(x, list)
+               else 2*np.array(xi, dtype=np.float64))
+    smoothed_dataA = csaps(x, y, xi, normalizedsmooth=True, smooth=0.25)
+    smoothed_dataB = csaps(x2, y, xi2, normalizedsmooth=True, smooth=0.25)
+    assert np.all(np.isclose(smoothed_dataA, smoothed_dataB))
+
 
 @pytest.mark.parametrize('smooth, cls', [
     (0.85, np.ndarray),

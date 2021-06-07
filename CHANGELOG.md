@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.0.5 (04.06.2021)
+
+* Introduced optional 'normalizedsmooth' argument to reduce dependence on xdata and weights
+
 ## v1.0.4 (04.05.2021)
 
 * Bump numpy dependency version
