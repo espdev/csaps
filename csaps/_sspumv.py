@@ -241,6 +241,23 @@ class CubicSmoothingSpline(ISmoothingSpline[
         return 1. / (1. + trace(a) / (6. * trace(b)))
 
     @staticmethod
+    def _normalize_smooth(x: np.ndarray, w: np.ndarray, smooth: Optional[float]):
+        """
+        See the explanation here: https://github.com/espdev/csaps/pull/47
+        """
+
+        span = np.ptp(x)
+
+        eff_x = 1 + (span ** 2) / np.sum(np.diff(x) ** 2)
+        eff_w = np.sum(w) ** 2 / np.sum(w ** 2)
+        k = 80 * (span ** 3) * (x.size ** -2) * (eff_x ** -0.5) * (eff_w ** -0.5)
+
+        s = 0.5 if smooth is None else smooth
+        p = s / (s + (1 - s) * k)
+
+        return p
+
+    @staticmethod
     def _make_spline(x, y, w, smooth, shape, normalizedsmooth):
         pcount = x.size
         dx = np.diff(x)
@@ -276,14 +293,9 @@ class CubicSmoothingSpline(ISmoothingSpline[
         qtw = qtw @ qtw.T
 
         p = smooth
+
         if normalizedsmooth:
-            span = np.ptp(x)
-            count = x.size
-            eff_x = 1+(np.ptp(x)**2)/np.sum(np.diff(x)**2)
-            eff_w = np.sum(w)**2 / np.sum(w**2)
-            K = (80)*(span**3)*(count**-2)*(eff_x**-0.5)*(eff_w**-0.5)
-            s = 0.5 if smooth is None else smooth
-            p = s/(s+(1-s)*K)
+            p = CubicSmoothingSpline._normalize_smooth(x, w, smooth)
         elif smooth is None:
             p = CubicSmoothingSpline._compute_smooth(r, qtw)
 
