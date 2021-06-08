@@ -73,20 +73,6 @@ def test_shortcut_output(data, tolist):
     sp = csaps(x, y, normalizedsmooth=True)
     assert isinstance(sp, sp_cls)
 
-    if tolist:
-        x2 = (2*np.array(x)).tolist()
-        xi2 = (2*np.array(xi)).tolist()
-    else:
-        x2 = ([2*np.array(xx, dtype=np.float64) for xx in x]
-              if isinstance(x, list)
-              else 2*np.array(x, dtype=np.float64))
-        xi2 = ([2*np.array(xx, dtype=np.float64) for xx in xi]
-               if isinstance(x, list)
-               else 2*np.array(xi, dtype=np.float64))
-    smoothed_dataA = csaps(x, y, xi, normalizedsmooth=True, smooth=0.25)
-    smoothed_dataB = csaps(x2, y, xi2, normalizedsmooth=True, smooth=0.25)
-    assert np.all(np.isclose(smoothed_dataA, smoothed_dataB))
-
 
 @pytest.mark.parametrize('smooth, cls', [
     (0.85, np.ndarray),
@@ -101,3 +87,28 @@ def test_shortcut_ndgrid_smooth_output(surface, smooth, cls):
 
     output = csaps(x, y, x, smooth=smooth)
     assert isinstance(output, cls)
+
+
+@pytest.mark.parametrize('data', ['univariate', 'ndgrid'], indirect=True)
+@pytest.mark.parametrize('smooth', [0.0, 0.1, 0.25, 0.5, 0.85, 1.0, None])
+@pytest.mark.parametrize('scale', [0.001, 0.005, 0.25, 0.5, 2.0, 5.0, 100.0, 1000.0])
+def test_normalized_smooth(data, smooth, scale):
+    x, y, xi, *_ = data
+
+    x2 = (
+        [scale * np.array(xx, dtype=np.float64) for xx in x]
+        if isinstance(x, list) else scale * np.array(x, dtype=np.float64)
+    )
+    xi2 = (
+        [scale * np.array(xx, dtype=np.float64) for xx in xi]
+        if isinstance(x, list) else scale * np.array(xi, dtype=np.float64)
+    )
+
+    smoothed_data_a = csaps(x, y, xi, smooth=smooth, normalizedsmooth=True)
+    smoothed_data_b = csaps(x2, y, xi2, smooth=smooth, normalizedsmooth=True)
+
+    if isinstance(smoothed_data_a, AutoSmoothingResult):
+        smoothed_data_a = smoothed_data_a.values
+        smoothed_data_b = smoothed_data_b.values
+
+    assert smoothed_data_a == pytest.approx(smoothed_data_b, rel=1e-2)
