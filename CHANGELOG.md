@@ -1,8 +1,10 @@
 # Changelog
 
-## v1.0.5 (04.06.2021)
+## v1.1.0.dev0
 
-* Introduced optional 'normalizedsmooth' argument to reduce dependence on xdata and weights
+_Unreleased_
+
+* Introduced optional 'normalizedsmooth' argument to reduce dependence on xdata and weights [#47](https://github.com/espdev/csaps/pull/47)
 
 ## v1.0.4 (04.05.2021)
 
