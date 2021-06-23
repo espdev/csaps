@@ -29,7 +29,7 @@ setup(
     packages=['csaps'],
     python_requires='>=3.6, <4',
     install_requires=[
-        'numpy >=1.11.0, <1.21.0',
+        'numpy >=1.11.0, <1.22.0',
         'scipy >=1.0.0, <1.7.0',
     ],
     extras_require={
