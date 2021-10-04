@@ -34,7 +34,7 @@ setup(
     ],
     extras_require={
         'docs': ['sphinx >=3.0.0, <5', 'matplotlib >=3.1', 'numpydoc', 'm2r2'],
-        'tests': ['pytest', 'coverage <6', 'pytest-cov', 'coveralls'],
+        'tests': ['pytest', 'coverage <7', 'pytest-cov', 'coveralls'],
     },
     package_data={"csaps": ["py.typed"]},
     url='https://github.com/espdev/csaps',
