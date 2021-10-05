@@ -344,6 +344,40 @@ For example, the following code will raise ``ValueError`` without ``axis`` param
     ``axis`` parameter is ignored in ND-gridded data cases.
 
 
+.. _tutorial-normalizedsmooth:
+
+Smooth normalization
+~~~~~~~~~~~~~~~~~~~~
+
+.. versionadded:: 1.1.0
+
+We can use ``normalizedsmooth`` option to normalize smooth parameter.
+If ``normalizedsmooth`` is True, the smooth parameter is normalized such that results are invariant to xdata range
+and less sensitive to nonuniformity of weights and xdata clumping.
+
+Let's show it on a simple example.
+
+.. plot::
+
+    x1, y = univariate_data(seed=1327)
+    x2 = x1 * 10
+
+    xi1 = np.linspace(x1[0], x1[-1], 150)
+    xi2 = np.linspace(x2[0], x2[-1], 150)
+
+    yi1 = csaps(x1, y, xi1, smooth=0.8)
+    yi2 = csaps(x2, y, xi2, smooth=0.8)
+
+    yi1_n = csaps(x1, y, xi1, smooth=0.8, normalizedsmooth=True)
+    yi2_n = csaps(x2, y, xi2, smooth=0.8, normalizedsmooth=True)
+
+    f, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(8, 6))
+    ax1.plot(x1, y, 'o', xi1, yi1, '-')
+    ax2.plot(x2, y, 'o', xi2, yi2, '-')
+    ax3.plot(x1, y, 'o', xi1, yi1_n, '-')
+    ax4.plot(x2, y, 'o', xi2, yi2_n, '-')
+
+
 Computing Spline Without Evaluating
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
