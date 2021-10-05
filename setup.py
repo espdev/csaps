@@ -29,8 +29,8 @@ setup(
     packages=['csaps'],
     python_requires='>=3.6, <4',
     install_requires=[
-        'numpy >=1.11.0, <1.22.0',
-        'scipy >=1.0.0, <1.8.0',
+        'numpy >=1.11.0, <2',
+        'scipy >=1.0.0, <2',
     ],
     extras_require={
         'docs': ['sphinx >=3.0.0, <5', 'matplotlib >=3.1', 'numpydoc', 'm2r2'],
@@ -64,6 +64,7 @@ setup(
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
         'Programming Language :: Python :: Implementation :: CPython',
     ],
 )
