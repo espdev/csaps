@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.1.0
+## v1.1.0 (05.10.2021)
 
 * Introduced optional `normalizedsmooth` argument to reduce dependence on xdata and weights [#47](https://github.com/espdev/csaps/pull/47)
 * Update numpy and scipy dependency ranges
