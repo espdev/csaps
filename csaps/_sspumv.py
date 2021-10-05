@@ -118,6 +118,9 @@ class CubicSmoothingSpline(ISmoothingSpline[
     normalizedsmooth : [*Optional*] bool
         If True, the smooth parameter is normalized such that results are invariant to xdata range
         and less sensitive to nonuniformity of weights and xdata clumping
+
+        .. versionadded:: 1.1.0
+
     """
 
     __module__ = 'csaps'
