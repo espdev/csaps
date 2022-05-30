@@ -33,7 +33,7 @@ setup(
         'scipy >=1.0.0, <2',
     ],
     extras_require={
-        'docs': ['sphinx >=3.0.0, <5', 'matplotlib >=3.1', 'numpydoc', 'm2r2'],
+        'docs': ['sphinx >=3.0.0, <6', 'matplotlib >=3.1', 'numpydoc', 'm2r2'],
         'tests': ['pytest', 'coverage <7', 'pytest-cov', 'coveralls'],
     },
     package_data={"csaps": ["py.typed"]},
