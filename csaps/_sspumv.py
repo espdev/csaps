@@ -40,6 +40,10 @@ class SplinePPForm(ISplinePPForm[np.ndarray, int], PPoly):
     @property
     def coeffs(self) -> np.ndarray:
         return self.c
+    
+    @property
+    def gcv(self) -> float:
+        return self.gcv
 
     @property
     def order(self) -> int:
@@ -79,6 +83,8 @@ class SplinePPForm(ISplinePPForm[np.ndarray, int], PPoly):
             f'  pieces: {self.pieces}\n'
             f'  order: {self.order}\n'
             f'  ndim: {self.ndim}\n'
+            f'  gcv: {self.gcv}\n'
+
         )
 
 
@@ -120,6 +126,18 @@ class CubicSmoothingSpline(ISmoothingSpline[
         and less sensitive to nonuniformity of weights and xdata clumping
 
         .. versionadded:: 1.1.0
+        
+    calculate_gcv : [*Optional*] bool
+        If True, the Generalized Cross Validation criterion value will be calculated for the spline upon creation. 
+        The GCV can be minimized to attempt to identify an optimal smoothing parameter, while penalizing over fitting. 
+        Strictly speaking this involves generating splines for all smoothing parameter values across the valid domain 
+        of the smoothing parameter [0,1] then selecting the smoothing parameter that produces the lowest GCV. 
+        [See GCV in TEOSL (page 244 section 7.52)](https://hastie.su.domains/ElemStatLearn/printings/ESLII_print12_toc.pdf) for more information on methodology. 
+        The simplest way to use the GCV is to setup a loop that generates a spline with your data at every step, a step size 
+        of 0.001 is generally sufficient, and keep track of the spline that produces the lowest GCV. Setting this parameter to True, 
+        does _not_ generate the lowest GCV, it simply generates the value for the spline with this specific smoothing parameter, 
+        so that you may decide how to optimize it for yourself. 
+        
 
     """
 
@@ -131,10 +149,16 @@ class CubicSmoothingSpline(ISmoothingSpline[
                  weights: Optional[UnivariateDataType] = None,
                  smooth: Optional[float] = None,
                  axis: int = -1,
-                 normalizedsmooth: bool = False):
+                 normalizedsmooth: bool = False,
+                 calculate_gcv: bool = False):
 
         x, y, w, shape, axis = self._prepare_data(xdata, ydata, weights, axis)
-        coeffs, smooth = self._make_spline(x, y, w, smooth, shape, normalizedsmooth)
+        if calculate_gcv:
+            coeffs, smooth, gcv = self._make_spline(x, y, w, smooth, shape, normalizedsmooth, calculate_gcv)
+            self.gcv = gcv
+        else:
+            coeffs, smooth = self._make_spline(x, y, w, smooth, shape, normalizedsmooth, calculate_gcv)
+            self.gcv = None
         spline = SplinePPForm.construct_fast(coeffs, x, axis=axis)
 
         self._smooth = smooth
@@ -261,7 +285,7 @@ class CubicSmoothingSpline(ISmoothingSpline[
         return p
 
     @staticmethod
-    def _make_spline(x, y, w, smooth, shape, normalizedsmooth):
+    def _make_spline(x, y, w, smooth, shape, normalizedsmooth, calculate_gcv):
         pcount = x.size
         dx = np.diff(x)
 
@@ -290,9 +314,10 @@ class CubicSmoothingSpline(ISmoothingSpline[
         dx_recip = 1. / dx
         diags_qtw = np.vstack((dx_recip[:-1], -(dx_recip[1:] + dx_recip[:-1]), dx_recip[1:]))
         diags_sqrw_recip = 1. / np.sqrt(w)
-
-        qtw = (sp.diags(diags_qtw, [0, 1, 2], (pcount - 2, pcount)) @
-               sp.diags(diags_sqrw_recip, 0, (pcount, pcount)))
+        
+        # Calculate and store qt separately, so we can use it later to calculate the degrees of freedom for the gcv
+        qt = sp.diags(diags_qtw, [0, 1, 2], (pcount - 2, pcount))
+        qtw = ( qt @ sp.diags(diags_sqrw_recip, 0, (pcount, pcount)))
         qtw = qtw @ qtw.T
 
         p = smooth
@@ -334,5 +359,11 @@ class CubicSmoothingSpline(ISmoothingSpline[
 
         c_shape = (4, pcount - 1) + shape[1:]
         c = np.vstack((c1, c2, c3, c4)).reshape(c_shape)
+        
+        # As calculating the GCV is a relatively expensive operation, it's best to add the calculation inline and make it optional
+        if calculate_gcv:
+            degrees_of_freedom = p * (la.inv(p * W + ((1-p) * 6 * qt.T @ la.inv(r) @ qt)) @ W).trace()
+            gcv = np.linalg.norm(y-y_pred)**2 / (y.size - degrees_of_freedom)**2
+            return c, p, gcv
 
         return c, p
