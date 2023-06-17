@@ -28,17 +28,17 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip setuptools wheel
-          python -m pip install flake8 flake8-colors
           python -m pip install -e .[tests]
 
       - name: Unit Tests
-        run: pytest --color=yes --cov=csaps --cov-report=term
+        run: pytest -v --color=yes --cov=csaps --cov-report=term --cov-report=lcov:coverage.info
 
       - name: Coveralls
         if: ${{ matrix.platform == 'ubuntu-latest' && matrix.python-version == '3.11' }}
-        uses: AndreMiras/coveralls-python-action@develop
+        uses: coverallsapp/github-action@v2
         with:
-          parallel: false
+          format: lcov
+          file: coverage.info
 
       - name: flake8 Static Analysis
         if: ${{ matrix.platform == 'ubuntu-latest' && matrix.python-version == '3.11' }}
