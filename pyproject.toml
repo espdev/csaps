@@ -1,0 +1,102 @@
+[tool.poetry]
+name = "csaps"
+version = "1.2.0"
+description = "Cubic spline approximation (smoothing)"
+authors = ["Evgeny Prilepin <esp.home@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+
+homepage = "https://github.com/espdev/csaps"
+repository = "https://github.com/espdev/csaps"
+documentation = "https://csaps.readthedocs.io"
+
+keywords = ["cubic", "spline", "approximation", "smoothing", "interpolation", "csaps"]
+
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Mathematics",
+    "Topic :: Software Development :: Libraries",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: Implementation :: CPython",
+]
+
+include = [
+    "LICENSE",
+    "CHANGELOG.md",
+    "CONTRIBUTORS.txt",
+]
+
+packages = [
+    {include = "csaps"}
+]
+
+
+[tool.poetry.dependencies]
+python = ">=3.8"
+numpy = [
+    {version = "*", python = "<3.12"},
+    {version = ">=1.26.2", python = ">=3.12"},
+]
+scipy = [
+    {version = "*", python = "<3.12"},
+    {version = ">=1.11.4", python = ">=3.12"},
+]
+
+
+[tool.poetry.group.dev.dependencies]
+setuptools = "^69.0.2"
+pytest = "^7.4.3"
+pytest-cov = "^4.1.0"
+m2r2 = "^0.3.2"
+sphinx = "^7.1.2"
+numpydoc = "^1.6.0"
+matplotlib = "^3.7.4"
+ruff = "^0.1.8"
+mypy = "^1.7.1"
+
+
+[build-system]
+requires = ["poetry-core", "setuptools"]
+build-backend = "poetry.core.masonry.api"
+
+
+[tool.ruff]
+target-version = "py38"
+line-length = 120
+select = [
+    "E",       # All pycodestyle errors
+    "W",       # All pycodestyle warnings
+    "F",       # All Pyflakes errors
+    "A",       # All flake8-builtins
+    "T201",    # print found
+    "T203",    # pprint found
+]
+ignore = [
+    "A001",
+]
+exclude = [
+    ".ruff_cache",
+    ".venv",
+]
+
+
+[tool.mypy]
+python_version = "3.8"
+
+[[tool.mypy.overrides]]
+module = [
+    "numpy",
+    "scipy"
+]
+ignore_missing_imports = true

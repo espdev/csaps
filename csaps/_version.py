@@ -1,3 +1,6 @@
-# -*- coding: utf-8 -*-
+from importlib.metadata import PackageNotFoundError, version
 
-__version__ = '1.1.0'
+try:
+    __version__ = version('csaps')
+except PackageNotFoundError:  # pragma: no cover
+    __version__ = '0.0.0.dev0'

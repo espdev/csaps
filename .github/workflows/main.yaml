@@ -12,51 +12,51 @@ jobs:
     strategy:
       max-parallel: 8
       matrix:
-        platform:
-          - ubuntu-latest
-          - macos-latest
-          - windows-latest
-        python-version: [ "3.7", "3.8", "3.9", "3.10", "3.11", "3.12" ]
+        platform: [ "ubuntu-latest", "macos-latest", "windows-latest" ]
+        python-version: [ "3.8", "3.9", "3.10", "3.11", "3.12" ]
+        poetry-version: [ "1.7.1" ]
 
     steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+      - name: Checkout project
+        uses: actions/checkout@v3
+
+      - name: Setup Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install dependencies
+      - name: Install Poetry ${{ matrix.poetry-version }}
+        uses: abatilo/actions-poetry@v2
+        with:
+          poetry-version: ${{ matrix.poetry-version }}
+
+      - name: Setup a local virtual environment
         run: |
-          python -m pip install --upgrade pip setuptools wheel
-          python -m pip install -e .[tests]
+          poetry config virtualenvs.create true --local
+          poetry config virtualenvs.in-project true --local
 
-      - name: Unit Tests
-        run: pytest -v --color=yes --cov=csaps --cov-report=term --cov-report=lcov:coverage.info
+      - name: Define a cache for the virtual environment based on the dependencies lock file
+        uses: actions/cache@v3
+        with:
+          path: ./.venv
+          key: venv-${{ hashFiles('poetry.lock') }}
 
-      - name: Coveralls
-        if: ${{ matrix.platform == 'ubuntu-latest' && matrix.python-version == '3.11' }}
+      - name: Install the project dependencies
+        run: poetry install
+
+      - name: Run static analysis with ruff
+        run: poetry run ruff check .
+
+      - name: Run tests
+        run: poetry run pytest -v --color=yes --cov=csaps --cov-report=term --cov-report=lcov:coverage.info
+
+      - name: Send coverage report to Coveralls
+        if: ${{ matrix.platform == 'ubuntu-latest' && matrix.python-version == '3.12' }}
         uses: coverallsapp/github-action@v2
         with:
           format: lcov
           file: coverage.info
 
-      - name: flake8 Static Analysis
-        if: ${{ matrix.platform == 'ubuntu-latest' && matrix.python-version == '3.11' }}
-        run: flake8 csaps/ tests/ setup.py
-
-  docs:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
-        with:
-          python-version: "3.11"
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip setuptools wheel
-          python -m pip install -e .[docs]
-
-      - name: Build Docs
-        run: make -C docs/ html
+      - name: Build docs
+        if: ${{ matrix.platform == 'ubuntu-latest' && matrix.python-version == '3.12' }}
+        run: poetry run sphinx-build -b html docs/ docs/_build/html
