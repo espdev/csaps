@@ -57,7 +57,7 @@ class SplinePPForm(ISplinePPForm[np.ndarray, int], PPoly):
         return prod(shape)
 
     @property
-    def shape(self) -> Tuple[int]:
+    def shape(self) -> Tuple[int, ...]:
         """Returns the source data shape
         """
         shape: List[int] = list(self.c.shape[2:])

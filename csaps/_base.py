@@ -73,7 +73,7 @@ class ISplinePPForm(abc.ABC, Generic[TData, TProps]):
 
     @property
     @abc.abstractmethod
-    def shape(self) -> Tuple[int]:
+    def shape(self) -> Tuple[int, ...]:
         """Returns the source data shape
 
         Returns

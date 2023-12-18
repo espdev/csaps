@@ -44,6 +44,7 @@ packages = [
 
 [tool.poetry.dependencies]
 python = ">=3.8"
+typing-extensions = "*"
 numpy = [
     {version = "*", python = "<3.12"},
     {version = ">=1.26.2", python = ">=3.12"},

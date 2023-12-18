@@ -3,14 +3,15 @@ Type-hints and type vars
 """
 
 from typing import Sequence, Tuple, TypeVar, Union
+from typing_extensions import TypeAlias
 from collections import abc
 from numbers import Number
 
 import numpy as np
 
-UnivariateDataType = Union[np.ndarray, Sequence[Number]]
-MultivariateDataType = Union[np.ndarray, abc.Sequence]
-NdGridDataType = Sequence[UnivariateDataType]
+UnivariateDataType: TypeAlias = Union[np.ndarray, Sequence[Number]]
+MultivariateDataType: TypeAlias = Union[np.ndarray, abc.Sequence]
+NdGridDataType: TypeAlias = Sequence[UnivariateDataType]
 
 TData = TypeVar('TData', np.ndarray, Sequence[np.ndarray])
 TProps = TypeVar('TProps', int, Tuple[int, ...])
