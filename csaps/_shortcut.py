@@ -33,7 +33,7 @@ def csaps(
     smooth: Optional[float] = None,
     axis: Optional[int] = None,
     normalizedsmooth: bool = False,
-) -> ISmoothingSpline:
+) -> ISmoothingSpline:  # pragma: no cover
     ...
 
 
@@ -46,7 +46,7 @@ def csaps(
     weights: Optional[UnivariateDataType] = None,
     axis: Optional[int] = None,
     normalizedsmooth: bool = False,
-) -> AutoSmoothingResult:
+) -> AutoSmoothingResult:  # pragma: no cover
     ...
 
 
@@ -60,7 +60,7 @@ def csaps(
     weights: Optional[UnivariateDataType] = None,
     axis: Optional[int] = None,
     normalizedsmooth: bool = False,
-) -> MultivariateDataType:
+) -> MultivariateDataType:  # pragma: no cover
     ...
 
 
@@ -73,7 +73,7 @@ def csaps(
     smooth: Optional[Sequence[float]] = None,
     axis: Optional[int] = None,
     normalizedsmooth: bool = False,
-) -> ISmoothingSpline:
+) -> ISmoothingSpline:  # pragma: no cover
     ...
 
 
@@ -86,7 +86,7 @@ def csaps(
     weights: Optional[NdGridDataType] = None,
     axis: Optional[int] = None,
     normalizedsmooth: bool = False,
-) -> AutoSmoothingResult:
+) -> AutoSmoothingResult:  # pragma: no cover
     ...
 
 
@@ -100,7 +100,7 @@ def csaps(
     weights: Optional[NdGridDataType] = None,
     axis: Optional[int] = None,
     normalizedsmooth: bool = False,
-) -> MultivariateDataType:
+) -> MultivariateDataType:  # pragma: no cover
     ...
 
 
