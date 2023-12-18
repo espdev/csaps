@@ -1,15 +1,12 @@
-# -*- coding: utf-8 -*-
-
 """
 Type-hints and type vars
-
 """
 
+from typing import Sequence, Tuple, TypeVar, Union
 from collections import abc
-from typing import Union, Sequence, Tuple, TypeVar
 from numbers import Number
-import numpy as np
 
+import numpy as np
 
 UnivariateDataType = Union[np.ndarray, Sequence[Number]]
 MultivariateDataType = Union[np.ndarray, abc.Sequence]

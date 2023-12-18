@@ -1,27 +1,24 @@
-# -*- coding: utf-8 -*-
-
 """
 ND-Gridded cubic smoothing spline implementation
-
 """
 
+from typing import Optional, Sequence, Tuple, Union
 import collections.abc as c_abc
 from numbers import Number
-from typing import Tuple, Sequence, Optional, Union
 
 import numpy as np
-from scipy.interpolate import PPoly, NdPPoly
+from scipy.interpolate import NdPPoly, PPoly
 
-from ._base import ISplinePPForm, ISmoothingSpline
-from ._types import UnivariateDataType, NdGridDataType
-from ._sspumv import CubicSmoothingSpline
+from ._base import ISmoothingSpline, ISplinePPForm
 from ._reshape import (
+    ndg_coeffs_to_canonical,
+    ndg_coeffs_to_flatten,
     prod,
     umv_coeffs_to_canonical,
     umv_coeffs_to_flatten,
-    ndg_coeffs_to_canonical,
-    ndg_coeffs_to_flatten,
 )
+from ._sspumv import CubicSmoothingSpline
+from ._types import NdGridDataType, UnivariateDataType
 
 
 def ndgrid_prepare_data_vectors(data, name, min_size: int = 2) -> Tuple[np.ndarray, ...]:

@@ -1,16 +1,13 @@
-# -*- coding: utf-8 -*-
-
 """
 The base classes and interfaces
-
 """
 
+from typing import Generic, Optional, Tuple
 import abc
-from typing import Generic, Tuple, Optional
 
 import numpy as np
 
-from ._types import TData, TProps, TSmooth, TXi, TNu, TExtrapolate, TSpline
+from ._types import TData, TExtrapolate, TNu, TProps, TSmooth, TSpline, TXi
 
 
 class ISplinePPForm(abc.ABC, Generic[TData, TProps]):

@@ -1,13 +1,11 @@
-# -*- coding: utf-8 -*-
-
 import pytest
 import numpy as np
 
 from csaps._reshape import (  # noqa
-    umv_coeffs_to_flatten,
-    umv_coeffs_to_canonical,
-    ndg_coeffs_to_flatten,
     ndg_coeffs_to_canonical,
+    ndg_coeffs_to_flatten,
+    umv_coeffs_to_canonical,
+    umv_coeffs_to_flatten,
 )
 
 

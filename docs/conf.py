@@ -20,15 +20,13 @@ sys.path.insert(0, str(ROOT_DIR))
 # -- Project information -----------------------------------------------------
 
 project = 'csaps'
-copyright = '2017-2020, Eugene Prilepin'
+copyright = '2017-2023, Eugene Prilepin'  # noqa
 author = 'Eugene Prilepin'
 
 
 def _get_version():
-    about = {}
-    ver_mod = ROOT_DIR / 'csaps' / '_version.py'
-    exec(ver_mod.read_text(), about)
-    return about['__version__']
+    from csaps import __version__
+    return __version__
 
 
 # The full version, including alpha/beta/rc tags

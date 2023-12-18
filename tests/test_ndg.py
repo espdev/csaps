@@ -1,9 +1,7 @@
-# -*- coding: utf-8 -*-
-
 import pytest
-
 import numpy as np
 from scipy.interpolate import NdPPoly
+
 import csaps
 
 

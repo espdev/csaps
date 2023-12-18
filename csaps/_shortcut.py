@@ -1,17 +1,14 @@
-# -*- coding: utf-8 -*-
-
 """
-The module provised `csaps` shortcut function for smoothing data
-
+The module provided `csaps` shortcut function for smoothing data
 """
 
+from typing import NamedTuple, Optional, Sequence, Union, overload
 from collections import abc as c_abc
-from typing import Optional, Union, Sequence, NamedTuple, overload
 
 from ._base import ISmoothingSpline
+from ._sspndg import NdGridCubicSmoothingSpline, ndgrid_prepare_data_vectors
 from ._sspumv import CubicSmoothingSpline
-from ._sspndg import ndgrid_prepare_data_vectors, NdGridCubicSmoothingSpline
-from ._types import UnivariateDataType, MultivariateDataType, NdGridDataType
+from ._types import MultivariateDataType, NdGridDataType, UnivariateDataType
 
 
 class AutoSmoothingResult(NamedTuple):

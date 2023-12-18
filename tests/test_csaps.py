@@ -1,9 +1,7 @@
-# -*- coding: utf-8 -*-
-
 import pytest
 import numpy as np
 
-from csaps import csaps, AutoSmoothingResult, CubicSmoothingSpline, NdGridCubicSmoothingSpline
+from csaps import AutoSmoothingResult, CubicSmoothingSpline, NdGridCubicSmoothingSpline, csaps
 
 
 @pytest.fixture(scope='module')

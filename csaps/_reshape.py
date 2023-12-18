@@ -1,9 +1,7 @@
-# -*- coding: utf-8 -*-
-
-import functools
-import operator
-from itertools import chain
 import typing as ty
+import functools
+from itertools import chain
+import operator
 
 import numpy as np
 from numpy.lib.stride_tricks import as_strided

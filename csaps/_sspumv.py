@@ -1,22 +1,18 @@
-# -*- coding: utf-8 -*-
-
 """
 Univariate/multivariate cubic smoothing spline implementation
-
 """
 
+from typing import List, Optional, Tuple, Union
 import functools
-from typing import Optional, Union, Tuple, List
 
 import numpy as np
-
+from scipy.interpolate import PPoly
 import scipy.sparse as sp
 import scipy.sparse.linalg as la
-from scipy.interpolate import PPoly
 
-from ._base import ISplinePPForm, ISmoothingSpline
-from ._types import UnivariateDataType, MultivariateDataType
-from ._reshape import to_2d, prod
+from ._base import ISmoothingSpline, ISplinePPForm
+from ._reshape import prod, to_2d
+from ._types import MultivariateDataType, UnivariateDataType
 
 
 class SplinePPForm(ISplinePPForm[np.ndarray, int], PPoly):

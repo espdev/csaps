@@ -1,10 +1,8 @@
-# -*- coding: utf-8 -*-
+from itertools import chain, permutations, product
 
-from itertools import chain, product, permutations
-
+import pytest
 import numpy as np
 from scipy.interpolate import CubicSpline
-import pytest
 
 import csaps
 
