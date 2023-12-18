@@ -1,30 +1,13 @@
-# -*- coding: utf-8 -*-
-
 """
 Cubic spline approximation (smoothing)
-
 """
 
-from csaps._version import __version__  # noqa
-
-from csaps._base import (
-    ISplinePPForm,
-    ISmoothingSpline,
-)
-from csaps._sspumv import (
-    SplinePPForm,
-    CubicSmoothingSpline,
-)
-from csaps._sspndg import (
-    NdGridSplinePPForm,
-    NdGridCubicSmoothingSpline,
-)
-from csaps._types import (
-    UnivariateDataType,
-    MultivariateDataType,
-    NdGridDataType,
-)
-from csaps._shortcut import csaps, AutoSmoothingResult
+from csaps._base import ISmoothingSpline, ISplinePPForm
+from csaps._shortcut import AutoSmoothingResult, csaps
+from csaps._sspndg import NdGridCubicSmoothingSpline, NdGridSplinePPForm
+from csaps._sspumv import CubicSmoothingSpline, SplinePPForm
+from csaps._types import MultivariateDataType, NdGridDataType, UnivariateDataType
+from csaps._version import __version__
 
 __all__ = [
     # Shortcut
@@ -43,4 +26,5 @@ __all__ = [
     'UnivariateDataType',
     'MultivariateDataType',
     'NdGridDataType',
+    '__version__',
 ]

@@ -44,8 +44,10 @@ jobs:
       - name: Install the project dependencies
         run: poetry install
 
-      - name: Run static analysis with ruff
-        run: poetry run ruff check .
+      - name: Run static analysis and linters
+        run: |
+          poetry run ruff check .
+          poetry run isort -c .
 
       - name: Run tests
         run: poetry run pytest -v --color=yes --cov=csaps --cov-report=term --cov-report=lcov:coverage.info

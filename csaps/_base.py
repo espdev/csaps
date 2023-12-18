@@ -1,16 +1,13 @@
-# -*- coding: utf-8 -*-
-
 """
 The base classes and interfaces
-
 """
 
+from typing import Generic, Optional, Tuple
 import abc
-from typing import Generic, Tuple, Optional
 
 import numpy as np
 
-from ._types import TData, TProps, TSmooth, TXi, TNu, TExtrapolate, TSpline
+from ._types import TData, TExtrapolate, TNu, TProps, TSmooth, TSpline, TXi
 
 
 class ISplinePPForm(abc.ABC, Generic[TData, TProps]):
@@ -76,7 +73,7 @@ class ISplinePPForm(abc.ABC, Generic[TData, TProps]):
 
     @property
     @abc.abstractmethod
-    def shape(self) -> Tuple[int]:
+    def shape(self) -> Tuple[int, ...]:
         """Returns the source data shape
 
         Returns
@@ -105,9 +102,6 @@ class ISmoothingSpline(abc.ABC, Generic[TSpline, TSmooth, TXi, TNu, TExtrapolate
         """
 
     @abc.abstractmethod
-    def __call__(self,
-                 xi: TXi,
-                 nu: Optional[TNu] = None,
-                 extrapolate: Optional[TExtrapolate] = None) -> np.ndarray:
+    def __call__(self, xi: TXi, nu: Optional[TNu] = None, extrapolate: Optional[TExtrapolate] = None) -> np.ndarray:
         """Evaluates spline on the data sites
         """

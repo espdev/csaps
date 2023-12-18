@@ -1,9 +1,7 @@
-# -*- coding: utf-8 -*-
-
-import functools
-import operator
-from itertools import chain
 import typing as ty
+import functools
+from itertools import chain
+import operator
 
 import numpy as np
 from numpy.lib.stride_tricks import as_strided
@@ -152,13 +150,12 @@ def umv_coeffs_to_flatten(arr: np.ndarray):
         strides = arr.strides[:-3:-1]
         arr_view = as_strided(arr, shape=shape, strides=strides)
     else:  # pragma: no cover
-        raise ValueError(
-            f"The array ndim must be 2 or 3, but given array has ndim={arr.ndim}.")
+        raise ValueError(f"The array ndim must be 2 or 3, but given array has ndim={arr.ndim}.")
 
     return arr_view
 
 
-def ndg_coeffs_to_canonical(arr: np.ndarray, pieces: ty.Tuple[int]) -> np.ndarray:
+def ndg_coeffs_to_canonical(arr: np.ndarray, pieces: ty.Tuple[int, ...]) -> np.ndarray:
     """Returns array canonical view for given n-d grid coeffs flatten array
 
     Creates n-d array canonical view with shape (k0, ..., kn, p0, ..., pn) for given
