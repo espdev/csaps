@@ -78,13 +78,7 @@ class SplinePPForm(ISplinePPForm[np.ndarray, int], PPoly):
         )
 
 
-class CubicSmoothingSpline(ISmoothingSpline[
-                               SplinePPForm,
-                               float,
-                               UnivariateDataType,
-                               int,
-                               Union[bool, str]
-                           ]):
+class CubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, UnivariateDataType, int, Union[bool, str]]):
     """Cubic smoothing spline
 
     The cubic spline implementation for univariate/multivariate data.
@@ -121,13 +115,15 @@ class CubicSmoothingSpline(ISmoothingSpline[
 
     __module__ = 'csaps'
 
-    def __init__(self,
-                 xdata: UnivariateDataType,
-                 ydata: MultivariateDataType,
-                 weights: Optional[UnivariateDataType] = None,
-                 smooth: Optional[float] = None,
-                 axis: int = -1,
-                 normalizedsmooth: bool = False):
+    def __init__(
+        self,
+        xdata: UnivariateDataType,
+        ydata: MultivariateDataType,
+        weights: Optional[UnivariateDataType] = None,
+        smooth: Optional[float] = None,
+        axis: int = -1,
+        normalizedsmooth: bool = False,
+    ):
 
         x, y, w, shape, axis = self._prepare_data(xdata, ydata, weights, axis)
         coeffs, smooth = self._make_spline(x, y, w, smooth, shape, normalizedsmooth)
@@ -136,10 +132,12 @@ class CubicSmoothingSpline(ISmoothingSpline[
         self._smooth = smooth
         self._spline = spline
 
-    def __call__(self,
-                 x: UnivariateDataType,
-                 nu: Optional[int] = None,
-                 extrapolate: Optional[Union[bool, str]] = None) -> np.ndarray:
+    def __call__(
+        self,
+        x: UnivariateDataType,
+        nu: Optional[int] = None,
+        extrapolate: Optional[Union[bool, str]] = None,
+    ) -> np.ndarray:
         """Evaluate the spline for given data
 
         Parameters
@@ -207,7 +205,8 @@ class CubicSmoothingSpline(ISmoothingSpline[
         if ydata.shape[axis] != xdata.size:
             raise ValueError(
                 f"'ydata' data must be a 1-D or N-D array with shape[{axis}] "
-                f"that is equal to 'xdata' size ({xdata.size})")
+                f"that is equal to 'xdata' size ({xdata.size})"
+            )
 
         # Rolling axis for using its shape while constructing coeffs array
         shape = np.rollaxis(ydata, axis).shape
@@ -247,9 +246,9 @@ class CubicSmoothingSpline(ISmoothingSpline[
 
         span = np.ptp(x)
 
-        eff_x = 1 + (span ** 2) / np.sum(np.diff(x) ** 2)
-        eff_w = np.sum(w) ** 2 / np.sum(w ** 2)
-        k = 80 * (span ** 3) * (x.size ** -2) * (eff_x ** -0.5) * (eff_w ** -0.5)
+        eff_x = 1 + (span**2) / np.sum(np.diff(x)**2)
+        eff_w = np.sum(w)**2 / np.sum(w**2)
+        k = 80 * (span**3) * (x.size**-2) * (eff_x**-0.5) * (eff_w**-0.5)
 
         s = 0.5 if smooth is None else smooth
         p = s / (s + (1 - s) * k)
@@ -262,8 +261,7 @@ class CubicSmoothingSpline(ISmoothingSpline[
         dx = np.diff(x)
 
         if not all(dx > 0):  # pragma: no cover
-            raise ValueError(
-                "Items of 'xdata' vector must satisfy the condition: x1 < x2 < ... < xN")
+            raise ValueError("Items of 'xdata' vector must satisfy the condition: x1 < x2 < ... < xN")
 
         dy = np.diff(y, axis=1)
         dy_dx = dy / dx
@@ -287,8 +285,7 @@ class CubicSmoothingSpline(ISmoothingSpline[
         diags_qtw = np.vstack((dx_recip[:-1], -(dx_recip[1:] + dx_recip[:-1]), dx_recip[1:]))
         diags_sqrw_recip = 1. / np.sqrt(w)
 
-        qtw = (sp.diags(diags_qtw, [0, 1, 2], (pcount - 2, pcount)) @
-               sp.diags(diags_sqrw_recip, 0, (pcount, pcount)))
+        qtw = (sp.diags(diags_qtw, [0, 1, 2], (pcount - 2, pcount)) @ sp.diags(diags_sqrw_recip, 0, (pcount, pcount)))
         qtw = qtw @ qtw.T
 
         p = smooth

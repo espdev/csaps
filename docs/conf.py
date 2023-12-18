@@ -16,7 +16,6 @@ import sys
 ROOT_DIR = pathlib.Path(__file__).parent.parent
 sys.path.insert(0, str(ROOT_DIR))
 
-
 # -- Project information -----------------------------------------------------
 
 project = 'csaps'
@@ -31,7 +30,6 @@ def _get_version():
 
 # The full version, including alpha/beta/rc tags
 release = _get_version()
-
 
 # -- General configuration ---------------------------------------------------
 
@@ -48,9 +46,7 @@ extensions = [
     'm2r2',
 ]
 
-intersphinx_mapping = {
-    'scipy': ('https://docs.scipy.org/doc/scipy/reference/', None)
-}
+intersphinx_mapping = {'scipy': ('https://docs.scipy.org/doc/scipy/reference/', None)}
 
 # Extension settings
 plot_apply_rcparams = True
@@ -109,13 +105,10 @@ html_static_path = ['_static']
 html_theme_options = {
     'fixed_sidebar': 'true',
     'show_powered_by': 'false',
-
     'description': 'Cubic spline approximation (smoothing)',
-
     'github_user': 'espdev',
     'github_repo': 'csaps',
     'github_type': 'star',
-
     'extra_nav_links': {
         'GitHub repository': 'https://github.com/espdev/csaps',
         'PyPI': 'https://pypi.org/project/csaps',

@@ -3,10 +3,10 @@ Type-hints and type vars
 """
 
 from typing import Sequence, Tuple, TypeVar, Union
-from typing_extensions import TypeAlias
 from collections import abc
 from numbers import Number
 
+from typing_extensions import TypeAlias
 import numpy as np
 
 UnivariateDataType: TypeAlias = Union[np.ndarray, Sequence[Number]]

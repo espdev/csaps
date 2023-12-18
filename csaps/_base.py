@@ -102,9 +102,6 @@ class ISmoothingSpline(abc.ABC, Generic[TSpline, TSmooth, TXi, TNu, TExtrapolate
         """
 
     @abc.abstractmethod
-    def __call__(self,
-                 xi: TXi,
-                 nu: Optional[TNu] = None,
-                 extrapolate: Optional[TExtrapolate] = None) -> np.ndarray:
+    def __call__(self, xi: TXi, nu: Optional[TNu] = None, extrapolate: Optional[TExtrapolate] = None) -> np.ndarray:
         """Evaluates spline on the data sites
         """

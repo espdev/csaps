@@ -38,8 +38,7 @@ def ndgrid_prepare_data_vectors(data, name, min_size: int = 2) -> Tuple[np.ndarr
     return tuple(data)
 
 
-class NdGridSplinePPForm(ISplinePPForm[Tuple[np.ndarray, ...], Tuple[int, ...]],
-                         NdPPoly):
+class NdGridSplinePPForm(ISplinePPForm[Tuple[np.ndarray, ...], Tuple[int, ...]], NdPPoly):
     """N-D grid spline representation in PP-form
 
     N-D grid spline is represented in piecewise tensor product polynomial form.
@@ -77,10 +76,12 @@ class NdGridSplinePPForm(ISplinePPForm[Tuple[np.ndarray, ...], Tuple[int, ...]],
     def shape(self) -> Tuple[int, ...]:
         return tuple(len(xi) for xi in self.x)
 
-    def __call__(self,
-                 x: Sequence[UnivariateDataType],
-                 nu: Optional[Tuple[int, ...]] = None,
-                 extrapolate: Optional[bool] = None) -> np.ndarray:
+    def __call__(
+        self,
+        x: Sequence[UnivariateDataType],
+        nu: Optional[Tuple[int, ...]] = None,
+        extrapolate: Optional[bool] = None,
+    ) -> np.ndarray:
         """Evaluate the spline for given data
 
         Parameters
@@ -108,11 +109,10 @@ class NdGridSplinePPForm(ISplinePPForm[Tuple[np.ndarray, ...], Tuple[int, ...]],
         x = ndgrid_prepare_data_vectors(x, 'x', min_size=1)
 
         if len(x) != self.ndim:
-            raise ValueError(
-                f"'x' sequence must have length {self.ndim} according to 'breaks'")
+            raise ValueError(f"'x' sequence must have length {self.ndim} according to 'breaks'")
 
         if nu is None:
-            nu = (0,) * len(x)
+            nu = (0, ) * len(x)
 
         if extrapolate is None:
             extrapolate = True
@@ -154,13 +154,15 @@ class NdGridSplinePPForm(ISplinePPForm[Tuple[np.ndarray, ...], Tuple[int, ...]],
         )
 
 
-class NdGridCubicSmoothingSpline(ISmoothingSpline[
-                                     NdGridSplinePPForm,
-                                     Tuple[float, ...],
-                                     NdGridDataType,
-                                     Tuple[int, ...],
-                                     bool,
-                                 ]):
+class NdGridCubicSmoothingSpline(
+    ISmoothingSpline[
+        NdGridSplinePPForm,
+        Tuple[float, ...],
+        NdGridDataType,
+        Tuple[int, ...],
+        bool,
+    ]
+):
     """N-D grid cubic smoothing spline
 
     Class implements N-D grid data smoothing (piecewise tensor product polynomial).
@@ -200,12 +202,14 @@ class NdGridCubicSmoothingSpline(ISmoothingSpline[
 
     __module__ = 'csaps'
 
-    def __init__(self,
-                 xdata: NdGridDataType,
-                 ydata: np.ndarray,
-                 weights: Optional[Union[UnivariateDataType, NdGridDataType]] = None,
-                 smooth: Optional[Union[float, Sequence[Optional[float]]]] = None,
-                 normalizedsmooth: bool = False) -> None:
+    def __init__(
+        self,
+        xdata: NdGridDataType,
+        ydata: np.ndarray,
+        weights: Optional[Union[UnivariateDataType, NdGridDataType]] = None,
+        smooth: Optional[Union[float, Sequence[Optional[float]]]] = None,
+        normalizedsmooth: bool = False,
+    ) -> None:
 
         x, y, w, s = self._prepare_data(xdata, ydata, weights, smooth)
         coeffs, smooth = self._make_spline(x, y, w, s, normalizedsmooth)
@@ -213,10 +217,12 @@ class NdGridCubicSmoothingSpline(ISmoothingSpline[
         self._spline = NdGridSplinePPForm.construct_fast(coeffs, x)
         self._smooth = smooth
 
-    def __call__(self,
-                 x: Union[NdGridDataType, Sequence[Number]],
-                 nu: Optional[Tuple[int, ...]] = None,
-                 extrapolate: Optional[bool] = None) -> np.ndarray:
+    def __call__(
+        self,
+        x: Union[NdGridDataType, Sequence[Number]],
+        nu: Optional[Tuple[int, ...]] = None,
+        extrapolate: Optional[bool] = None,
+    ) -> np.ndarray:
         """Evaluate the spline for given data
 
         Parameters
@@ -271,13 +277,11 @@ class NdGridCubicSmoothingSpline(ISmoothingSpline[
         data_ndim = len(xdata)
 
         if ydata.ndim != data_ndim:
-            raise ValueError(
-                f"'ydata' must have dimension {data_ndim} according to 'xdata'")
+            raise ValueError(f"'ydata' must have dimension {data_ndim} according to 'xdata'")
 
         for axis, (yd, xs) in enumerate(zip(ydata.shape, map(len, xdata))):
             if yd != xs:
-                raise ValueError(
-                    f"'ydata' ({yd}) and xdata ({xs}) sizes mismatch for axis {axis}")
+                raise ValueError(f"'ydata' ({yd}) and xdata ({xs}) sizes mismatch for axis {axis}")
 
         if not weights:
             weights = [None] * data_ndim
@@ -285,14 +289,12 @@ class NdGridCubicSmoothingSpline(ISmoothingSpline[
             weights = ndgrid_prepare_data_vectors(weights, 'weights')
 
         if len(weights) != data_ndim:
-            raise ValueError(
-                f"'weights' ({len(weights)}) and 'xdata' ({data_ndim}) dimensions mismatch")
+            raise ValueError(f"'weights' ({len(weights)}) and 'xdata' ({data_ndim}) dimensions mismatch")
 
         for axis, (w, x) in enumerate(zip(weights, xdata)):
             if w is not None:
                 if w.size != x.size:
-                    raise ValueError(
-                        f"'weights' ({w.size}) and 'xdata' ({x.size}) sizes mismatch for axis {axis}")
+                    raise ValueError(f"'weights' ({w.size}) and 'xdata' ({x.size}) sizes mismatch for axis {axis}")
 
         if smooth is None:
             smooth = [None] * data_ndim
@@ -305,7 +307,8 @@ class NdGridCubicSmoothingSpline(ISmoothingSpline[
         if len(smooth) != data_ndim:
             raise ValueError(
                 'Number of smoothing parameter values must '
-                f'be equal number of dimensions ({data_ndim})')
+                f'be equal number of dimensions ({data_ndim})'
+            )
 
         return xdata, ydata, weights, smooth
 
@@ -315,8 +318,13 @@ class NdGridCubicSmoothingSpline(ISmoothingSpline[
 
         if ndim == 1:
             s = CubicSmoothingSpline(
-                xdata[0], ydata, weights=weights[0], smooth=smooth[0], normalizedsmooth=normalizedsmooth)
-            return s.spline.coeffs, (s.smooth,)
+                xdata[0],
+                ydata,
+                weights=weights[0],
+                smooth=smooth[0],
+                normalizedsmooth=normalizedsmooth,
+            )
+            return s.spline.coeffs, (s.smooth, )
 
         shape = ydata.shape
         coeffs = ydata
@@ -331,7 +339,12 @@ class NdGridCubicSmoothingSpline(ISmoothingSpline[
                 coeffs = coeffs.reshape(prod(coeffs.shape[:-1]), coeffs.shape[-1])
 
             s = CubicSmoothingSpline(
-                xdata[i], coeffs, weights=weights[i], smooth=smooth[i], normalizedsmooth=normalizedsmooth)
+                xdata[i],
+                coeffs,
+                weights=weights[i],
+                smooth=smooth[i],
+                normalizedsmooth=normalizedsmooth,
+            )
 
             smooths.append(s.smooth)
             coeffs = umv_coeffs_to_flatten(s.spline.coeffs)

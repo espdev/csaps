@@ -26,6 +26,5 @@ __all__ = [
     'UnivariateDataType',
     'MultivariateDataType',
     'NdGridDataType',
-
     '__version__',
 ]

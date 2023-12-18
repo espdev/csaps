@@ -25,78 +25,100 @@ class AutoSmoothingResult(NamedTuple):
 # csaps signatures
 #
 @overload
-def csaps(xdata: UnivariateDataType,
-          ydata: MultivariateDataType,
-          *,
-          weights: Optional[UnivariateDataType] = None,
-          smooth: Optional[float] = None,
-          axis: Optional[int] = None,
-          normalizedsmooth: bool = False) -> ISmoothingSpline: ...
+def csaps(
+    xdata: UnivariateDataType,
+    ydata: MultivariateDataType,
+    *,
+    weights: Optional[UnivariateDataType] = None,
+    smooth: Optional[float] = None,
+    axis: Optional[int] = None,
+    normalizedsmooth: bool = False,
+) -> ISmoothingSpline:
+    ...
 
 
 @overload
-def csaps(xdata: UnivariateDataType,
-          ydata: MultivariateDataType,
-          xidata: UnivariateDataType,
-          *,
-          weights: Optional[UnivariateDataType] = None,
-          axis: Optional[int] = None,
-          normalizedsmooth: bool = False) -> AutoSmoothingResult: ...
+def csaps(
+    xdata: UnivariateDataType,
+    ydata: MultivariateDataType,
+    xidata: UnivariateDataType,
+    *,
+    weights: Optional[UnivariateDataType] = None,
+    axis: Optional[int] = None,
+    normalizedsmooth: bool = False,
+) -> AutoSmoothingResult:
+    ...
 
 
 @overload
-def csaps(xdata: UnivariateDataType,
-          ydata: MultivariateDataType,
-          xidata: UnivariateDataType,
-          *,
-          smooth: float,
-          weights: Optional[UnivariateDataType] = None,
-          axis: Optional[int] = None,
-          normalizedsmooth: bool = False) -> MultivariateDataType: ...
+def csaps(
+    xdata: UnivariateDataType,
+    ydata: MultivariateDataType,
+    xidata: UnivariateDataType,
+    *,
+    smooth: float,
+    weights: Optional[UnivariateDataType] = None,
+    axis: Optional[int] = None,
+    normalizedsmooth: bool = False,
+) -> MultivariateDataType:
+    ...
 
 
 @overload
-def csaps(xdata: NdGridDataType,
-          ydata: MultivariateDataType,
-          *,
-          weights: Optional[NdGridDataType] = None,
-          smooth: Optional[Sequence[float]] = None,
-          axis: Optional[int] = None,
-          normalizedsmooth: bool = False) -> ISmoothingSpline: ...
+def csaps(
+    xdata: NdGridDataType,
+    ydata: MultivariateDataType,
+    *,
+    weights: Optional[NdGridDataType] = None,
+    smooth: Optional[Sequence[float]] = None,
+    axis: Optional[int] = None,
+    normalizedsmooth: bool = False,
+) -> ISmoothingSpline:
+    ...
 
 
 @overload
-def csaps(xdata: NdGridDataType,
-          ydata: MultivariateDataType,
-          xidata: NdGridDataType,
-          *,
-          weights: Optional[NdGridDataType] = None,
-          axis: Optional[int] = None,
-          normalizedsmooth: bool = False) -> AutoSmoothingResult: ...
+def csaps(
+    xdata: NdGridDataType,
+    ydata: MultivariateDataType,
+    xidata: NdGridDataType,
+    *,
+    weights: Optional[NdGridDataType] = None,
+    axis: Optional[int] = None,
+    normalizedsmooth: bool = False,
+) -> AutoSmoothingResult:
+    ...
 
 
 @overload
-def csaps(xdata: NdGridDataType,
-          ydata: MultivariateDataType,
-          xidata: NdGridDataType,
-          *,
-          smooth: Sequence[float],
-          weights: Optional[NdGridDataType] = None,
-          axis: Optional[int] = None,
-          normalizedsmooth: bool = False) -> MultivariateDataType: ...
+def csaps(
+    xdata: NdGridDataType,
+    ydata: MultivariateDataType,
+    xidata: NdGridDataType,
+    *,
+    smooth: Sequence[float],
+    weights: Optional[NdGridDataType] = None,
+    axis: Optional[int] = None,
+    normalizedsmooth: bool = False,
+) -> MultivariateDataType:
+    ...
+
+
 #
 # csaps signatures
 # **************************************
 
 
-def csaps(xdata: Union[UnivariateDataType, NdGridDataType],
-          ydata: MultivariateDataType,
-          xidata: Optional[Union[UnivariateDataType, NdGridDataType]] = None,
-          *,
-          weights: Optional[Union[UnivariateDataType, NdGridDataType]] = None,
-          smooth: Optional[Union[float, Sequence[float]]] = None,
-          axis: Optional[int] = None,
-          normalizedsmooth: bool = False) -> Union[MultivariateDataType, ISmoothingSpline, AutoSmoothingResult]:
+def csaps(
+    xdata: Union[UnivariateDataType, NdGridDataType],
+    ydata: MultivariateDataType,
+    xidata: Optional[Union[UnivariateDataType, NdGridDataType]] = None,
+    *,
+    weights: Optional[Union[UnivariateDataType, NdGridDataType]] = None,
+    smooth: Optional[Union[float, Sequence[float]]] = None,
+    axis: Optional[int] = None,
+    normalizedsmooth: bool = False,
+) -> Union[MultivariateDataType, ISmoothingSpline, AutoSmoothingResult]:
     """Smooths the univariate/multivariate/gridded data or computes the corresponding splines
 
     This function might be used as the main API for smoothing any data.
@@ -210,10 +232,22 @@ def csaps(xdata: Union[UnivariateDataType, NdGridDataType],
 
     if umv:
         axis = -1 if axis is None else axis
-        sp = CubicSmoothingSpline(xdata, ydata, weights=weights, smooth=smooth, axis=axis,
-                                  normalizedsmooth=normalizedsmooth)
+        sp = CubicSmoothingSpline(
+            xdata,
+            ydata,
+            weights=weights,
+            smooth=smooth,
+            axis=axis,
+            normalizedsmooth=normalizedsmooth,
+        )
     else:
-        sp = NdGridCubicSmoothingSpline(xdata, ydata, weights, smooth, normalizedsmooth=normalizedsmooth)
+        sp = NdGridCubicSmoothingSpline(
+            xdata,
+            ydata,
+            weights,
+            smooth,
+            normalizedsmooth=normalizedsmooth,
+        )
 
     if xidata is None:
         return sp
