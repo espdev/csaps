@@ -8,8 +8,8 @@ from csaps import AutoSmoothingResult, CubicSmoothingSpline, NdGridCubicSmoothin
 def curve():
     np.random.seed(12345)
 
-    x = np.linspace(-5., 5., 25)
-    y = np.exp(-(x / 2.5)**2) + (np.random.rand(25) - 0.2) * 0.3
+    x = np.linspace(-5.0, 5.0, 25)
+    y = np.exp(-((x / 2.5) ** 2)) + (np.random.rand(25) - 0.2) * 0.3
 
     return x, y
 
@@ -22,8 +22,9 @@ def surface():
     i, j = np.meshgrid(*x, indexing='ij')
 
     y = (
-        3 * (1 - j)**2. * np.exp(-(j**2) - (i + 1)**2) - 10 * (j / 5 - j**3 - i**5) * np.exp(-j**2 - i**2) -
-        1 / 3 * np.exp(-(j + 1)**2 - i**2)
+        3 * (1 - j) ** 2.0 * np.exp(-(j**2) - (i + 1) ** 2)
+        - 10 * (j / 5 - j**3 - i**5) * np.exp(-(j**2) - i**2)
+        - 1 / 3 * np.exp(-((j + 1) ** 2) - i**2)
     )
     y += np.random.randn(*y.shape) * 0.75
 
@@ -43,10 +44,14 @@ def data(curve, surface, request):
         return x, y, x, [0.85, 0.85], NdGridCubicSmoothingSpline
 
 
-@pytest.mark.parametrize('data', [
-    'univariate',
-    'ndgrid',
-], indirect=True)
+@pytest.mark.parametrize(
+    'data',
+    [
+        'univariate',
+        'ndgrid',
+    ],
+    indirect=True,
+)
 @pytest.mark.parametrize('tolist', [True, False])
 def test_shortcut_output(data, tolist):
     x, y, xi, smooth, sp_cls = data
@@ -76,14 +81,15 @@ def test_shortcut_output(data, tolist):
 
 
 @pytest.mark.parametrize(
-    'smooth, cls', [
+    'smooth, cls',
+    [
         (0.85, np.ndarray),
         ([0.85, 0.85], np.ndarray),
         (None, AutoSmoothingResult),
         ([None, 0.85], AutoSmoothingResult),
         ([0.85, None], AutoSmoothingResult),
         ([None, None], AutoSmoothingResult),
-    ]
+    ],
 )
 def test_shortcut_ndgrid_smooth_output(surface, smooth, cls):
     x, y = surface
@@ -99,12 +105,14 @@ def test_normalized_smooth(data, smooth, scale):
     x, y, xi, *_ = data
 
     x2 = (
-        [scale * np.array(xx, dtype=np.float64)
-         for xx in x] if isinstance(x, list) else scale * np.array(x, dtype=np.float64)
+        [scale * np.array(xx, dtype=np.float64) for xx in x]
+        if isinstance(x, list)
+        else scale * np.array(x, dtype=np.float64)
     )
     xi2 = (
-        [scale * np.array(xx, dtype=np.float64)
-         for xx in xi] if isinstance(x, list) else scale * np.array(xi, dtype=np.float64)
+        [scale * np.array(xx, dtype=np.float64) for xx in xi]
+        if isinstance(x, list)
+        else scale * np.array(xi, dtype=np.float64)
     )
 
     smoothed_data_a = csaps(x, y, xi, smooth=smooth, normalizedsmooth=True)

@@ -58,8 +58,7 @@ class SplinePPForm(ISplinePPForm[np.ndarray, int], PPoly):
 
     @property
     def shape(self) -> Tuple[int, ...]:
-        """Returns the source data shape
-        """
+        """Returns the source data shape"""
         shape: List[int] = list(self.c.shape[2:])
         shape.insert(self.axis, self.c.shape[1] + 1)
 
@@ -124,7 +123,6 @@ class CubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, UnivariateDataT
         axis: int = -1,
         normalizedsmooth: bool = False,
     ):
-
         x, y, w, shape, axis = self._prepare_data(xdata, ydata, weights, axis)
         coeffs, smooth = self._make_spline(x, y, w, smooth, shape, normalizedsmooth)
         spline = SplinePPForm.construct_fast(coeffs, x, axis=axis)
@@ -236,7 +234,7 @@ class CubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, UnivariateDataT
         def trace(m: sp.dia_matrix):
             return m.diagonal().sum()
 
-        return 1. / (1. + trace(a) / (6. * trace(b)))
+        return 1.0 / (1.0 + trace(a) / (6.0 * trace(b)))
 
     @staticmethod
     def _normalize_smooth(x: np.ndarray, w: np.ndarray, smooth: Optional[float]):
@@ -246,8 +244,8 @@ class CubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, UnivariateDataT
 
         span = np.ptp(x)
 
-        eff_x = 1 + (span**2) / np.sum(np.diff(x)**2)
-        eff_w = np.sum(w)**2 / np.sum(w**2)
+        eff_x = 1 + (span**2) / np.sum(np.diff(x) ** 2)
+        eff_w = np.sum(w) ** 2 / np.sum(w**2)
         k = 80 * (span**3) * (x.size**-2) * (eff_x**-0.5) * (eff_w**-0.5)
 
         s = 0.5 if smooth is None else smooth
@@ -281,11 +279,11 @@ class CubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, UnivariateDataT
         diags_r = np.vstack((dx[1:], 2 * (dx[1:] + dx[:-1]), dx[:-1]))
         r = sp.spdiags(diags_r, [-1, 0, 1], pcount - 2, pcount - 2)
 
-        dx_recip = 1. / dx
+        dx_recip = 1.0 / dx
         diags_qtw = np.vstack((dx_recip[:-1], -(dx_recip[1:] + dx_recip[:-1]), dx_recip[1:]))
-        diags_sqrw_recip = 1. / np.sqrt(w)
+        diags_sqrw_recip = 1.0 / np.sqrt(w)
 
-        qtw = (sp.diags(diags_qtw, [0, 1, 2], (pcount - 2, pcount)) @ sp.diags(diags_sqrw_recip, 0, (pcount, pcount)))
+        qtw = sp.diags(diags_qtw, [0, 1, 2], (pcount - 2, pcount)) @ sp.diags(diags_sqrw_recip, 0, (pcount, pcount))
         qtw = qtw @ qtw.T
 
         p = smooth
@@ -295,7 +293,7 @@ class CubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, UnivariateDataT
         elif smooth is None:
             p = CubicSmoothingSpline._compute_smooth(r, qtw)
 
-        pp = (6. * (1. - p))
+        pp = 6.0 * (1.0 - p)
 
         # Solve linear system for the 2nd derivatives
         a = pp * qtw + p * r
@@ -314,15 +312,15 @@ class CubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, UnivariateDataT
         d1 = np.diff(vpad(u), axis=0) / dx
         d2 = np.diff(vpad(d1), axis=0)
 
-        diags_w_recip = 1. / w
+        diags_w_recip = 1.0 / w
         w = sp.diags(diags_w_recip, 0, (pcount, pcount))
 
         yi = y.T - (pp * w) @ d2
         pu = vpad(p * u)
 
         c1 = np.diff(pu, axis=0) / dx
-        c2 = 3. * pu[:-1, :]
-        c3 = np.diff(yi, axis=0) / dx - dx * (2. * pu[:-1, :] + pu[1:, :])
+        c2 = 3.0 * pu[:-1, :]
+        c3 = np.diff(yi, axis=0) / dx - dx * (2.0 * pu[:-1, :] + pu[1:, :])
         c4 = yi[:-1, :]
 
         c_shape = (4, pcount - 1) + shape[1:]

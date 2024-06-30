@@ -6,7 +6,8 @@ import csaps
 
 
 @pytest.mark.parametrize(
-    'x,y,w,p', [
+    'x,y,w,p',
+    [
         ([1, 2, 3], np.ones((10, 10)), None, None),
         ([[1], [1]], np.ones((1, 1)), None, None),
         ([[1, 2, 3], [1, 2, 3]], np.ones((4, 3)), None, None),
@@ -17,7 +18,7 @@ import csaps
         ([[1, 2, 3], [1, 2, 3]], np.ones((3, 3)), None, [0.5, 0.4, 0.2]),
         (np.array([[1, 2, 3], [4, 5, 6]]), np.ones((3, 3)), None, None),
         ([np.arange(6).reshape(2, 3), np.arange(6).reshape(2, 3)], np.ones((6, 6)), None, None),
-    ]
+    ],
 )
 def test_invalid_data(x, y, w, p):
     with pytest.raises((ValueError, TypeError)):
@@ -25,12 +26,13 @@ def test_invalid_data(x, y, w, p):
 
 
 @pytest.mark.parametrize(
-    'x, xi', [
-        (([1, 2, 3], ), ([], )),
+    'x, xi',
+    [
+        (([1, 2, 3],), ([],)),
         (([1, 2, 3], [1, 2, 3]), ([1, 2], [])),
         (([1, 2, 3], [1, 2, 3], [1, 2, 3]), ([1, 2, 3], [1, 2, 3])),
         (([1, 2, 3], [1, 2, 3]), ([1, 2, 3], [1, 2, 3], [1, 2, 3])),
-    ]
+    ],
 )
 def test_invalid_evaluate_data(x, xi):
     np.random.seed(1234)
@@ -43,10 +45,11 @@ def test_invalid_evaluate_data(x, xi):
 
 
 @pytest.mark.parametrize(
-    'shape, coeffs_shape, order, pieces, ndim', [
-        ((2, ), (2, 1), (2, ), (1, ), 1),
-        ((3, ), (4, 2), (4, ), (2, ), 1),
-        ((4, ), (4, 3), (4, ), (3, ), 1),
+    'shape, coeffs_shape, order, pieces, ndim',
+    [
+        ((2,), (2, 1), (2,), (1,), 1),
+        ((3,), (4, 2), (4,), (2,), 1),
+        ((4,), (4, 3), (4,), (3,), 1),
         ((2, 4), (2, 4, 1, 3), (2, 4), (1, 3), 2),
         ((3, 4), (4, 4, 2, 3), (4, 4), (2, 3), 2),
         ((4, 4), (4, 4, 3, 3), (4, 4), (3, 3), 2),
@@ -54,7 +57,7 @@ def test_invalid_evaluate_data(x, xi):
         ((3, 4, 5), (4, 4, 4, 2, 3, 4), (4, 4, 4), (2, 3, 4), 3),
         ((2, 3, 2, 6), (2, 4, 2, 4, 1, 2, 1, 5), (2, 4, 2, 4), (1, 2, 1, 5), 4),
         ((3, 4, 5, 6), (4, 4, 4, 4, 2, 3, 4, 5), (4, 4, 4, 4), (2, 3, 4, 5), 4),
-    ]
+    ],
 )
 def test_ndsplineppform(shape, coeffs_shape, order, pieces, ndim):
     x = tuple(np.arange(s) for s in shape)
@@ -83,13 +86,14 @@ def test_surface(surface_data):
 
 
 @pytest.mark.parametrize(
-    'shape, smooth', [
-        ((4, ), 0.0),
-        ((4, ), 0.5),
-        ((4, ), 1.0),
-        ((4, ), (0.0, )),
-        ((4, ), (0.5, )),
-        ((4, ), (1.0, )),
+    'shape, smooth',
+    [
+        ((4,), 0.0),
+        ((4,), 0.5),
+        ((4,), 1.0),
+        ((4,), (0.0,)),
+        ((4,), (0.5,)),
+        ((4,), (1.0,)),
         ((4, 5), 0.0),
         ((4, 5), 0.5),
         ((4, 5), 1.0),
@@ -118,7 +122,7 @@ def test_surface(surface_data):
         ((4, 5, 6, 7), (0.0, 0.5, 0.6, 0.0)),
         ((4, 5, 6, 7), (0.0, 0.5, 0.6, 0.7)),
         ((4, 5, 6, 7), (0.4, 0.5, 0.6, 0.7)),
-    ]
+    ],
 )
 def test_smooth_factor(shape, smooth):
     x = [np.arange(s) for s in shape]
@@ -135,8 +139,9 @@ def test_smooth_factor(shape, smooth):
 
 
 @pytest.mark.parametrize(
-    'shape', [
-        (2, ),
+    'shape',
+    [
+        (2,),
         (2, 3),
         (2, 2),
         (2, 3, 4),
@@ -151,7 +156,7 @@ def test_smooth_factor(shape, smooth):
         (2, 2, 2, 3, 4),
         (2, 2, 2, 2, 3),
         (2, 2, 2, 2, 2),
-    ]
+    ],
 )
 def test_nd_2pt_array(shape: tuple):
     xdata = [np.arange(s) for s in shape]
@@ -165,9 +170,10 @@ def test_nd_2pt_array(shape: tuple):
 
 
 @pytest.mark.parametrize(
-    'shape', [
-        (2, ),
-        (3, ),
+    'shape',
+    [
+        (2,),
+        (3,),
         (2, 3),
         (3, 4),
         (3, 2, 4),
@@ -176,7 +182,7 @@ def test_nd_2pt_array(shape: tuple):
         (3, 4, 5, 6),
         (3, 2, 2, 6, 2),
         (3, 4, 5, 6, 7),
-    ]
+    ],
 )
 def test_nd_array(shape: tuple):
     xdata = [np.arange(s) for s in shape]
@@ -201,17 +207,23 @@ def test_auto_smooth_2d(ndgrid_2d_data):
     assert zi == pytest.approx(zi_expected)
 
 
-@pytest.mark.parametrize('nu', [
-    None,
-    (0, 0),
-    (1, 1),
-    (2, 2),
-])
-@pytest.mark.parametrize('extrapolate', [
-    None,
-    True,
-    False,
-])
+@pytest.mark.parametrize(
+    'nu',
+    [
+        None,
+        (0, 0),
+        (1, 1),
+        (2, 2),
+    ],
+)
+@pytest.mark.parametrize(
+    'extrapolate',
+    [
+        None,
+        True,
+        False,
+    ],
+)
 def test_evaluate_nu_extrapolate(nu: tuple, extrapolate: bool):
     x = ([1, 2, 3, 4], [1, 2, 3, 4])
     xi = ([0, 1, 2, 3, 4, 5], [0, 1, 2, 3, 4, 5])

@@ -11,8 +11,7 @@ from ._types import TData, TExtrapolate, TNu, TProps, TSmooth, TSpline, TXi
 
 
 class ISplinePPForm(abc.ABC, Generic[TData, TProps]):
-    """The interface class for spline representation in PP-form
-    """
+    """The interface class for spline representation in PP-form"""
 
     __module__ = 'csaps'
 
@@ -84,24 +83,20 @@ class ISplinePPForm(abc.ABC, Generic[TData, TProps]):
 
 
 class ISmoothingSpline(abc.ABC, Generic[TSpline, TSmooth, TXi, TNu, TExtrapolate]):
-    """The interface class for smooting splines
-    """
+    """The interface class for smooting splines"""
 
     __module__ = 'csaps'
 
     @property
     @abc.abstractmethod
     def smooth(self) -> TSmooth:
-        """Returns smoothing factor(s)
-        """
+        """Returns smoothing factor(s)"""
 
     @property
     @abc.abstractmethod
     def spline(self) -> TSpline:
-        """Returns spline representation in PP-form
-        """
+        """Returns spline representation in PP-form"""
 
     @abc.abstractmethod
     def __call__(self, xi: TXi, nu: Optional[TNu] = None, extrapolate: Optional[TExtrapolate] = None) -> np.ndarray:
-        """Evaluates spline on the data sites
-        """
+        """Evaluates spline on the data sites"""
