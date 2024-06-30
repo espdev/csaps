@@ -150,7 +150,7 @@ def umv_coeffs_to_flatten(arr: np.ndarray):
         strides = arr.strides[:-3:-1]
         arr_view = as_strided(arr, shape=shape, strides=strides)
     else:  # pragma: no cover
-        raise ValueError(f"The array ndim must be 2 or 3, but given array has ndim={arr.ndim}.")
+        raise ValueError(f'The array ndim must be 2 or 3, but given array has ndim={arr.ndim}.')
 
     return arr_view
 

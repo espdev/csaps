@@ -25,6 +25,7 @@ author = 'Eugene Prilepin'
 
 def _get_version():
     from csaps import __version__
+
     return __version__
 
 
@@ -54,10 +55,10 @@ plot_rcparams = {
     'figure.autolayout': 'True',
     'figure.figsize': '5, 3.5',
     'savefig.bbox': 'tight',
-    'savefig.facecolor': "None",
+    'savefig.facecolor': 'None',
 }
 
-plot_formats = [("png", 90)]
+plot_formats = [('png', 90)]
 plot_include_source = True
 plot_html_show_source_link = False
 plot_html_show_formats = False

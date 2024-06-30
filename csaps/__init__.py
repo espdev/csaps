@@ -13,7 +13,6 @@ __all__ = [
     # Shortcut
     'csaps',
     'AutoSmoothingResult',
-
     # Classes
     'ISplinePPForm',
     'ISmoothingSpline',
@@ -21,7 +20,6 @@ __all__ = [
     'NdGridSplinePPForm',
     'CubicSmoothingSpline',
     'NdGridCubicSmoothingSpline',
-
     # Type-hints
     'UnivariateDataType',
     'MultivariateDataType',

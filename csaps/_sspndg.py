@@ -62,11 +62,11 @@ class NdGridSplinePPForm(ISplinePPForm[Tuple[np.ndarray, ...], Tuple[int, ...]],
 
     @property
     def order(self) -> Tuple[int, ...]:
-        return self.c.shape[:self.c.ndim // 2]
+        return self.c.shape[: self.c.ndim // 2]
 
     @property
     def pieces(self) -> Tuple[int, ...]:
-        return self.c.shape[self.c.ndim // 2:]
+        return self.c.shape[self.c.ndim // 2 :]
 
     @property
     def ndim(self) -> int:
@@ -112,7 +112,7 @@ class NdGridSplinePPForm(ISplinePPForm[Tuple[np.ndarray, ...], Tuple[int, ...]],
             raise ValueError(f"'x' sequence must have length {self.ndim} according to 'breaks'")
 
         if nu is None:
-            nu = (0, ) * len(x)
+            nu = (0,) * len(x)
 
         if extrapolate is None:
             extrapolate = True
@@ -210,7 +210,6 @@ class NdGridCubicSmoothingSpline(
         smooth: Optional[Union[float, Sequence[Optional[float]]]] = None,
         normalizedsmooth: bool = False,
     ) -> None:
-
         x, y, w, s = self._prepare_data(xdata, ydata, weights, smooth)
         coeffs, smooth = self._make_spline(x, y, w, s, normalizedsmooth)
 
@@ -306,8 +305,7 @@ class NdGridCubicSmoothingSpline(
 
         if len(smooth) != data_ndim:
             raise ValueError(
-                'Number of smoothing parameter values must '
-                f'be equal number of dimensions ({data_ndim})'
+                'Number of smoothing parameter values must ' f'be equal number of dimensions ({data_ndim})'
             )
 
         return xdata, ydata, weights, smooth
@@ -324,7 +322,7 @@ class NdGridCubicSmoothingSpline(
                 smooth=smooth[0],
                 normalizedsmooth=normalizedsmooth,
             )
-            return s.spline.coeffs, (s.smooth, )
+            return s.spline.coeffs, (s.smooth,)
 
         shape = ydata.shape
         coeffs = ydata
