@@ -55,7 +55,7 @@ scipy = [
 
 
 [tool.poetry.group.dev.dependencies]
-setuptools = "^69.0.2"
+setuptools = ">=69.0.2,<71.0.0"
 pytest = "^7.4.3"
 pytest-cov = "^4.1.0"
 m2r2 = "^0.3.2"
