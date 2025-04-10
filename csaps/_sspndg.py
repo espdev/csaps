@@ -304,9 +304,7 @@ class NdGridCubicSmoothingSpline(
             smooth = list(smooth)
 
         if len(smooth) != data_ndim:
-            raise ValueError(
-                'Number of smoothing parameter values must ' f'be equal number of dimensions ({data_ndim})'
-            )
+            raise ValueError(f'Number of smoothing parameter values must be equal number of dimensions ({data_ndim})')
 
         return xdata, ydata, weights, smooth
 

@@ -13,8 +13,8 @@ jobs:
       max-parallel: 8
       matrix:
         platform: [ "ubuntu-latest", "macos-latest", "windows-latest" ]
-        python-version: [ "3.9", "3.10", "3.11", "3.12" ]
-        poetry-version: [ "1.8.3" ]
+        python-version: [ "3.9", "3.10", "3.11", "3.12", "3.13" ]
+        poetry-version: [ "1.8.5" ]
 
     steps:
       - name: Checkout project
@@ -26,7 +26,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Install Poetry ${{ matrix.poetry-version }}
-        uses: abatilo/actions-poetry@v3
+        uses: abatilo/actions-poetry@v4
         with:
           poetry-version: ${{ matrix.poetry-version }}
 
@@ -45,11 +45,10 @@ jobs:
         run: poetry install
 
       - name: Run static analysis and linters
-        run: |
-          poetry run ruff check .
+        run: poetry run poe check
 
       - name: Run tests
-        run: poetry run pytest -v --color=yes --cov=csaps --cov-report=term --cov-report=lcov:coverage.info
+        run: poetry run poe test-ci
 
       - name: Send coverage report to Coveralls
         if: ${{ matrix.platform == 'ubuntu-latest' && matrix.python-version == '3.12' }}
@@ -60,4 +59,4 @@ jobs:
 
       - name: Build docs
         if: ${{ matrix.platform == 'ubuntu-latest' && matrix.python-version == '3.12' }}
-        run: poetry run make -C docs/ html
+        run: poetry run poe docs

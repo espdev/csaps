@@ -27,6 +27,7 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: Implementation :: CPython",
 ]
 
@@ -55,17 +56,18 @@ scipy = [
 
 
 [tool.poetry.group.dev.dependencies]
-setuptools = "^69.0.2"
-pytest = "^7.4.3"
-pytest-cov = "^4.1.0"
+setuptools = "^78.1.0"
+pytest = "^8.3.5"
+pytest-cov = "^6.1.1"
 m2r2 = "^0.3.2"
 docutils = "^0.20.0"
 sphinx = "^7.1.2"
 numpydoc = "^1.6.0"
 matplotlib = "^3.7.4"
-ruff = "^0.5.0"
+ruff = "^0.11.5"
 mypy = "^1.7.1"
-pre-commit = "^3.7.1"
+pre-commit = "^4.2.0"
+poethepoet = "^0.33.1"
 
 
 [build-system]
@@ -97,6 +99,10 @@ ignore = []
 docstring-quotes = "double"
 inline-quotes = "single"
 
+[tool.ruff.lint.isort]
+force-to-top = ["typing", "typing_extensions", "pytest"]
+force-sort-within-sections = true
+
 [tool.ruff.format]
 quote-style = "single"
 
@@ -110,3 +116,22 @@ module = [
     "scipy"
 ]
 ignore_missing_imports = true
+
+
+[tool.poe.tasks]
+test = "pytest -v "
+test-cov = "pytest --cov=csaps"
+test-ci = "pytest -v --color=yes --cov=csaps --cov-report=term --cov-report=lcov:coverage.info"
+
+check-format-pre-commit = "ruff format --check"
+check-lint-pre-commit = "ruff check"
+
+check-format = "ruff format . --check"
+check-lint = "ruff check ."
+check = ["check-format", "check-lint"]
+
+fix-format = "ruff format ."
+fix-lint = "ruff check --fix ."
+fix = ["fix-format", "fix-lint"]
+
+docs = "sphinx-build docs/ docs/_build/ --builder html"
