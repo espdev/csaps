@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.2.1 (10.04.2025)
+
+* Update dependencies
+* Update the package classifiers
+
+## v1.2.0 (30.06.2024)
+
+* Bump minimal Python version to 3.9
+* Use ruff as the code linter and formatter
+* Update dependencies
+
 ## v1.1.0 (05.10.2021)
 
 * Introduced optional `normalizedsmooth` argument to reduce dependence on xdata and weights [#47](https://github.com/espdev/csaps/pull/47)
