@@ -7,6 +7,7 @@ permissions:
 
 jobs:
   build:
+    name: Build Package
     runs-on: ubuntu-latest
 
     steps:
@@ -45,7 +46,7 @@ jobs:
           overwrite: true
 
   upload:
-    name: Upload to PyPI
+    name: Upload Package to PyPI
     needs: [ build ]
     runs-on: ubuntu-latest
     environment:
