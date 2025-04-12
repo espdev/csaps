@@ -3,8 +3,22 @@ name: main
 on:
   push:
     branches: [ master ]
+    paths:
+      - csaps/**/*
+      - docs/**/*
+      - tests/**/*
+      - poetry.lock
+      - pyproject.toml
+      - .github/workflows/main.yml
   pull_request:
     branches: [ master ]
+    paths:
+      - csaps/**/*
+      - docs/**/*
+      - tests/**/*
+      - poetry.lock
+      - pyproject.toml
+      - .github/workflows/main.yml
 
 jobs:
   tests:
