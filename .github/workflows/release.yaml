@@ -74,22 +74,19 @@ jobs:
       TAG_NAME: v${{ needs.build.outputs.version }}
 
     steps:
-      - name: Release version
-        run: echo "Release version is ${{ env.TAG_NAME }}"
-
       - name: Download build artifact
         uses: actions/download-artifact@v4
         with:
           name: csaps-packages
           path: dist
 
-      - name: Check tag
+      - name: Check tag ${{ env.TAG_NAME }}
         uses: mukunku/tag-exists-action@v1.6.0
         id: check-tag
         with:
           tag: ${{ env.TAG_NAME }}
 
-      - name: Create tag
+      - name: Create tag ${{ env.TAG_NAME }}
         if: ${{ steps.check-tag.outputs.exists == 'false' }}
         uses: actions/github-script@v7
         with:
