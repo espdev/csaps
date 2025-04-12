@@ -74,18 +74,22 @@ jobs:
       TAG_NAME: v${{ needs.build.outputs.version }}
 
     steps:
-      - uses: actions/download-artifact@v4
+      - name: Release version
+        run: echo "Release version is ${{ env.TAG_NAME }}"
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
         with:
           name: csaps-packages
           path: dist
 
-      - name: Check tag ${{ TAG_NAME }}
+      - name: Check tag
         uses: mukunku/tag-exists-action@v1.6.0
         id: check-tag
         with:
-          tag: ${{ TAG_NAME }}
+          tag: ${{ env.TAG_NAME }}
 
-      - name: Create tag ${{ TAG_NAME }}
+      - name: Create tag
         if: ${{ steps.check-tag.outputs.exists == 'false' }}
         uses: actions/github-script@v7
         with:
@@ -93,15 +97,15 @@ jobs:
             github.rest.git.createRef({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              ref: 'refs/tags/${{ TAG_NAME }}',
+              ref: 'refs/tags/${{ env.TAG_NAME }}',
               sha: context.sha
             })
 
-      - name: Create release ${{ TAG_NAME }}
+      - name: Create release ${{ env.TAG_NAME }}
         uses: softprops/action-gh-release@v2
         with:
-          name: ${{ TAG_NAME }}
-          tag_name: ${{ TAG_NAME }}
+          name: ${{ env.TAG_NAME }}
+          tag_name: ${{ env.TAG_NAME }}
           files: dist/*
 
       - name: Upload to PyPI
