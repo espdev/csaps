@@ -1,0 +1,115 @@
+name: Create Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_notes:
+        description: 'Release notes'
+        type: string
+        required: false
+        default: ''
+      upload_to_pypi:
+        description: 'Upload the release to PyPI'
+        type: boolean
+        required: false
+        default: true
+
+permissions:
+  actions: write
+  contents: write
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get-version.outputs.VERSION }}
+
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Poetry
+        uses: abatilo/actions-poetry@v4
+        with:
+          poetry-version: "1.8.5"
+
+      - name: Setup a local virtual environment
+        run: |
+          poetry config virtualenvs.create true --local
+          poetry config virtualenvs.in-project true --local
+
+      - name: Define a cache for the virtual environment based on the dependencies lock file
+        uses: actions/cache@v4
+        with:
+          path: ./.venv
+          key: venv-${{ hashFiles('poetry.lock') }}
+
+      - name: Build
+        run: |
+          poetry install
+          poetry build
+
+      - name: Get package version to create a new tag and release
+        id: get-version
+        run: echo "VERSION=$(poetry version --short)" >> $GITHUB_OUTPUT
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: csaps-packages
+          path: dist/*
+          overwrite: true
+
+  publish:
+    name: Publish
+    needs: [ build ]
+    runs-on: ubuntu-latest
+    environment:
+      name: release
+      url: https://pypi.org/project/csaps
+    permissions:
+      id-token: write
+    env:
+      TAG_NAME: v${{ needs.build.outputs.version }}
+
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: csaps-packages
+          path: dist
+
+      - name: Check tag ${{ TAG_NAME }}
+        uses: mukunku/tag-exists-action@v1.6.0
+        id: check-tag
+        with:
+          tag: ${{ TAG_NAME }}
+
+      - name: Create tag ${{ TAG_NAME }}
+        if: ${{ steps.check-tag.outputs.exists == 'false' }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: 'refs/tags/${{ TAG_NAME }}',
+              sha: context.sha
+            })
+
+      - name: Create release ${{ TAG_NAME }}
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ TAG_NAME }}
+          tag_name: ${{ TAG_NAME }}
+          files: dist/*
+          body: inputs.release_notes
+
+      - name: Upload to PyPI
+        if: ${{ inputs.upload_to_pypi }}
+        uses: pypa/gh-action-pypi-publish@release/v1
