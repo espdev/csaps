@@ -3,11 +3,6 @@ name: Create Release
 on:
   workflow_dispatch:
     inputs:
-      release_notes:
-        description: 'Release notes'
-        type: string
-        required: false
-        default: ''
       upload_to_pypi:
         description: 'Upload the release to PyPI'
         type: boolean
@@ -108,7 +103,6 @@ jobs:
           name: ${{ TAG_NAME }}
           tag_name: ${{ TAG_NAME }}
           files: dist/*
-          body: inputs.release_notes
 
       - name: Upload to PyPI
         if: ${{ inputs.upload_to_pypi }}
