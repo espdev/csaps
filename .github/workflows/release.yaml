@@ -11,7 +11,6 @@ on:
 
 permissions:
   actions: write
-  contents: write
 
 jobs:
   build:
@@ -70,6 +69,7 @@ jobs:
       url: https://pypi.org/project/csaps
     permissions:
       id-token: write
+      contents: write
     env:
       TAG_NAME: v${{ needs.build.outputs.version }}
 
