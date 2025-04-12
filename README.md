@@ -22,6 +22,12 @@ Use pip for installing:
 pip install -U csaps
 ```
 
+or Poetry:
+
+```
+poetry add csaps
+```
+
 The module depends only on NumPy and SciPy. Python 3.9 or above is supported.
 
 ## Simple Examples
@@ -96,9 +102,10 @@ More examples of usage and the full documentation can be found at https://csaps.
 We use pytest for testing.
 
 ```
-cd /path/to/csaps/project/directory
-pip install -e .[tests]
-pytest
+git clone https://github.com/espdev/csaps.git
+cd csaps
+poetry install
+poetry run poe test
 ```
 
 ## Algorithm and Implementation
