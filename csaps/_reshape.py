@@ -111,8 +111,11 @@ def umv_coeffs_to_canonical(arr: np.ndarray, pieces: int):
 
     """
 
-    ndim = arr.shape[0]
-    order = arr.shape[1] // pieces
+    ndim: int = arr.shape[0]
+    order: int = arr.shape[1] // pieces
+
+    shape: tuple[int, ...]
+    strides: tuple[int, ...]
 
     if ndim == 1:
         shape = (order, pieces)

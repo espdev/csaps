@@ -27,7 +27,7 @@ jobs:
       max-parallel: 8
       matrix:
         platform: [ "ubuntu-latest", "macos-latest", "windows-latest" ]
-        python-version: [ "3.9", "3.10", "3.11", "3.12", "3.13" ]
+        python-version: [ "3.10", "3.11", "3.12", "3.13" ]
         poetry-version: [ "1.8.5" ]
 
     steps:
@@ -58,7 +58,7 @@ jobs:
       - name: Install the project dependencies
         run: poetry install -E docs
 
-      - name: Run static analysis and linters
+      - name: Run static analysis, linters and mypy
         run: poetry run poe check
 
       - name: Run tests
