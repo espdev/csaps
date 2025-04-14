@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.3.1 (14.04.2025)
+
+* Update readme and docs
+
 ## v1.3.0 (14.04.2025)
 
 * Bump minimal Python version to 3.10
