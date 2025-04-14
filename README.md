@@ -28,7 +28,7 @@ or Poetry:
 poetry add csaps
 ```
 
-The module depends only on NumPy and SciPy. Python 3.9 or above is supported.
+The module depends only on NumPy and SciPy. Python 3.10 or above is supported.
 
 ## Simple Examples
 
@@ -97,15 +97,30 @@ plt.show()
 
 More examples of usage and the full documentation can be found at https://csaps.readthedocs.io.
 
-## Testing
+# Development
 
-We use pytest for testing.
+We use Poetry to manage the project:
 
 ```
 git clone https://github.com/espdev/csaps.git
 cd csaps
-poetry install
+poetry install -E docs
+```
+
+Also, install pre-commit hooks:
+
+```
+poetry run pre-commit install
+```
+
+## Testing and Linting
+
+We use pytest for testing and ruff/mypy for linting.
+Use `poethepoet` to run tests and linters:
+
+```
 poetry run poe test
+poetry run poe check
 ```
 
 ## Algorithm and Implementation
@@ -113,11 +128,10 @@ poetry run poe test
 **csaps** Python package is inspired by MATLAB [CSAPS](https://www.mathworks.com/help/curvefit/csaps.html) function that is an implementation of 
 Fortran routine SMOOTH from [PGS](http://pages.cs.wisc.edu/~deboor/pgs/) (originally written by Carl de Boor).
 
-Also the algothithm implementation in other languages:
+Also, the algothithm implementation in other languages:
 
 * [csaps-rs](https://github.com/espdev/csaps-rs) Rust ndarray/sprs based implementation
 * [csaps-cpp](https://github.com/espdev/csaps-cpp) C++11 Eigen based implementation (incomplete)
-
 
 ## References
 

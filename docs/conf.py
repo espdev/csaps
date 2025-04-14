@@ -19,7 +19,7 @@ sys.path.insert(0, str(ROOT_DIR))
 # -- Project information -----------------------------------------------------
 
 project = 'csaps'
-copyright = '2017-2023, Eugene Prilepin'  # noqa
+copyright = '2017-2025, Eugene Prilepin'  # noqa
 author = 'Eugene Prilepin'
 
 
