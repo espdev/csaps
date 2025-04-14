@@ -7,7 +7,7 @@ import abc
 
 import numpy as np
 
-from ._types import TData, TExtrapolate, TNu, TProps, TSmooth, TSpline, TXi
+from ._types import TData, TExtrapolate, TNu, TProps, TSmooth, TSpline, TXi, FloatNDArrayType
 
 
 class ISplinePPForm(abc.ABC, Generic[TData, TProps]):
@@ -22,7 +22,7 @@ class ISplinePPForm(abc.ABC, Generic[TData, TProps]):
 
         Returns
         -------
-        breaks : Union[np.ndarray, ty.Tuple[np.ndarray, ...]]
+        breaks : Union[np.ndarray, Tuple[np.ndarray, ...]]
             Breaks data
         """
 
@@ -44,7 +44,7 @@ class ISplinePPForm(abc.ABC, Generic[TData, TProps]):
 
         Returns
         -------
-        order : ty.Union[int, ty.Tuple[int, ...]]
+        order : Union[int, Tuple[int, ...]]
             The spline order
         """
 
@@ -55,7 +55,7 @@ class ISplinePPForm(abc.ABC, Generic[TData, TProps]):
 
         Returns
         -------
-        pieces : ty.Union[int, ty.Tuple[int, ...]]
+        pieces : Union[int, Tuple[int, ...]]
             The spline pieces data
         """
 
@@ -98,5 +98,10 @@ class ISmoothingSpline(abc.ABC, Generic[TSpline, TSmooth, TXi, TNu, TExtrapolate
         """Returns spline representation in PP-form"""
 
     @abc.abstractmethod
-    def __call__(self, xi: TXi, nu: Optional[TNu] = None, extrapolate: Optional[TExtrapolate] = None) -> np.ndarray:
+    def __call__(
+        self,
+        xi: TXi,
+        nu: Optional[TNu] = None,
+        extrapolate: Optional[TExtrapolate] = None,
+    ) -> FloatNDArrayType:
         """Evaluates spline on the data sites"""

@@ -2,21 +2,24 @@
 Type-hints and type vars
 """
 
-from typing import Sequence, Tuple, TypeVar, Union
-from collections import abc
-from numbers import Number
+from typing import Sequence, TypeVar, Union, Annotated, Literal
 
 from typing_extensions import TypeAlias
 import numpy as np
+from numpy.typing import NDArray
 
-UnivariateDataType: TypeAlias = Union[np.ndarray, Sequence[Number]]
-MultivariateDataType: TypeAlias = Union[np.ndarray, abc.Sequence]
-NdGridDataType: TypeAlias = Sequence[UnivariateDataType]
+FloatDType: TypeAlias = Union[np.float32, np.float64]
+FloatNDArrayType: TypeAlias = NDArray[FloatDType]
+Float1DArrayTupe: TypeAlias = Annotated[FloatNDArrayType, Literal['N']]
 
-TData = TypeVar('TData', np.ndarray, Sequence[np.ndarray])
-TProps = TypeVar('TProps', int, Tuple[int, ...])
-TSmooth = TypeVar('TSmooth', float, Tuple[float, ...])
-TXi = TypeVar('TXi', UnivariateDataType, NdGridDataType)
-TNu = TypeVar('TNu', int, Tuple[int, ...])
-TExtrapolate = TypeVar('TExtrapolate', bool, Union[bool, str])
+UnivariateDataType: TypeAlias = Union[Float1DArrayTupe, Sequence[float]]
+MultivariateDataType: TypeAlias = Union[FloatNDArrayType, Sequence[Union[float, UnivariateDataType]]]
+SequenceUnivariateDataType: TypeAlias = Sequence[UnivariateDataType]
+
+TData = TypeVar('TData')
+TProps = TypeVar('TProps')
+TSmooth = TypeVar('TSmooth')
+TXi = TypeVar('TXi')
+TNu = TypeVar('TNu')
+TExtrapolate = TypeVar('TExtrapolate')
 TSpline = TypeVar('TSpline')

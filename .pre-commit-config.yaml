@@ -16,3 +16,9 @@ repos:
         language: system
         types: [ python ]
         require_serial: true
+      - id: check-types
+        name: check-types
+        entry: poetry run poe check-types-pre-commit
+        language: system
+        types: [ python ]
+        require_serial: true

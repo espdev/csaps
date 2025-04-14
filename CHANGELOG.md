@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.3.0 (14.04.2025)
+
+* Bump minimal Python version to 3.10
+* Fix type annotations
+* Fix checking types by mypy
+
 ## v1.2.1 (10.04.2025)
 
 * Update dependencies

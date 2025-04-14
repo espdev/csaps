@@ -2,9 +2,8 @@
 ND-Gridded cubic smoothing spline implementation
 """
 
-from typing import Optional, Sequence, Tuple, Union
+from typing import Optional, Sequence, Tuple, Union, cast
 import collections.abc as c_abc
-from numbers import Number
 
 import numpy as np
 from scipy.interpolate import NdPPoly, PPoly
@@ -18,14 +17,18 @@ from ._reshape import (
     umv_coeffs_to_flatten,
 )
 from ._sspumv import CubicSmoothingSpline
-from ._types import NdGridDataType, UnivariateDataType
+from ._types import SequenceUnivariateDataType, FloatNDArrayType, Float1DArrayTupe
 
 
-def ndgrid_prepare_data_vectors(data, name, min_size: int = 2) -> Tuple[np.ndarray, ...]:
+def ndgrid_prepare_data_vectors(
+    data: SequenceUnivariateDataType,
+    name: str,
+    min_size: int = 2,
+) -> Tuple[Float1DArrayTupe, ...]:
     if not isinstance(data, c_abc.Sequence):
         raise TypeError(f"'{name}' must be a sequence of 1-d array-like (vectors) or scalars.")
 
-    data = list(data)
+    data_: list[Float1DArrayTupe] = []
 
     for axis, d in enumerate(data):
         d = np.asarray(d, dtype=np.float64)
@@ -33,9 +36,9 @@ def ndgrid_prepare_data_vectors(data, name, min_size: int = 2) -> Tuple[np.ndarr
             raise ValueError(f"All '{name}' elements must be a vector for axis {axis}.")
         if d.size < min_size:
             raise ValueError(f"'{name}' must contain at least {min_size} data points for axis {axis}.")
-        data[axis] = d
+        data_.append(d)
 
-    return tuple(data)
+    return tuple(data_)
 
 
 class NdGridSplinePPForm(ISplinePPForm[Tuple[np.ndarray, ...], Tuple[int, ...]], NdPPoly):
@@ -76,9 +79,9 @@ class NdGridSplinePPForm(ISplinePPForm[Tuple[np.ndarray, ...], Tuple[int, ...]],
     def shape(self) -> Tuple[int, ...]:
         return tuple(len(xi) for xi in self.x)
 
-    def __call__(
+    def __call__(  # type: ignore[override]
         self,
-        x: Sequence[UnivariateDataType],
+        x: SequenceUnivariateDataType,
         nu: Optional[Tuple[int, ...]] = None,
         extrapolate: Optional[bool] = None,
     ) -> np.ndarray:
@@ -87,8 +90,8 @@ class NdGridSplinePPForm(ISplinePPForm[Tuple[np.ndarray, ...], Tuple[int, ...]],
         Parameters
         ----------
 
-        x : tuple of 1-d array-like
-            The tuple of point values for each dimension to evaluate the spline at.
+        x : Sequence of 1-d array-like
+            The sequence of point values for each dimension to evaluate the spline at.
 
         nu : [*Optional*] tuple of int
             Orders of derivatives to evaluate. Each must be non-negative.
@@ -158,7 +161,7 @@ class NdGridCubicSmoothingSpline(
     ISmoothingSpline[
         NdGridSplinePPForm,
         Tuple[float, ...],
-        NdGridDataType,
+        SequenceUnivariateDataType,
         Tuple[int, ...],
         bool,
     ]
@@ -204,31 +207,29 @@ class NdGridCubicSmoothingSpline(
 
     def __init__(
         self,
-        xdata: NdGridDataType,
+        xdata: SequenceUnivariateDataType,
         ydata: np.ndarray,
-        weights: Optional[Union[UnivariateDataType, NdGridDataType]] = None,
+        weights: Optional[SequenceUnivariateDataType] = None,
         smooth: Optional[Union[float, Sequence[Optional[float]]]] = None,
         normalizedsmooth: bool = False,
     ) -> None:
         x, y, w, s = self._prepare_data(xdata, ydata, weights, smooth)
-        coeffs, smooth = self._make_spline(x, y, w, s, normalizedsmooth)
-
-        self._spline = NdGridSplinePPForm.construct_fast(coeffs, x)
-        self._smooth = smooth
+        coeffs, self._smooth = self._make_spline(x, y, w, s, normalizedsmooth)
+        self._spline = cast(NdGridSplinePPForm, NdGridSplinePPForm.construct_fast(coeffs, x))
 
     def __call__(
         self,
-        x: Union[NdGridDataType, Sequence[Number]],
+        x: SequenceUnivariateDataType,
         nu: Optional[Tuple[int, ...]] = None,
         extrapolate: Optional[bool] = None,
-    ) -> np.ndarray:
+    ) -> FloatNDArrayType:
         """Evaluate the spline for given data
 
         Parameters
         ----------
 
-        x : tuple of 1-d array-like
-            The tuple of point values for each dimension to evaluate the spline at.
+        x : Sequence of 1-d array-like
+            The sequence of point values for each dimension to evaluate the spline at.
 
         nu : [*Optional*] tuple of int
             Orders of derivatives to evaluate. Each must be non-negative.

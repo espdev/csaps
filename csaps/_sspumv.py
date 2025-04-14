@@ -2,7 +2,7 @@
 Univariate/multivariate cubic smoothing spline implementation
 """
 
-from typing import List, Optional, Tuple, Union
+from typing import List, Optional, Tuple, Union, Literal, cast
 import functools
 
 import numpy as np
@@ -12,7 +12,7 @@ import scipy.sparse.linalg as la
 
 from ._base import ISmoothingSpline, ISplinePPForm
 from ._reshape import prod, to_2d
-from ._types import MultivariateDataType, UnivariateDataType
+from ._types import MultivariateDataType, UnivariateDataType, FloatNDArrayType
 
 
 class SplinePPForm(ISplinePPForm[np.ndarray, int], PPoly):
@@ -64,7 +64,7 @@ class SplinePPForm(ISplinePPForm[np.ndarray, int], PPoly):
 
         return tuple(shape)
 
-    def __repr__(self):  # pragma: no cover
+    def __repr__(self) -> str:  # pragma: no cover
         return (
             f'{type(self).__name__}\n'
             f'  breaks: {self.breaks}\n'
@@ -77,7 +77,9 @@ class SplinePPForm(ISplinePPForm[np.ndarray, int], PPoly):
         )
 
 
-class CubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, UnivariateDataType, int, Union[bool, str]]):
+class CubicSmoothingSpline(
+    ISmoothingSpline[SplinePPForm, float, UnivariateDataType, int, Union[bool, Literal['periodic']]],
+):
     """Cubic smoothing spline
 
     The cubic spline implementation for univariate/multivariate data.
@@ -102,7 +104,7 @@ class CubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, UnivariateDataT
     axis : [*Optional*] int
         Axis along which ``ydata`` is assumed to be varying.
         Meaning that for x[i] the corresponding values are np.take(ydata, i, axis=axis).
-        By default is -1 (the last axis).
+        By default, it is -1 (the last axis).
 
     normalizedsmooth : [*Optional*] bool
         If True, the smooth parameter is normalized such that results are invariant to xdata range
@@ -122,20 +124,17 @@ class CubicSmoothingSpline(ISmoothingSpline[SplinePPForm, float, UnivariateDataT
         smooth: Optional[float] = None,
         axis: int = -1,
         normalizedsmooth: bool = False,
-    ):
+    ) -> None:
         x, y, w, shape, axis = self._prepare_data(xdata, ydata, weights, axis)
-        coeffs, smooth = self._make_spline(x, y, w, smooth, shape, normalizedsmooth)
-        spline = SplinePPForm.construct_fast(coeffs, x, axis=axis)
-
-        self._smooth = smooth
-        self._spline = spline
+        coeffs, self._smooth = self._make_spline(x, y, w, smooth, shape, normalizedsmooth)
+        self._spline = cast(SplinePPForm, SplinePPForm.construct_fast(coeffs, x, axis=axis))
 
     def __call__(
         self,
         x: UnivariateDataType,
         nu: Optional[int] = None,
-        extrapolate: Optional[Union[bool, str]] = None,
-    ) -> np.ndarray:
+        extrapolate: Optional[Union[bool, Literal['periodic']]] = None,
+    ) -> FloatNDArrayType:
         """Evaluate the spline for given data
 
         Parameters
