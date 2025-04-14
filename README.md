@@ -97,7 +97,7 @@ plt.show()
 
 More examples of usage and the full documentation can be found at https://csaps.readthedocs.io.
 
-# Development
+## Development
 
 We use Poetry to manage the project:
 
