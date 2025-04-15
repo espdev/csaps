@@ -45,9 +45,7 @@ jobs:
           key: venv-${{ hashFiles('poetry.lock') }}
 
       - name: Build
-        run: |
-          poetry install
-          poetry build
+        run: poetry build
 
       - name: Get package version to create a new tag and release
         id: get-version

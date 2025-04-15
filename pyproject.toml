@@ -52,12 +52,6 @@ scipy = [
     {version = "*", python = "<3.12"},
     {version = ">=1.11.4", python = ">=3.12"},
 ]
-sphinx = {version = "^7.1.2", optional = true}
-docutils = {version = "^0.20.0", optional = true}
-furo = {version = "^2024.8.6", optional = true}
-numpydoc = {version = "^1.6.0", optional = true}
-m2r2 = {version = "^0.3.2", optional = true}
-matplotlib = {version = "^3.7.4", optional = true}
 
 
 [tool.poetry.group.dev.dependencies]
@@ -71,8 +65,13 @@ pre-commit = "^4.2.0"
 poethepoet = "^0.33.1"
 
 
-[tool.poetry.extras]
-docs = ["sphinx", "docutils", "furo", "numpydoc", "m2r2", "matplotlib"]
+[tool.poetry.group.docs.dependencies]
+sphinx = "^7.1.2"
+docutils = "^0.20.0"
+furo = "^2024.8.6"
+numpydoc = "^1.6.0"
+m2r2 = "^0.3.2"
+matplotlib = "^3.7.4"
 
 
 [build-system]
