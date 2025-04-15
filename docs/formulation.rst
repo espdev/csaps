@@ -89,7 +89,8 @@ It is an example plot of comparison ``csaps`` and ``scipy.UnivariateSpline`` (k=
     plt.plot(x, y, 'o')
     plt.plot(xi, yi_scipy, '-', label='scipy UnivariateSpline')
     plt.plot(xi, yi_csaps, '-', label='csaps')
-    plt.legend()
+
+    plt.legend(bbox_to_anchor=(0, 1, 1, 0), loc="lower center", ncol=2)
 
 
 .. rubric:: Footnotes

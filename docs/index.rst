@@ -5,6 +5,9 @@ csaps
 
 CSAPS -- Cubic Spline Approximation (Smoothing)
 
+Version:
+|release|
+
 Overview
 --------
 
@@ -38,27 +41,37 @@ You can install and update csaps using pip:
 
     pip install -U csaps
 
+or using modern packaging tools like Poetry:
+
+.. code-block:: bash
+
+    poetry add csaps
+
+
 The module depends only on NumPy and SciPy.
 
 Python 3.10 or above is supported.
 
-Content
--------
-
 .. toctree::
-    :maxdepth: 2
+    :caption: User Guide
+    :hidden:
 
     formulation
     tutorial
     internals
     benchmarks
-    api
     changelog
 
+.. toctree::
+    :caption: API
+    :hidden:
 
-Indices and Tables
-==================
+    api
+    genindex
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+.. toctree::
+    :caption: Project Links
+    :hidden:
+
+    GitHub <https://github.com/espdev/csaps>
+    PyPI <https://pypi.org/project/csaps>

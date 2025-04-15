@@ -122,7 +122,7 @@ The same weights vector and the same smoothing parameter will be used for all Y 
     ax = fig.add_subplot(111, projection='3d')
     ax.set_facecolor('none')
     ax.plot(x, y, z, '.:')
-    ax.plot(xi, yi, zi, '-')
+    ax.plot(xi, yi, zi, '-', linewidth=2)
 
 
 N-D grid Smoothing
@@ -225,14 +225,11 @@ The example of auto smoothing univariate data:
     x, y = univariate_data()
     xi = np.linspace(x[0], x[-1], 51)
 
-    smoothing_result = csaps(x, y, xi)
-
-    yi = smoothing_result.values
-    smooth = smoothing_result.smooth
+    yi, smooth = csaps(x, y, xi)
 
     plt.plot(x, y, 'o')
-    plt.plot(xi, yi, '-', label=f'smooth={smooth:.3f}')
-    plt.legend()
+    plt.plot(xi, yi, '-', label=f'smooth={smooth:.4f}')
+    plt.legend(bbox_to_anchor=(0, 1, 1, 0), loc="lower center")
 
 In ND-gridded data case we can use auto smoothing for all dimensions or the particular dimensions:
 
@@ -268,9 +265,9 @@ The following example demonstartes these two boundary cases:
     yi_1 = csaps(x, y, xi, smooth=1)
 
     plt.plot(x, y, 'o:')
-    plt.plot(xi, yi_0, '-', label='smooth=0')
-    plt.plot(xi, yi_1, '-', label='smooth=1')
-    plt.legend()
+    plt.plot(xi, yi_0, '-', label='smooth=0.0')
+    plt.plot(xi, yi_1, '-', label='smooth=1.0')
+    plt.legend(bbox_to_anchor=(0, 1, 1, 0), loc="lower center", ncol=2)
 
 
 Weighted Smoothing
@@ -303,7 +300,7 @@ The example of weighted smoothing univariate data:
     plt.plot(x, y, 'o')
     plt.plot(xi, yi, '-', label='unweighted')
     plt.plot(xi, yi_w, '-', label='weighted')
-    plt.legend()
+    plt.legend(bbox_to_anchor=(0, 1, 1, 0), loc="lower center", ncol=2)
 
 In n-d gridded data case we can use the same weights for all dimensions or different
 weights for each dimension.
@@ -377,6 +374,11 @@ Let's show it on a simple example.
     ax3.plot(x1, y, 'o', xi1, yi1_n, '-')
     ax4.plot(x2, y, 'o', xi2, yi2_n, '-')
 
+    ax1.set_title('normalizedsmooth=False')
+    ax2.set_title('normalizedsmooth=False')
+    ax3.set_title('normalizedsmooth=True')
+    ax4.set_title('normalizedsmooth=True')
+
 
 Computing Spline Without Evaluating
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -407,6 +409,9 @@ The example for univariate data:
     f, (ax1, ax2) = plt.subplots(2, 1, figsize=(5, 6))
     ax1.plot(x, y, 'o', xi1, yi1, '.-')
     ax2.plot(x, y, 'o', xi2, yi2, '.-')
+
+    ax1.set_title('20 evaluated points')
+    ax2.set_title('50 evaluated points')
 
 
 .. _tutorial-analysis:
