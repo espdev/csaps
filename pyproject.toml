@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "csaps"
-version = "1.3.1"
+version = "1.3.2"
 description = "Cubic spline approximation (smoothing)"
 authors = ["Evgeny Prilepin <esp.home@gmail.com>"]
 license = "MIT"

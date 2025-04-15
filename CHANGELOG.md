@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.3.2 (15.04.2025)
+
+* Remove `docs` extra dependencies from the package
+* Refresh the documentation with Furo theme
+
+
 ## v1.3.1 (14.04.2025)
 
 * Update readme and docs
