@@ -19,8 +19,8 @@ sys.path.insert(0, str(ROOT_DIR))
 # -- Project information -----------------------------------------------------
 
 project = 'csaps'
-copyright = '2017-2025, Eugene Prilepin'  # noqa
 author = 'Eugene Prilepin'
+copyright = f'2017-2025, {author}'  # noqa
 
 
 def _get_version():
@@ -47,7 +47,9 @@ extensions = [
     'm2r2',
 ]
 
-intersphinx_mapping = {'scipy': ('https://docs.scipy.org/doc/scipy/reference/', None)}
+intersphinx_mapping = {
+    'scipy': ('https://docs.scipy.org/doc/scipy/reference/', None),
+}
 
 # Extension settings
 plot_apply_rcparams = True
@@ -69,7 +71,7 @@ from matplotlib import pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from csaps import csaps
 
-plt.style.use('ggplot')
+plt.style.use('csaps.mplstyle')
 
 def univariate_data(n=25, seed=1234):
     np.random.seed(seed)
@@ -95,23 +97,22 @@ master_doc = 'index'
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-#
-html_theme = 'alabaster'
+html_theme = 'furo'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 
+pygments_style = 'tango'
+pygments_dark_style = 'stata-dark'
+
 html_theme_options = {
-    'fixed_sidebar': 'true',
-    'show_powered_by': 'false',
-    'description': 'Cubic spline approximation (smoothing)',
-    'github_user': 'espdev',
-    'github_repo': 'csaps',
-    'github_type': 'star',
-    'extra_nav_links': {
-        'GitHub repository': 'https://github.com/espdev/csaps',
-        'PyPI': 'https://pypi.org/project/csaps',
-    },
+    'light_logo': 'logo.png',
+    'dark_logo': 'logo-dark-mode.png',
+    'sidebar_hide_name': True,
+    'source_repository': 'https://github.com/espdev/csaps',
+    'source_branch': 'master',
+    'source_directory': 'docs/',
+    'top_of_page_buttons': ['view'],
 }

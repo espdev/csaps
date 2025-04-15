@@ -56,7 +56,7 @@ jobs:
           key: venv-${{ hashFiles('poetry.lock') }}
 
       - name: Install the project dependencies
-        run: poetry install -E docs
+        run: poetry install
 
       - name: Run static analysis, linters and mypy
         run: poetry run poe check
