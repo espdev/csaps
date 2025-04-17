@@ -368,7 +368,7 @@ Let's show it on a simple example.
     yi1_n = csaps(x1, y, xi1, smooth=0.8, normalizedsmooth=True)
     yi2_n = csaps(x2, y, xi2, smooth=0.8, normalizedsmooth=True)
 
-    f, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(8, 6))
+    f, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(10, 6))
     ax1.plot(x1, y, 'o', xi1, yi1, '-')
     ax2.plot(x2, y, 'o', xi2, yi2, '-')
     ax3.plot(x1, y, 'o', xi1, yi1_n, '-')
@@ -406,12 +406,48 @@ The example for univariate data:
     yi1 = spline(xi1)
     yi2 = spline(xi2)
 
-    f, (ax1, ax2) = plt.subplots(2, 1, figsize=(5, 6))
+    f, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 4))
     ax1.plot(x, y, 'o', xi1, yi1, '.-')
     ax2.plot(x, y, 'o', xi2, yi2, '.-')
 
     ax1.set_title('20 evaluated points')
     ax2.set_title('50 evaluated points')
+
+
+.. _tutorial-extrapolation:
+
+Extrapolation
+~~~~~~~~~~~~~
+
+Spline values can be evaluated out-of-bounds input X-values (the input grid) based on first and last intervals.
+These values will be extrapolated. The ``extrapolate`` parameter in the spline evaluation method is used for this.
+Extrapolation can be used for all evaluated splines: univariate, multivariate and N-D grid.
+
+Here is an example for univariate data:
+
+.. plot::
+
+    x, y = univariate_data()
+    xi = np.linspace(x[0] - 2.0, x[-1] + 2.0, 50)
+
+    s1 = csaps(x, y, smooth=0.85)
+    s2 = csaps(x, y, smooth=0.85)
+
+    yi1 = s1(xi, extrapolate=True)
+    yi2 = s2(xi, extrapolate='periodic')
+
+    _, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 4))
+    ax1.plot(x, y, 'o:', xi, yi1, '.-')
+    ax2.plot(x, y, 'o:', xi, yi2, '.-')
+
+    ax1.set_title('extrapolate=True')
+    ax2.set_title('extrapolate="periodic"')
+
+.. attention::
+
+    How we can see ``'periodic'`` extrapolation method works incorrectly with the spline. There is a discontinuity.
+    This can be fixed in the future. Please see `the issue <https://github.com/espdev/csaps/issues/46>`_ for details.
+    So don't use this method for now if you need extrapolation.
 
 
 .. _tutorial-analysis:
