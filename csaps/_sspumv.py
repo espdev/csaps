@@ -78,7 +78,13 @@ class SplinePPForm(ISplinePPForm[np.ndarray, int], PPoly):
 
 
 class CubicSmoothingSpline(
-    ISmoothingSpline[SplinePPForm, float, UnivariateDataType, int, Union[bool, Literal['periodic']]],
+    ISmoothingSpline[
+        SplinePPForm,
+        float,
+        UnivariateDataType,
+        int,
+        Union[bool, Literal['periodic']],
+    ]
 ):
     """Cubic smoothing spline
 
