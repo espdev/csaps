@@ -2,8 +2,7 @@
 The module provided `csaps` shortcut function for smoothing data
 """
 
-from typing import NamedTuple, Optional, Sequence, Union, overload
-from collections import abc as c_abc
+from typing import NamedTuple, Sequence, overload
 
 import numpy as np
 
@@ -19,7 +18,7 @@ class AutoSmoothingResult(NamedTuple):
     values: MultivariateDataType
     """Smoothed data values"""
 
-    smooth: Union[float, Sequence[Optional[float]]]
+    smooth: float | Sequence[float | None]
     """The calculated smoothing parameter"""
 
 
@@ -33,9 +32,9 @@ def csaps(
     xdata: UnivariateDataType,
     ydata: MultivariateDataType,
     *,
-    weights: Optional[UnivariateDataType] = None,
-    smooth: Optional[float] = None,
-    axis: Optional[int] = None,
+    weights: UnivariateDataType | None = None,
+    smooth: float | None = None,
+    axis: int | None = None,
     normalizedsmooth: bool = False,
 ) -> ISmoothingSpline:  # pragma: no cover
     ...
@@ -47,8 +46,8 @@ def csaps(
     ydata: MultivariateDataType,
     xidata: UnivariateDataType,
     *,
-    weights: Optional[UnivariateDataType] = None,
-    axis: Optional[int] = None,
+    weights: UnivariateDataType | None = None,
+    axis: int | None = None,
     normalizedsmooth: bool = False,
 ) -> AutoSmoothingResult:  # pragma: no cover
     ...
@@ -61,8 +60,8 @@ def csaps(
     xidata: UnivariateDataType,
     *,
     smooth: float,
-    weights: Optional[UnivariateDataType] = None,
-    axis: Optional[int] = None,
+    weights: UnivariateDataType | None = None,
+    axis: int | None = None,
     normalizedsmooth: bool = False,
 ) -> MultivariateDataType:  # pragma: no cover
     ...
@@ -73,9 +72,9 @@ def csaps(
     xdata: SequenceUnivariateDataType,
     ydata: MultivariateDataType,
     *,
-    weights: Optional[SequenceUnivariateDataType] = None,
-    smooth: Optional[Sequence[float]] = None,
-    axis: Optional[int] = None,
+    weights: SequenceUnivariateDataType | None = None,
+    smooth: Sequence[float | None] | None = None,
+    axis: int | None = None,
     normalizedsmooth: bool = False,
 ) -> ISmoothingSpline:  # pragma: no cover
     ...
@@ -87,8 +86,8 @@ def csaps(
     ydata: MultivariateDataType,
     xidata: SequenceUnivariateDataType,
     *,
-    weights: Optional[SequenceUnivariateDataType] = None,
-    axis: Optional[int] = None,
+    weights: SequenceUnivariateDataType | None = None,
+    axis: int | None = None,
     normalizedsmooth: bool = False,
 ) -> AutoSmoothingResult:  # pragma: no cover
     ...
@@ -100,9 +99,9 @@ def csaps(
     ydata: MultivariateDataType,
     xidata: SequenceUnivariateDataType,
     *,
-    smooth: Sequence[float],
-    weights: Optional[SequenceUnivariateDataType] = None,
-    axis: Optional[int] = None,
+    smooth: Sequence[float | None],
+    weights: SequenceUnivariateDataType | None = None,
+    axis: int | None = None,
     normalizedsmooth: bool = False,
 ) -> MultivariateDataType:  # pragma: no cover
     ...
@@ -224,8 +223,8 @@ def csaps(
     """
 
     umv = True
-    if isinstance(xdata, c_abc.Sequence):
-        if len(xdata) and isinstance(xdata[0], (np.ndarray, c_abc.Sequence)):
+    if isinstance(xdata, Sequence):
+        if len(xdata) and isinstance(xdata[0], (np.ndarray, Sequence)):
             umv = False
 
     if umv:

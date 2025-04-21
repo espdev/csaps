@@ -1,4 +1,3 @@
-import typing as ty
 import functools
 from itertools import chain
 import operator
@@ -158,7 +157,7 @@ def umv_coeffs_to_flatten(arr: np.ndarray):
     return arr_view
 
 
-def ndg_coeffs_to_canonical(arr: np.ndarray, pieces: ty.Tuple[int, ...]) -> np.ndarray:
+def ndg_coeffs_to_canonical(arr: np.ndarray, pieces: tuple[int, ...]) -> np.ndarray:
     """Returns array canonical view for given n-d grid coeffs flatten array
 
     Creates n-d array canonical view with shape (k0, ..., kn, p0, ..., pn) for given
