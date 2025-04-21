@@ -2,7 +2,7 @@
 Univariate/multivariate cubic smoothing spline implementation
 """
 
-from typing import List, Optional, Tuple, Union, Literal, cast
+from typing import Literal, cast
 import functools
 
 import numpy as np
@@ -57,9 +57,9 @@ class SplinePPForm(ISplinePPForm[np.ndarray, int], PPoly):
         return prod(shape)
 
     @property
-    def shape(self) -> Tuple[int, ...]:
+    def shape(self) -> tuple[int, ...]:
         """Returns the source data shape"""
-        shape: List[int] = list(self.c.shape[2:])
+        shape: list[int] = list(self.c.shape[2:])
         shape.insert(self.axis, self.c.shape[1] + 1)
 
         return tuple(shape)
@@ -83,7 +83,7 @@ class CubicSmoothingSpline(
         float,
         UnivariateDataType,
         int,
-        Union[bool, Literal['periodic']],
+        bool | Literal['periodic'],
     ]
 ):
     """Cubic smoothing spline
@@ -126,8 +126,8 @@ class CubicSmoothingSpline(
         self,
         xdata: UnivariateDataType,
         ydata: MultivariateDataType,
-        weights: Optional[UnivariateDataType] = None,
-        smooth: Optional[float] = None,
+        weights: UnivariateDataType | None = None,
+        smooth: float | None = None,
         axis: int = -1,
         normalizedsmooth: bool = False,
     ) -> None:
@@ -138,8 +138,8 @@ class CubicSmoothingSpline(
     def __call__(
         self,
         x: UnivariateDataType,
-        nu: Optional[int] = None,
-        extrapolate: Optional[Union[bool, Literal['periodic']]] = None,
+        nu: int | None = None,
+        extrapolate: bool | Literal['periodic'] | None = None,
     ) -> FloatNDArrayType:
         """Evaluate the spline for given data
 
@@ -242,7 +242,7 @@ class CubicSmoothingSpline(
         return 1.0 / (1.0 + trace(a) / (6.0 * trace(b)))
 
     @staticmethod
-    def _normalize_smooth(x: np.ndarray, w: np.ndarray, smooth: Optional[float]):
+    def _normalize_smooth(x: np.ndarray, w: np.ndarray, smooth: float | None) -> float:
         """
         See the explanation here: https://github.com/espdev/csaps/pull/47
         """

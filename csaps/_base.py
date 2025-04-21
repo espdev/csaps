@@ -2,7 +2,7 @@
 The base classes and interfaces
 """
 
-from typing import Generic, Optional, Tuple
+from typing import Generic
 import abc
 
 import numpy as np
@@ -72,7 +72,7 @@ class ISplinePPForm(abc.ABC, Generic[TData, TProps]):
 
     @property
     @abc.abstractmethod
-    def shape(self) -> Tuple[int, ...]:
+    def shape(self) -> tuple[int, ...]:
         """Returns the source data shape
 
         Returns
@@ -101,7 +101,7 @@ class ISmoothingSpline(abc.ABC, Generic[TSpline, TSmooth, TXi, TNu, TExtrapolate
     def __call__(
         self,
         xi: TXi,
-        nu: Optional[TNu] = None,
-        extrapolate: Optional[TExtrapolate] = None,
+        nu: TNu | None = None,
+        extrapolate: TExtrapolate | None = None,
     ) -> FloatNDArrayType:
         """Evaluates spline on the data sites"""
