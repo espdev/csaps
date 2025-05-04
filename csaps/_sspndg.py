@@ -16,7 +16,7 @@ from ._reshape import (
     umv_coeffs_to_flatten,
 )
 from ._sspumv import CubicSmoothingSpline
-from ._types import SequenceUnivariateDataType, FloatNDArrayType, Float1DArrayTupe
+from ._types import Float1DArrayTupe, FloatNDArrayType, SequenceUnivariateDataType
 
 
 def ndgrid_prepare_data_vectors(

@@ -12,7 +12,7 @@ import scipy.sparse.linalg as la
 
 from ._base import ISmoothingSpline, ISplinePPForm
 from ._reshape import prod, to_2d
-from ._types import MultivariateDataType, UnivariateDataType, FloatNDArrayType
+from ._types import FloatNDArrayType, MultivariateDataType, UnivariateDataType
 
 
 class SplinePPForm(ISplinePPForm[np.ndarray, int], PPoly):

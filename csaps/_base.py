@@ -7,7 +7,7 @@ import abc
 
 import numpy as np
 
-from ._types import TData, TExtrapolate, TNu, TProps, TSmooth, TSpline, TXi, FloatNDArrayType
+from ._types import FloatNDArrayType, TData, TExtrapolate, TNu, TProps, TSmooth, TSpline, TXi
 
 
 class ISplinePPForm(abc.ABC, Generic[TData, TProps]):

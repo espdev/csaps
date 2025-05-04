@@ -2,7 +2,7 @@
 Type-hints and type vars
 """
 
-from typing import Sequence, TypeVar, Union, Annotated, Literal
+from typing import Annotated, Literal, Sequence, TypeVar, Union
 
 from typing_extensions import TypeAlias
 import numpy as np

@@ -94,6 +94,7 @@ select = [
     "F",       # All Pyflakes errors
     "A",       # All flake8-builtins
     "Q",       # Quotes
+    "I",       # Sort imports
     "T201",    # print found
     "T203",    # pprint found
 ]
