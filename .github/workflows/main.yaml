@@ -28,7 +28,7 @@ jobs:
       matrix:
         platform: [ "ubuntu-latest", "macos-latest", "windows-latest" ]
         python-version: [ "3.10", "3.11", "3.12", "3.13" ]
-        poetry-version: [ "1.8.5" ]
+        poetry-version: [ "2.0.1" ]
 
     steps:
       - name: Checkout project
