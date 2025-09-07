@@ -3,7 +3,7 @@ Univariate/multivariate cubic smoothing spline implementation
 """
 
 from typing import Literal, cast
-import functools
+from functools import partial
 
 import numpy as np
 from scipy.interpolate import PPoly
@@ -13,6 +13,9 @@ import scipy.sparse.linalg as la
 from ._base import ISmoothingSpline, ISplinePPForm
 from ._reshape import prod, to_2d
 from ._types import FloatNDArrayType, MultivariateDataType, UnivariateDataType
+
+diags_csr = partial(sp.diags, format='csr')
+vpad = partial(np.pad, pad_width=[(1, 1), (0, 0)], mode='constant')
 
 
 class SplinePPForm(ISplinePPForm[np.ndarray, int], PPoly):
@@ -282,13 +285,13 @@ class CubicSmoothingSpline(
 
         # Create diagonal sparse matrices
         diags_r = np.vstack((dx[1:], 2 * (dx[1:] + dx[:-1]), dx[:-1]))
-        r = sp.spdiags(diags_r, [-1, 0, 1], pcount - 2, pcount - 2)
+        r = sp.spdiags(diags_r, [-1, 0, 1], pcount - 2, pcount - 2, format='csr')
 
         dx_recip = 1.0 / dx
         diags_qtw = np.vstack((dx_recip[:-1], -(dx_recip[1:] + dx_recip[:-1]), dx_recip[1:]))
         diags_sqrw_recip = 1.0 / np.sqrt(w)
 
-        qtw = sp.diags(diags_qtw, [0, 1, 2], (pcount - 2, pcount)) @ sp.diags(diags_sqrw_recip, 0, (pcount, pcount))
+        qtw = diags_csr(diags_qtw, [0, 1, 2], (pcount - 2, pcount)) @ diags_csr(diags_sqrw_recip, 0, (pcount, pcount))
         qtw = qtw @ qtw.T
 
         p = smooth
@@ -312,13 +315,11 @@ class CubicSmoothingSpline(
 
         dx = dx[:, np.newaxis]
 
-        vpad = functools.partial(np.pad, pad_width=[(1, 1), (0, 0)], mode='constant')
-
         d1 = np.diff(vpad(u), axis=0) / dx
         d2 = np.diff(vpad(d1), axis=0)
 
         diags_w_recip = 1.0 / w
-        w = sp.diags(diags_w_recip, 0, (pcount, pcount))
+        w = diags_csr(diags_w_recip, 0, (pcount, pcount))
 
         yi = y.T - (pp * w) @ d2
         pu = vpad(p * u)
