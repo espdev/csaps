@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.3.3 (07.09.2025)
+
+* Fix spsolve warning (set diag sparse matrix type to CSR to fix the warning)
+* Add extrapolation section to tutorial documentation 
+* Formatting code, type-hints (internal)
+
+
 ## v1.3.2 (15.04.2025)
 
 * Remove `docs` extra dependencies from the package
